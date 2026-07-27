@@ -1,0 +1,81 @@
+/* Tailwind handles all styling. Only pseudo-elements, scrollbar, media queries, animations kept here. */
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeUp {
+  animation: fadeUp .8s ease both;
+}
+
+/* Decoraciones pseudo-elemento */
+.register-decorations::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border: 2px solid rgba(110, 100, 70, .15);
+  border-radius: 50%;
+  top: -260px;
+  left: 180px;
+}
+
+.register-decorations::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 220px;
+  right: 25px;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(120, 105, 70, .25) 0,
+    rgba(120, 105, 70, .25) 6px,
+    transparent 6px,
+    transparent 18px
+  );
+  opacity: .8;
+}
+
+/* Scrollbar */
+.register-scroll::-webkit-scrollbar { width: 5px; }
+.register-scroll::-webkit-scrollbar-thumb { background: #BFA76A; border-radius: 20px; }
+.register-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* Tablet (<=992px) */
+@media (max-width: 992px) {
+  .register-container {
+    flex-direction: column;
+    width: 100%;
+    padding: 0;
+  }
+  .register-form-section {
+    flex: 1;
+    width: 100%;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+  .register-info { display: none; }
+  .register-mobile-header { display: flex; }
+  .register-mobile-footer { display: flex; }
+}
+
+/* Mobile (<=768px) */
+@media (max-width: 768px) {
+  .register-form-section { padding: 28px 22px; }
+  .register-row { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* 390px */
+@media (max-width: 390px) {
+  .register-form-section { padding: 20px 16px; border-radius: 0; }
+  .register-mobile-header { padding: 16px; border-radius: 0 0 20px 20px; }
+  .register-mobile-footer { padding: 20px 16px; border-radius: 20px 20px 0 0; }
+}

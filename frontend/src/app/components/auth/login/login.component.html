@@ -1,0 +1,154 @@
+<div class="w-full h-full font-sans bg-[#F8F3EA] text-[#232233] overflow-hidden">
+  <main class="w-[min(1200px,95%)] h-full mx-auto flex items-stretch py-4 login-container">
+
+    <!-- MOVIL: HEADER -->
+    <header class="login-mobile-header hidden justify-center items-center bg-[#D9C997] p-6 rounded-t-[25px]">
+      <div class="text-center">
+        <h2 class="flex items-center gap-3 text-[38px] font-serif font-bold text-[#232233]">
+          <mat-icon class="text-[28px] w-[28px] h-[28px]">local_library</mat-icon>
+          BiblioLib
+        </h2>
+      </div>
+    </header>
+
+    <!-- PANEL IZQUIERDO -->
+    <aside class="login-info-panel flex-[.65] bg-[#D9C997] rounded-l-[25px] p-[32px_36px] relative overflow-hidden flex flex-col justify-between shadow-lg animate-fadeUp login-info">
+
+      <div class="z-[2]">
+        <small class="block tracking-[4px] text-[11px] text-[#232233] mb-[14px] font-semibold">FUNDACIÓN ACADÉMICA</small>
+        <h2 class="flex items-center gap-3 text-[42px] font-serif font-bold">
+          <mat-icon class="text-[30px] w-[30px] h-[30px]">local_library</mat-icon>
+          BiblioLib
+        </h2>
+        <span class="block mt-2 tracking-[3px] text-[12px] text-[#232233] font-medium">SISTEMA DE GESTIÓN &amp; ARCHIVO</span>
+      </div>
+
+      <div class="max-w-[320px] z-[2]">
+        <h1 class="font-serif text-[42px] font-bold leading-none mb-[18px]">Bienvenido<br>de nuevo</h1>
+        <p class="text-sm leading-[1.7] text-[#232233]/70">Consulta tus préstamos, reservas y el estado de tu cuenta desde un solo lugar.</p>
+      </div>
+
+      <div class="z-[2]">
+        <p class="mb-[14px] text-[#232233]/70 text-sm">¿No tienes cuenta todavía?</p>
+        <button (click)="openRegister.emit()" class="inline-flex items-center gap-3 px-7 py-[14px] border-2 border-[#232233]/25 rounded-[14px] bg-transparent text-[#232233] no-underline font-semibold text-sm tracking-wide transition-all duration-300 cursor-pointer hover:bg-[#232233] hover:text-white">
+          Regístrate Aquí
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <!-- Decoraciones -->
+      <div class="absolute inset-0 pointer-events-none login-decorations"></div>
+    </aside>
+
+    <!-- FORMULARIO -->
+    <section class="login-login-panel flex-1 bg-[#FCFAF7] rounded-r-[25px] p-[32px_36px] shadow-lg overflow-y-auto login-scroll">
+      <div class="w-[min(650px,100%)] mx-auto h-full flex flex-col justify-center animate-fadeUp login-wrapper-anim" style="animation-delay:.2s">
+        <button (click)="goBack.emit()" class="flex items-center gap-2 text-[11px] text-[#54546A] hover:text-[#232233] transition-colors cursor-pointer mb-6 self-start">
+          <mat-icon class="text-sm">arrow_back</mat-icon> Volver al inicio
+        </button>
+        <span class="block text-center tracking-[4px] text-[11px] text-[#CDBA84] mb-[14px]">ACCESO AL SISTEMA</span>
+        <h2 class="text-center text-[38px] font-serif font-bold mb-1.5">Inicia sesión</h2>
+        <p class="text-center text-[#54546A] mb-7 text-sm">Ingresa tus credenciales para continuar</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="flex flex-col gap-[18px]">
+          <div class="flex flex-col gap-3">
+            <label class="text-[11px] tracking-[3px] text-[#54546A] font-semibold">CORREO ELECTRÓNICO</label>
+            <div class="flex items-center border-b-2 border-[#DDD4BE] pb-[14px] transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+              <mat-icon class="w-[25px] h-[25px] text-[18px] text-[#A0A0B2]">mail</mat-icon>
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="admin@universidad.edu"
+                class="flex-1 border-none outline-none bg-transparent text-[15px] text-[#232233] font-sans pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[3px] transition-transform duration-300">
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <label class="text-[11px] tracking-[3px] text-[#54546A] font-semibold">CONTRASEÑA</label>
+            <div class="flex items-center border-b-2 border-[#DDD4BE] pb-[14px] transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+              <mat-icon class="w-[25px] h-[25px] text-[18px] text-[#A0A0B2]">lock</mat-icon>
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="••••••••"
+                class="flex-1 border-none outline-none bg-transparent text-[15px] text-[#232233] font-sans pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[3px] transition-transform duration-300">
+              <button
+                type="button"
+                (click)="showPassword.set(!showPassword())"
+                class="border-none bg-transparent cursor-pointer text-[#A0A0B2] text-[18px] p-0 flex items-center">
+                <mat-icon class="text-[18px] w-[18px] h-[18px]">{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-end -mt-2.5">
+            <a href="#" class="no-underline text-[#54546A] text-[13px] hover:text-[#232233] transition-colors duration-300">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <button type="submit" [disabled]="loginForm.invalid" class="h-[52px] border-none rounded-[14px] bg-[#232233] text-white tracking-[2px] text-[15px] font-semibold cursor-pointer flex justify-center items-center gap-3 transition-all duration-300 hover:bg-[#1a1928] hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none">
+            INGRESAR A BIBLIOLIB
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </form>
+
+        <!-- ACCESOS RÁPIDOS -->
+        <div class="mt-6 pt-5 border-t-2 border-[#DDD4BE]/60">
+          <p class="text-center text-[10px] tracking-[3px] text-[#A0A0B2] font-semibold mb-3 uppercase">Acceso Rápido</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button (click)="useCredentials('admin@biblioteca.com', 'ADMIN')" type="button"
+              class="flex items-center gap-2 px-3 py-2.5 border-2 border-[#DDD4BE] rounded-lg bg-transparent hover:bg-[#232233] hover:text-white hover:border-[#232233] text-[#232233] transition-all duration-200 cursor-pointer group">
+              <div class="w-7 h-7 rounded-full bg-[#232233] group-hover:bg-white flex items-center justify-center flex-shrink-0">
+                <mat-icon class="text-sm text-white group-hover:text-[#232233]">admin_panel_settings</mat-icon>
+              </div>
+              <div class="text-left">
+                <span class="block text-[10px] font-bold uppercase tracking-wider">Admin</span>
+                <span class="block text-[9px] text-[#54546A] group-hover:text-white/70">admin@biblioteca.com</span>
+              </div>
+            </button>
+            <button (click)="useCredentials('maria@biblioteca.com', 'BIBL')" type="button"
+              class="flex items-center gap-2 px-3 py-2.5 border-2 border-[#DDD4BE] rounded-lg bg-transparent hover:bg-[#232233] hover:text-white hover:border-[#232233] text-[#232233] transition-all duration-200 cursor-pointer group">
+              <div class="w-7 h-7 rounded-full bg-[#CDBA84] group-hover:bg-white flex items-center justify-center flex-shrink-0">
+                <mat-icon class="text-sm text-white group-hover:text-[#232233]">local_library</mat-icon>
+              </div>
+              <div class="text-left">
+                <span class="block text-[10px] font-bold uppercase tracking-wider">Bibliotecaria</span>
+                <span class="block text-[9px] text-[#54546A] group-hover:text-white/70">maria@biblioteca.com</span>
+              </div>
+            </button>
+            <button (click)="useCredentials('carlos@universidad.edu', 'DOC')" type="button"
+              class="flex items-center gap-2 px-3 py-2.5 border-2 border-[#DDD4BE] rounded-lg bg-transparent hover:bg-[#232233] hover:text-white hover:border-[#232233] text-[#232233] transition-all duration-200 cursor-pointer group">
+              <div class="w-7 h-7 rounded-full bg-[#6B8E7B] group-hover:bg-white flex items-center justify-center flex-shrink-0">
+                <mat-icon class="text-sm text-white group-hover:text-[#232233]">school</mat-icon>
+              </div>
+              <div class="text-left">
+                <span class="block text-[10px] font-bold uppercase tracking-wider">Docente</span>
+                <span class="block text-[9px] text-[#54546A] group-hover:text-white/70">carlos@universidad.edu</span>
+              </div>
+            </button>
+            <button (click)="useCredentials('ana@estudiante.edu', 'EST')" type="button"
+              class="flex items-center gap-2 px-3 py-2.5 border-2 border-[#DDD4BE] rounded-lg bg-transparent hover:bg-[#232233] hover:text-white hover:border-[#232233] text-[#232233] transition-all duration-200 cursor-pointer group">
+              <div class="w-7 h-7 rounded-full bg-[#B8860B] group-hover:bg-white flex items-center justify-center flex-shrink-0">
+                <mat-icon class="text-sm text-white group-hover:text-[#232233]">person</mat-icon>
+              </div>
+              <div class="text-left">
+                <span class="block text-[10px] font-bold uppercase tracking-wider">Estudiante</span>
+                <span class="block text-[9px] text-[#54546A] group-hover:text-white/70">ana@estudiante.edu</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MOVIL: FOOTER -->
+    <footer class="login-mobile-footer hidden flex-col items-center bg-[#D9C997] p-7 rounded-b-[25px] text-center">
+      <p class="mb-4 text-[#232233] text-[15px]">¿No tienes cuenta todavía?</p>
+      <button (click)="openRegister.emit()" class="inline-flex items-center gap-3 px-[30px] py-4 border-2 border-[#232233]/25 rounded-[14px] bg-transparent text-[#232233] no-underline font-semibold text-[15px] transition-all duration-300 cursor-pointer hover:bg-[#232233] hover:text-white">
+        Regístrate Aquí
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </footer>
+
+  </main>
+</div>

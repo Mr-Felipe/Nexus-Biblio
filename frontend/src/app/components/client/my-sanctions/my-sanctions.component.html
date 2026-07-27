@@ -1,0 +1,50 @@
+<div class="space-y-6">
+  <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Mis Sanciones y Multas</h1>
+
+  <div class="border-2 border-[#232233] p-6 bg-transparent">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Sanciones Activas Pendientes</h3>
+    <div class="space-y-4">
+      @for (sanc of mySanctions().filter(s => s.status === 'Activa'); track sanc.id) {
+        <div class="p-4 border-2 border-red-600 bg-red-50/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h4 class="font-serif font-bold text-red-600 uppercase tracking-wide text-sm flex items-center gap-1"><mat-icon class="text-base">error_outline</mat-icon> Sanción {{ sanc.type }}</h4>
+            <p class="text-xs text-[#232233] font-serif italic mt-1 font-medium">Motivo: {{ sanc.reason }}</p>
+            <p class="text-[10px] text-[#54546A]/70 font-mono mt-0.5">Registrado el: {{ sanc.date }}</p>
+          </div>
+
+          <div class="text-right">
+            <span class="text-lg font-mono font-bold text-red-600 block">${{ sanc.fine | number }}</span>
+            <span class="text-[9px] text-red-600 font-bold uppercase tracking-widest block mt-1">ESTADO: {{ sanc.status }}</span>
+          </div>
+        </div>
+      } @empty {
+        <div class="p-8 text-center border-2 border-[#232233] bg-transparent">
+          <mat-icon class="text-4xl text-[#232233] mb-2">verified_user</mat-icon>
+          <p class="text-sm font-bold text-[#232233] uppercase tracking-wider">¡Tu cuenta se encuentra libre de sanciones!</p>
+          <p class="text-xs text-[#54546A]/80 font-serif italic mt-1">Cumples con el reglamento de devoluciones BiblioLib de forma excelente.</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (mySanctions().some(s => s.status === 'Pagada')) {
+    <div class="border-2 border-[#232233] p-6 bg-transparent">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Historial de Sanciones Liquidadas</h3>
+      <div class="space-y-3">
+        @for (sanc of mySanctions().filter(s => s.status === 'Pagada'); track sanc.id) {
+          <div class="p-4 border-2 border-[#232233]/20 bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h4 class="font-serif font-bold text-[#232233]/60 uppercase tracking-wide text-sm flex items-center gap-1"><mat-icon class="text-base">verified</mat-icon> Sanción {{ sanc.type }}</h4>
+              <p class="text-xs text-[#54546A] font-serif italic mt-1">Motivo: {{ sanc.reason }}</p>
+              <p class="text-[10px] text-[#54546A]/50 font-mono mt-0.5">Registrado el: {{ sanc.date }}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-mono font-bold text-[#232233]/40 block">${{ sanc.fine | number }}</span>
+              <span class="text-[9px] text-emerald-700 font-bold uppercase tracking-widest block mt-1">SALDADA</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

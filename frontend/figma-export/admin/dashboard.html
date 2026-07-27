@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioLib - Panel de Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { warm: '#F5F2ED', primary: '#1A1A1A' } } }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body { font-family: "Helvetica Neue", Arial, "Plus Jakarta Sans", "Inter", sans-serif; background-color: #F5F2ED; color: #1A1A1A; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    .font-serif { font-family: Georgia, "Playfair Display", serif; }
+    .font-sans { font-family: "Helvetica Neue", Arial, "Plus Jakarta Sans", "Inter", sans-serif; }
+    .font-mono { font-family: "JetBrains Mono", monospace; }
+    input:focus, select:focus { border-color: #1A1A1A !important; outline: none !important; }
+    input, select, textarea { border-radius: 0px !important; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #F5F2ED; }
+    ::-webkit-scrollbar-thumb { background: rgba(26,26,26,0.2); border-radius: 0px; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen flex flex-col">
+    <!-- MAIN BODY -->
+    <div class="flex-1 flex flex-col min-w-0 bg-[#F5F2ED] relative">
+      <!-- NAVBAR -->
+      <header class="min-h-16 py-2 border-b-2 border-[#1A1A1A] bg-[#F5F2ED] flex items-center px-4 lg:px-6 z-30 sticky top-0 gap-2 lg:gap-4">
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="flex items-center gap-2 mr-2">
+            <span class="material-icons text-[#1A1A1A] text-lg">local_library</span>
+            <span class="font-serif text-sm font-bold italic tracking-tight text-[#1A1A1A]">BiblioLib</span>
+          </div>
+        </div>
+        <nav class="flex items-center gap-0.5 xl:gap-1 mr-auto overflow-x-auto flex-nowrap scrollbar-none">
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Inicio</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 bg-[#1A1A1A] text-[#F5F2ED]">Panel</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Usuarios</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Catálogo</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Inventario</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Préstamos</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Reservas</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Sanciones</button>
+        </nav>
+        <div class="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+          <button class="p-2 text-[#1A1A1A] hover:bg-[#1A1A1A]/5 transition-all relative cursor-pointer">
+            <span class="material-icons text-xl">notifications</span>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-[#1A1A1A] rounded-full"></span>
+          </button>
+          <div class="flex items-center gap-2 border-l border-[#1A1A1A]/20 pl-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-[#1A1A1A] text-[#F5F2ED] flex items-center justify-center font-bold text-xs border border-[#1A1A1A]">CA</div>
+              <div class="text-left leading-tight">
+                <p class="text-[10px] font-bold text-[#1A1A1A] max-w-[100px] truncate font-serif">Carlos Admin</p>
+                <span class="text-[8px] uppercase font-mono font-bold text-[#1A1A1A]/60">ADMIN</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT: DASHBOARD -->
+      <main class="flex-1 p-6 overflow-y-auto">
+        <div class="space-y-6">
+          <h1 class="font-serif text-3xl text-[#1A1A1A] font-bold tracking-tight">Panel de Estadísticas</h1>
+
+          <!-- KPIs -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-5 bg-transparent border-2 border-[#1A1A1A] flex items-center justify-between">
+              <div>
+                <p class="text-[10px] text-[#1A1A1A]/60 uppercase tracking-wider font-bold">Libros Totales</p>
+                <h3 class="text-3xl font-serif text-[#1A1A1A] font-bold mt-1.5">8</h3>
+              </div>
+              <div class="text-[#1A1A1A]"><span class="material-icons text-3xl">collections_bookmark</span></div>
+            </div>
+            <div class="p-5 bg-transparent border-2 border-[#1A1A1A] flex items-center justify-between">
+              <div>
+                <p class="text-[10px] text-[#1A1A1A]/60 uppercase tracking-wider font-bold">Disponibles</p>
+                <h3 class="text-3xl font-serif text-[#1A1A1A] font-bold mt-1.5">5</h3>
+              </div>
+              <div class="text-[#1A1A1A]"><span class="material-icons text-3xl">check_circle</span></div>
+            </div>
+            <div class="p-5 bg-transparent border-2 border-[#1A1A1A] flex items-center justify-between">
+              <div>
+                <p class="text-[10px] text-[#1A1A1A]/60 uppercase tracking-wider font-bold">Préstamos Activos</p>
+                <h3 class="text-3xl font-serif text-[#1A1A1A] font-bold mt-1.5">3</h3>
+              </div>
+              <div class="text-[#1A1A1A]"><span class="material-icons text-3xl">swap_horiz</span></div>
+            </div>
+            <div class="p-5 bg-transparent border-2 border-[#1A1A1A] flex items-center justify-between">
+              <div>
+                <p class="text-[10px] text-[#1A1A1A]/60 uppercase tracking-wider font-bold">Multas en Suspenso</p>
+                <h3 class="text-3xl font-serif text-[#1A1A1A] font-bold mt-1.5">$2,500</h3>
+              </div>
+              <div class="text-[#1A1A1A]"><span class="material-icons text-3xl">gavel</span></div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Bar Chart -->
+            <div class="p-6 bg-transparent border-2 border-[#1A1A1A]">
+              <h3 class="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-[0.15em] mb-4 border-b border-[#1A1A1A]/10 pb-1">Ejemplares Registrados por Categoría</h3>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-bold text-[#1A1A1A] uppercase tracking-wider text-[10px]">Novela</span>
+                    <span class="font-serif italic text-[#1A1A1A]/70">5 copias</span>
+                  </div>
+                  <div class="w-full bg-[#1A1A1A]/10 h-3 border border-[#1A1A1A]/30 overflow-hidden">
+                    <div class="bg-[#1A1A1A] h-full" style="width: 100%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-bold text-[#1A1A1A] uppercase tracking-wider text-[10px]">Clásico</span>
+                    <span class="font-serif italic text-[#1A1A1A]/70">3 copias</span>
+                  </div>
+                  <div class="w-full bg-[#1A1A1A]/10 h-3 border border-[#1A1A1A]/30 overflow-hidden">
+                    <div class="bg-[#1A1A1A] h-full" style="width: 60%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-bold text-[#1A1A1A] uppercase tracking-wider text-[10px]">Distopía</span>
+                    <span class="font-serif italic text-[#1A1A1A]/70">2 copias</span>
+                  </div>
+                  <div class="w-full bg-[#1A1A1A]/10 h-3 border border-[#1A1A1A]/30 overflow-hidden">
+                    <div class="bg-[#1A1A1A] h-full" style="width: 40%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-bold text-[#1A1A1A] uppercase tracking-wider text-[10px]">Filosofía</span>
+                    <span class="font-serif italic text-[#1A1A1A]/70">1 copias</span>
+                  </div>
+                  <div class="w-full bg-[#1A1A1A]/10 h-3 border border-[#1A1A1A]/30 overflow-hidden">
+                    <div class="bg-[#1A1A1A] h-full" style="width: 20%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-bold text-[#1A1A1A] uppercase tracking-wider text-[10px]">Terror</span>
+                    <span class="font-serif italic text-[#1A1A1A]/70">1 copias</span>
+                  </div>
+                  <div class="w-full bg-[#1A1A1A]/10 h-3 border border-[#1A1A1A]/30 overflow-hidden">
+                    <div class="bg-[#1A1A1A] h-full" style="width: 20%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-bold text-[#1A1A1A] uppercase tracking-wider text-[10px]">Otros</span>
+                    <span class="font-serif italic text-[#1A1A1A]/70">1 copias</span>
+                  </div>
+                  <div class="w-full bg-[#1A1A1A]/10 h-3 border border-[#1A1A1A]/30 overflow-hidden">
+                    <div class="bg-[#1A1A1A] h-full" style="width: 20%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stacked Bar -->
+            <div class="p-6 bg-transparent border-2 border-[#1A1A1A] flex flex-col justify-between">
+              <div>
+                <h3 class="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-[0.15em] mb-4 border-b border-[#1A1A1A]/10 pb-1">Distribución del Estado de Libros</h3>
+                <div class="flex items-center justify-center py-5">
+                  <div class="w-full max-w-sm">
+                    <div class="flex h-8 border-2 border-[#1A1A1A] overflow-hidden bg-[#1A1A1A]/5">
+                      <div class="bg-[#1A1A1A] text-[#F5F2ED] flex items-center justify-center text-[10px] font-bold border-r border-[#1A1A1A]" style="width: 62.5%">Disponibles</div>
+                      <div class="bg-[#1A1A1A]/30 text-[#1A1A1A] flex items-center justify-center text-[10px] font-bold" style="width: 37.5%">Prestados</div>
+                    </div>
+                    <div class="flex justify-between text-[11px] mt-4 font-serif italic text-[#1A1A1A]/80">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-[#1A1A1A]"></span> Disponibles (5)</span>
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-[#1A1A1A]/30 border border-[#1A1A1A]/50"></span> Prestados (3)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="border-t border-[#1A1A1A]/15 pt-4 mt-4 flex justify-between items-center text-xs">
+                <span class="text-[#1A1A1A]/50 font-serif italic">Detección automatizada de atrasos de entrega activa.</span>
+                <button class="text-[#1A1A1A] font-bold hover:underline flex items-center gap-0.5 uppercase tracking-widest text-[9px]">Analizar más <span class="material-icons text-sm">chevron_right</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Lists -->
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 font-sans">
+            <!-- Recent Loans -->
+            <div class="bg-transparent border-2 border-[#1A1A1A] p-6">
+              <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#1A1A1A] mb-4 border-b border-[#1A1A1A]/10 pb-1.5">Últimos Préstamos Concedidos</h3>
+              <div class="divide-y divide-[#1A1A1A]/15">
+                <div class="py-3 flex items-center justify-between text-xs">
+                  <div>
+                    <p class="font-bold text-[#1A1A1A] uppercase tracking-wide text-[11px]">El Túnel</p>
+                    <p class="text-[10px] text-[#1A1A1A]/60 mt-0.5 font-serif italic">Lector: María García (ID: 1003)</p>
+                  </div>
+                  <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-[#1A1A1A] text-[#1A1A1A]">Activo</span>
+                </div>
+                <div class="py-3 flex items-center justify-between text-xs">
+                  <div>
+                    <p class="font-bold text-[#1A1A1A] uppercase tracking-wide text-[11px]">Cien años de soledad</p>
+                    <p class="text-[10px] text-[#1A1A1A]/60 mt-0.5 font-serif italic">Lector: Juan Pérez (ID: 1004)</p>
+                  </div>
+                  <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-red-600 text-white">Vencido</span>
+                </div>
+                <div class="py-3 flex items-center justify-between text-xs">
+                  <div>
+                    <p class="font-bold text-[#1A1A1A] uppercase tracking-wide text-[11px]">1984</p>
+                    <p class="text-[10px] text-[#1A1A1A]/60 mt-0.5 font-serif italic">Lector: Ana López (ID: 1005)</p>
+                  </div>
+                  <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#1A1A1A] text-[#F5F2ED]">Devuelto</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Sanctions -->
+            <div class="bg-transparent border-2 border-[#1A1A1A] p-6">
+              <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#1A1A1A] mb-4 border-b border-[#1A1A1A]/10 pb-1.5">Sanciones Activas Recientes</h3>
+              <div class="divide-y divide-[#1A1A1A]/15">
+                <div class="py-3 flex items-center justify-between text-xs">
+                  <div>
+                    <p class="font-bold text-[#1A1A1A] uppercase tracking-wide text-[11px]">Juan Pérez — Económica</p>
+                    <p class="text-[10px] text-red-600 font-semibold mt-0.5">Multa: $2,500 — Retraso en devolución</p>
+                  </div>
+                  <span class="px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold uppercase tracking-wider">ACTIVA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

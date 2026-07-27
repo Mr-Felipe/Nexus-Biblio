@@ -1,0 +1,140 @@
+<div class="space-y-6">
+  <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Catálogo de Libros</h1>
+
+  <!-- Search -->
+  <div class="flex gap-4 p-4 border-2 border-[#232233] bg-transparent">
+    <div class="flex-1 relative">
+      <mat-icon class="absolute left-3 top-3 text-[#54546A]/80 text-lg">search</mat-icon>
+      <input type="text" placeholder="Buscar por título, autor o palabras clave..."
+             [value]="catalogueSearchQuery()" (input)="catalogueSearchQuery.set($any($event.target).value)"
+             class="w-full pl-10 pr-4 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+    </div>
+  </div>
+
+   <!-- Catalogue Grid list -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (book of filteredCatalogue(); track book.isbn) {
+      @let userRes = getUserReservation(book.isbn);
+      <div class="border-2 border-[#232233] p-4 flex gap-4 hover:bg-[#D9C997]/15 transition-all relative bg-transparent">
+        <!-- Book Cover visual -->
+        <div class="w-24 h-36 bg-transparent overflow-hidden flex-shrink-0 border-2 border-[#232233]">
+          <img [src]="book.coverUrl" alt="Cover" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+        </div>
+
+        <!-- Details -->
+        <div class="flex-1 flex flex-col justify-between">
+          <div>
+            <span class="text-[9px] font-bold text-[#232233] border border-[#232233] px-2 py-0.5 uppercase tracking-wider bg-transparent">{{ book.isbn }}</span>
+            <h3 class="font-serif text-sm font-bold text-[#232233] mt-2 line-clamp-1" [title]="book.title">{{ book.title }}</h3>
+            <p class="text-xs text-[#54546A]/80 font-medium font-serif italic">{{ book.author }}</p>
+            <p class="text-[10px] text-[#54546A] mt-2 line-clamp-2 font-sans">{{ book.description }}</p>
+          </div>
+
+          <div class="border-t-2 border-[#232233]/12 pt-2.5 mt-2 flex flex-col gap-2">
+            <!-- Stock status & availability indicators -->
+            <div class="flex justify-between items-center">
+              <div>
+                @if (book.availableCopies > 0) {
+                  <span class="text-[10px] text-[#232233] font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#232233] animate-pulse"></span> Disponible</span>
+                } @else {
+                  <span class="text-[10px] text-red-600 font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> En espera</span>
+                }
+                <span class="text-[9px] text-[#54546A]/80 block font-mono font-bold mt-0.5">Stock: {{ book.availableCopies }} u.</span>
+              </div>
+
+              <!-- Active reservation indicators -->
+              @if (userRes) {
+                <div class="text-right">
+                  @if (userRes.status === 'En cola') {
+                    <span class="text-[9px] bg-[#D9C997]/15 text-[#232233] border border-[#232233] px-2 py-0.5 font-bold uppercase tracking-wider block">
+                      En Cola (Pos: {{ userRes.queuePosition }})
+                    </span>
+                  } @else if (userRes.status === 'Listo para retirar') {
+                    <span class="text-[9px] bg-emerald-600 text-white px-2 py-0.5 font-bold uppercase tracking-wider block animate-pulse">
+                      Listo para retiro
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 mt-1">
+              @if (!state.currentUser()) {
+                <!-- Not logged in: show login prompt -->
+                <div class="flex gap-1.5 w-full">
+                  <button (click)="showLoginRequiredModal.set(true)"
+                          [disabled]="book.availableCopies <= 0"
+                          class="flex-1 border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 disabled:opacity-30 disabled:hover:bg-transparent px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
+                    <mat-icon class="text-xs">login</mat-icon> Prestar
+                  </button>
+                  <button (click)="showLoginRequiredModal.set(true)"
+                          class="flex-1 border border-[#232233] bg-transparent text-[#232233] hover:bg-[#232233] hover:text-white px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
+                      <mat-icon class="text-xs">bookmark</mat-icon> Reservar
+                  </button>
+                </div>
+              } @else if (userRes) {
+                <!-- If already reserved by this user -->
+                <div class="flex gap-1.5 w-full">
+                  @if (userRes.status === 'Listo para retirar' || (userRes.status === 'En cola' && userRes.queuePosition === 1)) {
+                    <button (click)="claimReservedBook(userRes)"
+                            class="flex-1 border-2 border-[#232233] bg-[#232233] text-white hover:bg-[#1a1928] px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
+                      <mat-icon class="text-xs">assignment_turned_in</mat-icon> Reclamar
+                    </button>
+                  }
+                  <button (click)="cancelReservation(userRes.id)"
+                          class="border border-red-200 text-red-600 hover:bg-red-50 px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer">
+                    Cancelar
+                  </button>
+                </div>
+              } @else {
+                <!-- Normal view: Reserve or borrow -->
+                <div class="flex gap-1.5 w-full">
+                  <!-- Prestar (Direct borrow): Only enabled if availableCopies > 0 -->
+                  <button (click)="borrowBookDirectly(book)"
+                          [disabled]="book.availableCopies <= 0"
+                          class="flex-1 border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 disabled:opacity-30 disabled:hover:bg-transparent px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
+                    <mat-icon class="text-xs">assignment_ind</mat-icon> Prestar
+                  </button>
+
+                  <!-- Reservar (Queue reservation) -->
+                  <button (click)="requestReservation(book)"
+                          class="flex-1 border border-[#232233] bg-transparent text-[#232233] hover:bg-[#232233] hover:text-white px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
+                      <mat-icon class="text-xs">bookmark</mat-icon> Reservar
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-span-full p-12 text-center text-[#A0A0B2] font-serif italic">No hay ejemplares registrados con esos criterios.</div>
+    }
+  </div>
+</div>
+
+<!-- Login Required Modal -->
+@if (showLoginRequiredModal()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-sm p-6 relative text-center">
+      <div class="flex justify-center mb-4">
+        <div class="w-14 h-14 bg-[#D9C997]/30 border-2 border-[#232233] flex items-center justify-center">
+          <mat-icon class="text-3xl text-[#232233]">lock</mat-icon>
+        </div>
+      </div>
+      <h3 class="font-serif text-lg font-bold text-[#232233] mb-2">Inicia sesión para continuar</h3>
+      <p class="text-xs text-[#54546A] mb-6 leading-relaxed">Debes iniciar sesión para realizar préstamos o reservas de libros en BiblioLib.</p>
+      <div class="flex flex-col gap-2">
+        <button (click)="showLoginRequiredModal.set(false); state.activeView.set('login')"
+                class="w-full bg-[#232233] hover:bg-[#1a1928] text-white px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <mat-icon class="text-sm">login</mat-icon> Iniciar Sesión
+        </button>
+        <button (click)="showLoginRequiredModal.set(false)"
+                class="w-full border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+}

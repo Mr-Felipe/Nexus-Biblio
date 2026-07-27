@@ -1,0 +1,116 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Estadísticas e Informes</h1>
+    <div class="flex gap-2">
+      <button (click)="exportReport('inventario')" class="border-2 border-[#232233] text-[#232233] hover:bg-[#232233] hover:text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer">
+        <mat-icon class="text-sm">download</mat-icon> CSV
+      </button>
+      <button (click)="exportPdf()" class="border-2 border-[#232233] bg-[#232233] text-white hover:bg-[#1a1928] px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer">
+        <mat-icon class="text-sm">picture_as_pdf</mat-icon> PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Date Range Filter -->
+  <div class="flex flex-col sm:flex-row gap-4 p-4 border-2 border-[#232233] bg-transparent">
+    <div class="flex-1">
+      <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Fecha Inicio</span>
+      <input type="date" [value]="dateFrom()" (input)="dateFrom.set($any($event.target).value)"
+             class="w-full px-3 py-2 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
+    </div>
+    <div class="flex-1">
+      <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Fecha Fin</span>
+      <input type="date" [value]="dateTo()" (input)="dateTo.set($any($event.target).value)"
+             class="w-full px-3 py-2 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
+    </div>
+    <div class="flex items-end">
+      <button (click)="dateFrom.set(''); dateTo.set('')" class="border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 px-4 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer">
+        Limpiar
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Loan Status Distribution -->
+    <div class="border-2 border-[#232233] p-6 bg-transparent">
+      <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Distribución de Préstamos</h3>
+      @if (filteredLoans().length > 0) {
+        <div class="flex h-6 border-2 border-[#232233] overflow-hidden mb-4">
+          @for (seg of loanStatusData(); track seg.label) {
+            @if (seg.value > 0) {
+              <div [class]="seg.color + ' flex items-center justify-center text-[9px] text-white font-bold border-r border-[#232233] last:border-r-0'"
+                   [style.width.%]="seg.percent" [title]="seg.label + ': ' + seg.value">
+                {{ seg.percent > 15 ? seg.value : '' }}
+              </div>
+            }
+          }
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          @for (seg of loanStatusData(); track seg.label) {
+            <span class="flex items-center gap-1.5 text-[10px] font-serif">
+              <span class="w-2.5 h-2.5" [class]="seg.color"></span>
+              {{ seg.label }} ({{ seg.value }})
+            </span>
+          }
+        </div>
+      } @else {
+        <p class="text-xs text-[#54546A]/70 text-center font-serif italic py-8">No hay préstamos en el rango seleccionado.</p>
+      }
+    </div>
+
+    <!-- Sanctions Distribution -->
+    <div class="border-2 border-[#232233] p-6 bg-transparent">
+      <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Estado de Sanciones</h3>
+      @if (state.sanctions().length > 0) {
+        <div class="flex h-6 border-2 border-[#232233] overflow-hidden mb-4">
+          @for (seg of sanctionStatusData(); track seg.label) {
+            @if (seg.value > 0) {
+              <div [class]="seg.color + ' flex items-center justify-center text-[9px] text-white font-bold border-r border-[#232233] last:border-r-0'"
+                   [style.width.%]="(seg.value / (state.sanctions().length || 1)) * 100">
+                {{ seg.value }}
+              </div>
+            }
+          }
+        </div>
+        <div class="flex gap-4">
+          @for (seg of sanctionStatusData(); track seg.label) {
+            <span class="flex items-center gap-1.5 text-[10px] font-serif">
+              <span class="w-2.5 h-2.5" [class]="seg.color"></span>
+              {{ seg.label }} ({{ seg.value }})
+            </span>
+          }
+        </div>
+      } @else {
+        <p class="text-xs text-[#54546A]/70 text-center font-serif italic py-8">No hay sanciones registradas.</p>
+      }
+    </div>
+
+    <!-- General Stats Summary -->
+    <div class="border-2 border-[#232233] p-6 flex flex-col justify-between bg-transparent">
+      <div>
+        <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Resumen General</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+            <p class="text-xl font-mono font-bold text-[#232233]">{{ state.users().length }}</p>
+            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Usuarios</p>
+          </div>
+          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+            <p class="text-xl font-mono font-bold text-[#232233]">{{ state.books().length }}</p>
+            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">ISBNs</p>
+          </div>
+          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+            <p class="text-xl font-mono font-bold text-[#232233]">{{ filteredLoans().length }}</p>
+            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Préstamos (Rango)</p>
+          </div>
+          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+            <p class="text-xl font-mono font-bold text-[#232233]">{{ state.sanctions().length }}</p>
+            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Sanciones</p>
+          </div>
+        </div>
+      </div>
+      <div class="border border-[#232233] p-3 text-[11px] text-[#232233] mt-4 bg-transparent font-serif italic">
+        Para un informe detallado de transacciones, visite la <strong>Bitácora de Auditoría</strong>.
+      </div>
+    </div>
+  </div>
+</div>

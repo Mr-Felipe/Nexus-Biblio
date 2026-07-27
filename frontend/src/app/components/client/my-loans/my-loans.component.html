@@ -1,0 +1,59 @@
+<div class="space-y-6">
+  <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Mis Préstamos Personales</h1>
+
+  <div class="border-2 border-[#232233] p-6 bg-transparent">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Préstamos Activos</h3>
+    <div class="space-y-4">
+      @for (loan of myActiveLoans(); track loan.id) {
+        <div class="p-4 border-2 border-[#232233] bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h4 class="font-serif font-bold text-[#232233] uppercase tracking-wide text-sm">{{ loan.bookTitle }}</h4>
+            <p class="text-[10px] text-[#54546A]/80 font-mono mt-0.5">ISBN: {{ loan.bookIsbn }} — Retirado el: {{ loan.loanDate }}</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Due indicator calculations -->
+            <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border-2 border-[#232233]"
+                 [ngClass]="getDaysRemainingText(loan.dueDate).css">
+              <mat-icon class="text-sm">{{ getDaysRemainingText(loan.dueDate).icon }}</mat-icon>
+              <span>{{ getDaysRemainingText(loan.dueDate).text }}</span>
+            </div>
+
+            @if (loan.status === 'Pendiente devolución') {
+              <span class="bg-amber-500 text-white px-3 py-1.5 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1">
+                <mat-icon class="text-xs">hourglass_top</mat-icon> En evaluación
+              </span>
+            } @else {
+              <button (click)="returnBook(loan.id)" class="border border-[#232233] text-[#232233] hover:bg-[#232233] hover:text-white px-3 py-1.5 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-all">
+                <mat-icon class="text-xs">assignment_returned</mat-icon> Devolver
+              </button>
+            }
+          </div>
+        </div>
+      } @empty {
+        <div class="p-8 text-center border-2 border-dashed border-[#232233]/30 bg-transparent">
+          <mat-icon class="text-4xl text-[#A0A0B2] mb-2">shopping_cart</mat-icon>
+          <p class="text-xs text-[#54546A]/70 font-serif italic">No tienes libros retirados en este momento.</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Return history -->
+  <div class="border-2 border-[#232233] p-6 bg-transparent">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Historial de Lecturas y Devoluciones</h3>
+    <div class="divide-y-2 divide-[#232233]/12">
+      @for (loan of myLoansHistory(); track loan.id) {
+        <div class="py-4 flex justify-between items-center text-xs">
+          <div>
+            <p class="font-serif font-bold text-[#232233] uppercase text-xs">{{ loan.bookTitle }}</p>
+            <p class="text-[10px] text-[#54546A]/70 mt-1 font-mono">Retirado el: {{ loan.loanDate }} — Devuelto el: {{ loan.returnDate }}</p>
+          </div>
+          <span class="border border-[#232233] text-[#232233] bg-transparent px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider">Devuelto con Éxito</span>
+        </div>
+      } @empty {
+        <p class="text-xs text-[#A0A0B2] py-4 text-center font-serif italic">Aún no registras un historial de préstamos devueltos.</p>
+      }
+    </div>
+  </div>
+</div>

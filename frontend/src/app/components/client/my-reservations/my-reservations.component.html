@@ -1,0 +1,46 @@
+<div class="space-y-6">
+  <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Mis Reservas</h1>
+
+  <div class="border-2 border-[#232233] p-6 bg-transparent">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Apartados Vigentes</h3>
+    <div class="space-y-4">
+      @for (res of myReservations(); track res.id) {
+        <div class="p-4 border-2 border-[#232233] bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h4 class="font-serif font-bold text-[#232233] uppercase tracking-wide text-sm">{{ res.bookTitle }}</h4>
+            <p class="text-[10px] text-[#54546A]/80 font-mono mt-0.5">ISBN: {{ res.bookIsbn }} — Apartado el: {{ res.reservationDate }}</p>
+          </div>
+
+          <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+            <div>
+              @if (res.status === 'Listo para retirar') {
+                <span class="text-[10px] text-[#232233] font-bold border-2 border-[#232233] px-3 py-1 flex items-center gap-1 uppercase tracking-wider bg-[#232233] text-white"><mat-icon class="text-sm">check_circle</mat-icon> ¡Listo en mostrador!</span>
+              } @else if (res.status === 'En cola') {
+                <span class="text-[10px] text-[#54546A] font-bold border border-[#232233] px-3 py-1 flex items-center gap-1 uppercase tracking-wider"><mat-icon class="text-sm">hourglass_full</mat-icon> En cola de espera (Pos: {{ res.queuePosition }})</span>
+              } @else {
+                <span class="text-[10px] text-[#A0A0B2] font-bold border border-[#232233]/8 px-3 py-1 uppercase tracking-wider">{{ res.status }}</span>
+              }
+            </div>
+
+            <div class="flex items-center gap-2">
+              @if (res.status === 'Listo para retirar' || (res.status === 'En cola' && res.queuePosition === 1)) {
+                <button (click)="claimReservedBook(res)"
+                        class="text-[9px] text-white bg-[#232233] border border-[#232233] hover:bg-[#1a1928] px-3 py-1.5 font-bold uppercase tracking-wider cursor-pointer transition-all flex items-center gap-1">
+                  <mat-icon class="text-xs">assignment_turned_in</mat-icon> Reclamar / Retirar
+                </button>
+              }
+              @if (res.status === 'En cola' || res.status === 'Listo para retirar') {
+                <button (click)="cancelReservation(res.id)" class="text-[9px] text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-400 px-3 py-1.5 font-bold uppercase tracking-wider cursor-pointer transition-all">Cancelar Reserva</button>
+              }
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="p-8 text-center border-2 border-dashed border-[#232233]/30 bg-transparent">
+          <mat-icon class="text-4xl text-[#A0A0B2] mb-2">bookmark_border</mat-icon>
+          <p class="text-xs text-[#54546A]/70 font-serif italic">No tienes apartados activos.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

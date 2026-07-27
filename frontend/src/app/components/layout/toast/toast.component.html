@@ -1,0 +1,15 @@
+@if (toast.current(); as t) {
+  <div class="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-300 animate-bounce"
+       [ngClass]="{
+         'bg-emerald-50 border-emerald-200 text-emerald-800': t.type === 'success',
+         'bg-red-50 border-red-200 text-red-800': t.type === 'error',
+         'bg-amber-50 border-amber-200 text-amber-800': t.type === 'warning',
+         'bg-indigo-50 border-indigo-200 text-indigo-800': t.type === 'info'
+       }">
+    <mat-icon class="text-xl">{{ t.type === 'success' ? 'check_circle' : t.type === 'error' ? 'error' : 'info' }}</mat-icon>
+    <p class="text-xs font-semibold">{{ t.text }}</p>
+    <button (click)="toast.dismiss()" class="text-gray-400 hover:text-[#232233] ml-2">
+      <mat-icon class="text-sm">close</mat-icon>
+    </button>
+  </div>
+}

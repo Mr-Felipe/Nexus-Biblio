@@ -1,0 +1,138 @@
+<div class="space-y-6">
+
+  <!-- BLOQUE 1: HERO — Bienvenida + Buscador -->
+  <div class="bg-[#EDE5D0] p-8 border-2 border-[#232233] flex flex-col items-center text-center space-y-5">
+    <div class="space-y-3">
+      <div class="flex items-center justify-center gap-2">
+        <mat-icon class="text-3xl text-[#232233]">local_library</mat-icon>
+        <span class="font-serif text-2xl font-bold italic tracking-tight text-[#232233]">BiblioLib</span>
+      </div>
+      <h1 class="font-serif text-2xl md:text-3xl text-[#232233] font-bold tracking-tight">
+        Tu biblioteca digital al servicio de la comunidad educativa
+      </h1>
+      <p class="text-xs text-[#54546A] max-w-lg mx-auto leading-relaxed">
+        BiblioLib gestiona préstamos, reservas y catálogo de libros para estudiantes, docentes y bibliotecarios. Busca un título y comienza a explorar.
+      </p>
+      <p class="text-[10px] text-[#54546A]/70 uppercase tracking-widest font-semibold">
+        @if (state.currentUser()) {
+          Bienvenido, <span class="text-[#232233]">{{ state.currentUser()?.name }}</span> — <span class="border border-[#232233]/25 px-2 py-0.5 text-[#232233] bg-[#F8F3EA]">{{ state.currentUser()?.role }}</span>
+        } @else {
+          Bienvenido, <span class="text-[#232233]">Visitante</span> — <button (click)="navigate.emit('login')" class="border border-[#232233]/25 px-2 py-0.5 text-[#232233] bg-[#F8F3EA] hover:bg-[#232233] hover:text-white transition-all cursor-pointer font-bold">Iniciar Sesión</button>
+        }
+      </p>
+    </div>
+
+    <div class="w-full max-w-xl">
+      <form (submit)="$event.preventDefault(); searchFromHome()" class="flex flex-col sm:flex-row gap-3">
+        <div class="flex-1 relative">
+          <mat-icon class="absolute left-3 top-3.5 text-[#54546A]/80 text-lg">search</mat-icon>
+          <input type="text" [placeholder]="homePlaceholders[homePlaceholderIndex()]"
+                 [value]="homeSearchQuery()" (input)="homeSearchQuery.set($any($event.target).value)"
+                 class="w-full pl-10 pr-4 py-3 text-xs bg-[#F8F3EA] border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+        </div>
+        <button type="submit" class="bg-[#232233] hover:bg-[#1a1928] text-white px-6 py-3 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer">
+          Buscar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BLOQUE 2: LIBROS DISPONIBLES (Carrusel Auto-Scroll) -->
+  <div>
+    <div class="flex items-center justify-between mb-4 border-b border-[#232233]/12 pb-1">
+      <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#54546A]">Libros Disponibles</h3>
+      <button (click)="homeSearchQuery.set(''); searchFromHome()"
+              class="text-[10px] font-bold text-[#232233] hover:underline uppercase tracking-widest flex items-center gap-1 cursor-pointer">
+        Ver todo <mat-icon class="text-xs">arrow_forward</mat-icon>
+      </button>
+    </div>
+
+    <div class="overflow-hidden">
+      <div class="carousel-track">
+        @for (book of state.books().filter(b => b.availableCopies > 0).slice(0, 10); track book.isbn) {
+          <div class="flex-shrink-0 w-44 bg-transparent border-2 border-[#232233] hover:bg-[#D9C997]/10 transition-colors cursor-pointer flex flex-col">
+            <div class="h-40 bg-[#D9C997]/20 flex items-center justify-center border-b-2 border-[#232233] overflow-hidden">
+              @if (book.coverUrl) {
+                <img [src]="book.coverUrl" [alt]="book.title" class="w-full h-full object-cover" />
+              } @else {
+                <div class="text-center px-3">
+                  <mat-icon class="text-4xl text-[#232233]/40">menu_book</mat-icon>
+                </div>
+              }
+            </div>
+            <div class="p-3 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-[11px] font-bold text-[#232233] uppercase tracking-wide leading-tight line-clamp-2">{{ book.title }}</h4>
+                <p class="text-[10px] text-[#54546A] mt-1 font-serif italic">{{ book.author }}</p>
+              </div>
+              <div class="flex items-center justify-between mt-2 pt-2 border-t border-[#232233]/10">
+                <span class="text-[9px] font-bold text-[#232233]">{{ book.availableCopies }} disp.</span>
+                <button (click)="searchBook(book.title); $event.stopPropagation()" class="text-[9px] font-bold text-[#232233] uppercase tracking-wider hover:underline cursor-pointer flex items-center gap-0.5">
+                  <mat-icon class="text-xs">search</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+        <!-- Duplicated for seamless loop -->
+        @for (book of state.books().filter(b => b.availableCopies > 0).slice(0, 10); track 'dup-' + book.isbn) {
+          <div class="flex-shrink-0 w-44 bg-transparent border-2 border-[#232233] hover:bg-[#D9C997]/10 transition-colors cursor-pointer flex flex-col">
+            <div class="h-40 bg-[#D9C997]/20 flex items-center justify-center border-b-2 border-[#232233] overflow-hidden">
+              @if (book.coverUrl) {
+                <img [src]="book.coverUrl" [alt]="book.title" class="w-full h-full object-cover" />
+              } @else {
+                <div class="text-center px-3">
+                  <mat-icon class="text-4xl text-[#232233]/40">menu_book</mat-icon>
+                </div>
+              }
+            </div>
+            <div class="p-3 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="text-[11px] font-bold text-[#232233] uppercase tracking-wide leading-tight line-clamp-2">{{ book.title }}</h4>
+                <p class="text-[10px] text-[#54546A] mt-1 font-serif italic">{{ book.author }}</p>
+              </div>
+              <div class="flex items-center justify-between mt-2 pt-2 border-t border-[#232233]/10">
+                <span class="text-[9px] font-bold text-[#232233]">{{ book.availableCopies }} disp.</span>
+                <button (click)="searchBook(book.title); $event.stopPropagation()" class="text-[9px] font-bold text-[#232233] uppercase tracking-wider hover:underline cursor-pointer flex items-center gap-0.5">
+                  <mat-icon class="text-xs">search</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 3: RECORDATORIO DE NORMATIVA -->
+  <div class="bg-[#D9C997]/25 p-6 border-2 border-[#232233] flex flex-col sm:flex-row gap-6 items-center">
+    <mat-icon class="text-4xl text-[#232233]">school</mat-icon>
+    <div>
+      <h4 class="font-serif text-lg font-bold italic text-[#232233]">Normativa de Convivencia BiblioLib</h4>
+      <p class="text-xs text-[#54546A] mt-1.5 leading-relaxed">Recuerda devolver tus préstamos a tiempo para evitar sanciones económicas ($500/día a partir del día 10) o disciplinarias. Ayuda a mantener los libros en excelente estado para los siguientes lectores.</p>
+    </div>
+  </div>
+
+  <!-- BLOQUE 4: FOOTER DE NAVEGACIÓN -->
+  <div class="border-t-2 border-[#232233]/12 pt-6 mt-6 text-center space-y-4">
+    <div class="flex flex-wrap items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-widest">
+      <button (click)="navigate.emit('catalogue')" class="text-[#232233] hover:underline cursor-pointer flex items-center gap-1">
+        <mat-icon class="text-sm">search</mat-icon> Catálogo
+      </button>
+      @if (state.currentUser()) {
+        <button (click)="navigate.emit('my-loans')" class="text-[#232233] hover:underline cursor-pointer flex items-center gap-1">
+          <mat-icon class="text-sm">library_books</mat-icon> Mis Préstamos
+        </button>
+        <button (click)="navigate.emit('my-reservations')" class="text-[#232233] hover:underline cursor-pointer flex items-center gap-1">
+          <mat-icon class="text-sm">bookmark</mat-icon> Mis Reservas
+        </button>
+      } @else {
+        <button (click)="navigate.emit('login')" class="text-[#232233] hover:underline cursor-pointer flex items-center gap-1">
+          <mat-icon class="text-sm">login</mat-icon> Iniciar Sesión
+        </button>
+      }
+    </div>
+    <p class="text-[9px] text-[#54546A]/50 font-serif italic">BiblioLib — Fundación Cultural &copy; 2026. Sistema de Gestión Bibliotecaria Académica.</p>
+  </div>
+
+</div>

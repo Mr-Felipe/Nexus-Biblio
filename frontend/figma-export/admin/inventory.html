@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioLib - Inventario</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { warm: '#F5F2ED', primary: '#1A1A1A' } } }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body { font-family: "Helvetica Neue", Arial, "Plus Jakarta Sans", "Inter", sans-serif; background-color: #F5F2ED; color: #1A1A1A; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    .font-serif { font-family: Georgia, "Playfair Display", serif; }
+    .font-sans { font-family: "Helvetica Neue", Arial, "Plus Jakarta Sans", "Inter", sans-serif; }
+    .font-mono { font-family: "JetBrains Mono", monospace; }
+    input:focus, select:focus { border-color: #1A1A1A !important; outline: none !important; }
+    input, select, textarea { border-radius: 0px !important; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #F5F2ED; } ::-webkit-scrollbar-thumb { background: rgba(26,26,26,0.2); border-radius: 0px; }
+    .scrollbar-none::-webkit-scrollbar { display: none; } .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen flex flex-col">
+    <div class="flex-1 flex flex-col min-w-0 bg-[#F5F2ED] relative">
+      <header class="min-h-16 py-2 border-b-2 border-[#1A1A1A] bg-[#F5F2ED] flex items-center px-4 lg:px-6 z-30 sticky top-0 gap-2 lg:gap-4">
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="flex items-center gap-2 mr-2"><span class="material-icons text-[#1A1A1A] text-lg">local_library</span><span class="font-serif text-sm font-bold italic tracking-tight text-[#1A1A1A]">BiblioLib</span></div>
+        </div>
+        <nav class="flex items-center gap-0.5 xl:gap-1 mr-auto overflow-x-auto flex-nowrap scrollbar-none">
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Inicio</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Panel</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Usuarios</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Catálogo</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 bg-[#1A1A1A] text-[#F5F2ED]">Inventario</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Préstamos</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Reservas</button>
+          <button class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold whitespace-nowrap cursor-pointer flex-shrink-0 text-[#1A1A1A] hover:bg-[#1A1A1A]/10">Sanciones</button>
+        </nav>
+        <div class="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+          <div class="flex items-center gap-2 border-l border-[#1A1A1A]/20 pl-3">
+            <div class="flex items-center gap-2"><div class="w-8 h-8 bg-[#1A1A1A] text-[#F5F2ED] flex items-center justify-center font-bold text-xs border border-[#1A1A1A]">CA</div><div class="text-left leading-tight"><p class="text-[10px] font-bold text-[#1A1A1A] max-w-[100px] truncate font-serif">Carlos Admin</p><span class="text-[8px] uppercase font-mono font-bold text-[#1A1A1A]/60">ADMIN</span></div></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 p-6 overflow-y-auto">
+        <div class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="font-serif text-3xl text-[#1A1A1A] font-bold tracking-tight">Gestión de Inventario</h1>
+              <p class="text-xs text-[#1A1A1A]/60 mt-1 font-serif italic">Administra rápidamente el stock de ejemplares, disponibilidad física y consulta de reservas activas.</p>
+            </div>
+            <button class="bg-[#1A1A1A] hover:bg-[#1A1A1A]/85 text-[#F5F2ED] px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+              <span class="material-icons text-sm">add_box</span> Registrar Nuevo Libro
+            </button>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-sans">
+            <div class="border-2 border-[#1A1A1A] p-4 bg-transparent flex flex-col justify-between">
+              <span class="text-[9px] font-bold uppercase tracking-wider text-[#1A1A1A]/50">Títulos Registrados</span>
+              <span class="font-serif text-2xl font-bold text-[#1A1A1A] mt-2">8</span>
+            </div>
+            <div class="border-2 border-[#1A1A1A] p-4 bg-transparent flex flex-col justify-between">
+              <span class="text-[9px] font-bold uppercase tracking-wider text-[#1A1A1A]/50">Ejemplares Totales</span>
+              <span class="font-serif text-2xl font-bold text-[#1A1A1A] mt-2">13</span>
+            </div>
+            <div class="border-2 border-[#1A1A1A] p-4 bg-transparent flex flex-col justify-between">
+              <span class="text-[9px] font-bold uppercase tracking-wider text-[#1A1A1A]/50">En Estantería</span>
+              <span class="font-serif text-2xl font-bold text-[#1A1A1A] mt-2">10</span>
+            </div>
+            <div class="border-2 border-[#1A1A1A] p-4 bg-transparent flex flex-col justify-between">
+              <span class="text-[9px] font-bold uppercase tracking-wider text-[#1A1A1A]/50">En Préstamo (Activos)</span>
+              <span class="font-serif text-2xl font-bold text-[#1A1A1A] mt-2">3</span>
+            </div>
+          </div>
+
+          <!-- Search bar -->
+          <div class="flex flex-col sm:flex-row gap-4 p-4 border-2 border-[#1A1A1A] bg-transparent">
+            <div class="flex-1 relative">
+              <span class="material-icons absolute left-3 top-3 text-[#1A1A1A]/60 text-lg">search</span>
+              <input type="text" placeholder="Buscar por título, autor o ISBN en inventario..." class="w-full pl-10 pr-4 py-2.5 text-xs bg-transparent border-2 border-[#1A1A1A] focus:outline-none font-bold uppercase tracking-wide placeholder-[#1A1A1A]/40" />
+            </div>
+            <select class="text-xs px-4 py-2.5 bg-transparent border-2 border-[#1A1A1A] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
+              <option>Todas las Categorías</option>
+            </select>
+          </div>
+
+          <!-- Inventory Table -->
+          <div class="border-2 border-[#1A1A1A] bg-[#F5F2ED] overflow-x-auto">
+            <table class="w-full text-left border-collapse font-sans text-xs min-w-[800px]">
+              <thead>
+                <tr class="bg-[#1A1A1A]/5 border-b-2 border-[#1A1A1A]">
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A] w-1/3">Libro</th>
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A]">ISBN / Categoría</th>
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A] text-center w-36">Ejemplares Totales</th>
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A] text-center">En Biblioteca</th>
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A] text-center">Prestados</th>
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A] text-center">Reservas / Cola</th>
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A] text-center">Estado</th>
+                  <th class="p-3 font-bold uppercase tracking-wider text-[10px] text-[#1A1A1A] text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y border-[#1A1A1A]/10">
+                <tr class="hover:bg-[#1A1A1A]/5 transition-all">
+                  <td class="p-3 flex items-center gap-3">
+                    <div class="w-10 h-14 bg-[#1A1A1A]/5 border border-[#1A1A1A] overflow-hidden flex-shrink-0">
+                      <img src="https://picsum.photos/seed/ElTunel/200/300" alt="Cover" class="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <div class="font-serif font-bold text-sm text-[#1A1A1A] line-clamp-1">El Túnel</div>
+                      <div class="text-[10px] text-[#1A1A1A]/60 italic font-serif">Ernesto Sabato</div>
+                    </div>
+                  </td>
+                  <td class="p-3"><div class="font-mono text-[10px] text-[#1A1A1A]">978-0060886806</div><div class="text-[9px] uppercase font-bold text-[#1A1A1A]/50 mt-0.5">Novela</div></td>
+                  <td class="p-3 text-center">
+                    <div class="inline-flex items-center gap-1.5 border border-[#1A1A1A] px-2 py-1 bg-transparent">
+                      <button class="w-5 h-5 flex items-center justify-center font-bold text-xs border border-[#1A1A1A]/20 hover:bg-[#1A1A1A] hover:text-[#F5F2ED] cursor-pointer">-</button>
+                      <span class="font-mono font-bold px-1 w-6 text-center text-sm text-[#1A1A1A]">3</span>
+                      <button class="w-5 h-5 flex items-center justify-center font-bold text-xs border border-[#1A1A1A]/20 hover:bg-[#1A1A1A] hover:text-[#F5F2ED] cursor-pointer">+</button>
+                    </div>
+                  </td>
+                  <td class="p-3 text-center"><span class="font-mono font-bold text-sm text-[#1A1A1A]">2</span></td>
+                  <td class="p-3 text-center"><span class="font-mono text-sm font-bold text-[#1A1A1A]/70">1</span></td>
+                  <td class="p-3 text-center"><span class="font-mono text-sm font-bold text-[#1A1A1A]/40">0</span></td>
+                  <td class="p-3 text-center"><span class="bg-emerald-50 border border-emerald-200 text-emerald-700 border px-2 py-1 font-bold text-[9px] uppercase tracking-wider rounded-sm select-none">Disponible</span></td>
+                  <td class="p-3 text-right">
+                    <div class="flex justify-end gap-1.5">
+                      <button class="p-1.5 text-[#1A1A1A] hover:bg-[#1A1A1A]/10 border border-[#1A1A1A]/20 cursor-pointer flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider" title="Ver Ejemplares"><span class="material-icons text-xs">view_list</span> Ejemplares</button>
+                      <button class="p-1.5 text-[#1A1A1A] hover:bg-[#1A1A1A]/10 border border-[#1A1A1A]/20 cursor-pointer" title="Editar Detalles"><span class="material-icons text-xs">edit</span></button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="hover:bg-[#1A1A1A]/5 transition-all">
+                  <td class="p-3 flex items-center gap-3">
+                    <div class="w-10 h-14 bg-[#1A1A1A]/5 border border-[#1A1A1A] overflow-hidden flex-shrink-0">
+                      <img src="https://picsum.photos/seed/CienAnos/200/300" alt="Cover" class="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <div class="font-serif font-bold text-sm text-[#1A1A1A] line-clamp-1">Cien años de soledad</div>
+                      <div class="text-[10px] text-[#1A1A1A]/60 italic font-serif">Gabriel García Márquez</div>
+                    </div>
+                  </td>
+                  <td class="p-3"><div class="font-mono text-[10px] text-[#1A1A1A]">978-0060883287</div><div class="text-[9px] uppercase font-bold text-[#1A1A1A]/50 mt-0.5">Novela</div></td>
+                  <td class="p-3 text-center">
+                    <div class="inline-flex items-center gap-1.5 border border-[#1A1A1A] px-2 py-1 bg-transparent">
+                      <button class="w-5 h-5 flex items-center justify-center font-bold text-xs border border-[#1A1A1A]/20 hover:bg-[#1A1A1A] hover:text-[#F5F2ED] cursor-pointer">-</button>
+                      <span class="font-mono font-bold px-1 w-6 text-center text-sm text-[#1A1A1A]">2</span>
+                      <button class="w-5 h-5 flex items-center justify-center font-bold text-xs border border-[#1A1A1A]/20 hover:bg-[#1A1A1A] hover:text-[#F5F2ED] cursor-pointer">+</button>
+                    </div>
+                  </td>
+                  <td class="p-3 text-center"><span class="font-mono font-bold text-sm text-red-600">0</span></td>
+                  <td class="p-3 text-center"><span class="font-mono text-sm font-bold text-[#1A1A1A]/70">2</span></td>
+                  <td class="p-3 text-center"><span class="font-mono text-sm font-bold text-amber-700">1</span></td>
+                  <td class="p-3 text-center"><span class="bg-red-50 border border-red-200 text-red-600 border px-2 py-1 font-bold text-[9px] uppercase tracking-wider rounded-sm select-none">No Disponible</span></td>
+                  <td class="p-3 text-right">
+                    <div class="flex justify-end gap-1.5">
+                      <button class="p-1.5 text-[#1A1A1A] hover:bg-[#1A1A1A]/10 border border-[#1A1A1A]/20 cursor-pointer flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider"><span class="material-icons text-xs">view_list</span> Ejemplares</button>
+                      <button class="p-1.5 text-[#1A1A1A] hover:bg-[#1A1A1A]/10 border border-[#1A1A1A]/20 cursor-pointer"><span class="material-icons text-xs">edit</span></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

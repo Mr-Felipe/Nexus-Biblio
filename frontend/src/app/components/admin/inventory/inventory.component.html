@@ -1,0 +1,226 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Gestión de Inventario</h1>
+      <p class="text-xs text-[#54546A]/80 mt-1 font-serif italic">Administra rápidamente el stock de ejemplares, disponibilidad física y consulta de reservas activas.</p>
+    </div>
+  </div>
+
+  <!-- Summary KPI Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-sans">
+    <div class="border-2 border-[#232233] p-4 bg-transparent flex flex-col justify-between">
+      <span class="text-[9px] font-bold uppercase tracking-wider text-[#54546A]/70">Títulos Registrados</span>
+      <span class="font-serif text-2xl font-bold text-[#232233] mt-2">{{ state.books().length }}</span>
+    </div>
+    <div class="border-2 border-[#232233] p-4 bg-transparent flex flex-col justify-between">
+      <span class="text-[9px] font-bold uppercase tracking-wider text-[#54546A]/70">Ejemplares Totales</span>
+      <span class="font-serif text-2xl font-bold text-[#232233] mt-2">{{ totalCopiesCount() }}</span>
+    </div>
+    <div class="border-2 border-[#232233] p-4 bg-transparent flex flex-col justify-between">
+      <span class="text-[9px] font-bold uppercase tracking-wider text-[#54546A]/70">En Estantería</span>
+      <span class="font-serif text-2xl font-bold text-[#232233] mt-2">{{ totalAvailableCopiesCount() }}</span>
+    </div>
+    <div class="border-2 border-[#232233] p-4 bg-transparent flex flex-col justify-between">
+      <span class="text-[9px] font-bold uppercase tracking-wider text-[#54546A]/70">En Préstamo (Activos)</span>
+      <span class="font-serif text-2xl font-bold text-[#232233] mt-2">{{ totalLoanedCopiesCount() }}</span>
+    </div>
+  </div>
+
+  <!-- Search bar & filters -->
+  <div class="flex flex-col sm:flex-row gap-4 p-4 border-2 border-[#232233] bg-transparent">
+    <div class="flex-1 relative">
+      <mat-icon class="absolute left-3 top-3 text-[#54546A]/80 text-lg">search</mat-icon>
+      <input type="text" placeholder="Buscar por título, autor o ISBN en inventario..."
+             [value]="bookSearchQuery()" (input)="bookSearchQuery.set($any($event.target).value)"
+             class="w-full pl-10 pr-4 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+    </div>
+
+  </div>
+
+  <!-- Inventory Tabular Table -->
+  <div class="border-2 border-[#232233] bg-[#F8F3EA] overflow-x-auto">
+    <table class="w-full text-left border-collapse font-sans text-xs min-w-[800px]">
+      <thead>
+        <tr class="bg-[#D9C997] text-[#232233] font-bold uppercase tracking-wider text-[10px] border-b-2 border-[#232233]">
+          <th class="p-3 font-bold w-1/3">Libro</th>
+          <th class="p-3 font-bold">ISBN</th>
+          <th class="p-3 font-bold text-center w-36">Ejemplares Totales</th>
+          <th class="p-3 font-bold text-center">En Biblioteca</th>
+          <th class="p-3 font-bold text-center">Prestados</th>
+          <th class="p-3 font-bold text-center">Reservas / Cola</th>
+          <th class="p-3 font-bold text-center">Estado</th>
+          <th class="p-3 font-bold text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y border-[#232233]/12">
+        @for (book of filteredBooks(); track book.isbn) {
+          <tr class="hover:bg-[#D9C997]/15 transition-all">
+            <!-- Book Column -->
+            <td class="p-3 flex items-center gap-3">
+              <div class="w-10 h-14 bg-[#D9C997]/15 border border-[#232233] overflow-hidden flex-shrink-0">
+                <img [src]="book.coverUrl" alt="Cover" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+              </div>
+              <div>
+                <div class="font-serif font-bold text-sm text-[#232233] line-clamp-1" [title]="book.title">{{ book.title }}</div>
+                <div class="text-[10px] text-[#54546A]/80 italic font-serif">{{ book.author }}</div>
+              </div>
+            </td>
+
+            <!-- ISBN / Category -->
+            <td class="p-3">
+              <div class="font-mono text-[10px] text-[#232233]">{{ book.isbn }}</div>
+            </td>
+
+            <!-- Ejemplares Totales (Stepper) -->
+            <td class="p-3 text-center">
+              <div class="inline-flex items-center gap-1.5 border border-[#232233] px-2 py-1 bg-transparent">
+                <button (click)="decrementCopies(book)" 
+                        [disabled]="book.copies <= getLoanedCopiesCount(book.isbn)"
+                        class="w-5 h-5 flex items-center justify-center font-bold text-xs border border-[#232233]/8 hover:bg-[#232233] hover:text-white cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[#232233] disabled:cursor-not-allowed">
+                  -
+                </button>
+                <span class="font-mono font-bold px-1 w-6 text-center text-sm text-[#232233]">{{ book.copies }}</span>
+                <button (click)="incrementCopies(book)" 
+                        class="w-5 h-5 flex items-center justify-center font-bold text-xs border border-[#232233]/8 hover:bg-[#232233] hover:text-white cursor-pointer">
+                  +
+                </button>
+              </div>
+            </td>
+
+            <!-- En Biblioteca -->
+            <td class="p-3 text-center">
+              <span class="font-mono font-bold text-sm" [ngClass]="book.availableCopies > 0 ? 'text-[#232233]' : 'text-red-600'">
+                {{ book.availableCopies }}
+              </span>
+            </td>
+
+            <!-- Prestados -->
+            <td class="p-3 text-center">
+              <span class="font-mono text-sm font-bold text-[#54546A]">
+                {{ getLoanedCopiesCount(book.isbn) }}
+              </span>
+            </td>
+
+            <!-- En Cola (Espera) -->
+            <td class="p-3 text-center">
+              <span class="font-mono text-sm font-bold" [ngClass]="getReservationsCount(book.isbn) > 0 ? 'text-amber-700' : 'text-[#A0A0B2]'">
+                {{ getReservationsCount(book.isbn) }}
+              </span>
+            </td>
+
+            <!-- Estado Automático -->
+            <td class="p-3 text-center">
+              <span [ngClass]="book.availableCopies > 0 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-600'"
+                    class="border px-2 py-1 font-bold text-[9px] uppercase tracking-wider rounded-sm select-none">
+                {{ book.availableCopies > 0 ? 'Disponible' : 'No Disponible' }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="p-3 text-right">
+              <div class="flex justify-end gap-1.5">
+                <button (click)="toggleBookExemplars(book.isbn)" 
+                        [ngClass]="expandedBookIsbn() === book.isbn ? 'bg-[#232233] text-white' : 'text-[#232233] hover:bg-[#D9C997]/20'"
+                        class="p-1.5 border border-[#232233]/8 cursor-pointer flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider" 
+                        title="Ver Ejemplares">
+                  <mat-icon class="text-xs">view_list</mat-icon> Ejemplares
+                </button>
+                <button (click)="openEditBookModal(book)" class="p-1.5 text-[#232233] hover:bg-[#D9C997]/20 border border-[#232233]/8 cursor-pointer" title="Editar Detalles">
+                  <mat-icon class="text-xs">edit</mat-icon>
+                </button>
+                <button (click)="deleteBook(book.isbn)" class="p-1.5 text-red-600 hover:bg-red-50 border border-red-200 cursor-pointer" title="Dar de baja">
+                  <mat-icon class="text-xs">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          @if (expandedBookIsbn() === book.isbn) {
+            <tr class="bg-[#D9C997]/15 border-b border-[#232233]/8">
+              <td colspan="8" class="p-4">
+                <div class="border-2 border-[#232233] p-4 bg-[#F8F3EA] space-y-4">
+                  <div class="flex items-center justify-between border-b border-[#232233]/12 pb-2">
+                    <h4 class="font-serif font-bold text-xs text-[#232233] uppercase tracking-wider flex items-center gap-1.5">
+                      <mat-icon class="text-sm">layers</mat-icon> Listado de Ejemplares para "{{ book.title }}"
+                    </h4>
+                    <span class="text-[9px] font-mono font-bold text-[#54546A]/70">ISBN: {{ book.isbn }}</span>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    @for (copy of getBookCopies(book); track copy.id) {
+                      <div class="border border-[#232233]/8 p-3 bg-white/50 flex flex-col justify-between space-y-2">
+                        <div class="flex items-center justify-between">
+                          <span class="font-bold text-[10px] text-[#232233] uppercase tracking-wider font-mono">Ejemplar #{{ copy.number }}</span>
+                          
+                          <span [ngClass]="{
+                            'bg-emerald-50 border-emerald-200 text-emerald-700': copy.status === 'Disponible',
+                            'bg-blue-50 border-blue-200 text-blue-700': copy.status === 'Prestado',
+                            'bg-amber-50 border-amber-200 text-amber-700': copy.status === 'En reserva',
+                            'bg-red-50 border-red-200 text-red-600': copy.status === 'Perdido',
+                            'bg-orange-50 border-orange-200 text-orange-600': copy.status === 'Dañado'
+                          }" class="border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-sm">
+                            {{ copy.status }}
+                          </span>
+                        </div>
+
+                        @if (copy.status === 'Prestado' && copy.loanDetails) {
+                          <div class="text-[9px] text-[#54546A] space-y-0.5 font-sans">
+                            <div class="flex items-center gap-1"><mat-icon class="text-[10px]">person</mat-icon> <strong>Prestado a:</strong> {{ copy.loanDetails.userName }}</div>
+                            <div class="flex items-center gap-1"><mat-icon class="text-[10px]">event</mat-icon> <strong>Vence el:</strong> {{ copy.loanDetails.dueDate }}</div>
+                          </div>
+                        } @else if (copy.status === 'En reserva' && copy.reservationDetails) {
+                          <div class="text-[9px] text-[#54546A] space-y-0.5 font-sans">
+                            <div class="flex items-center gap-1"><mat-icon class="text-[10px]">person</mat-icon> <strong>Reservado por:</strong> {{ copy.reservationDetails.userName }}</div>
+                          </div>
+                        } @else {
+                          <div class="text-[9px] text-[#A0A0B2] font-serif italic">
+                            Sin préstamos ni reservas activas.
+                          </div>
+                        }
+
+                        <div class="pt-2 border-t border-[#232233]/12 flex items-center justify-between gap-2">
+                          <span class="text-[8px] font-bold uppercase tracking-wider text-[#54546A]/80">Cambiar Estado:</span>
+                          
+                          <div class="flex gap-1">
+                            @if (copy.status === 'Prestado' || copy.status === 'En reserva') {
+                              <span class="text-[8px] italic text-[#54546A]/70 font-serif">Operación bloqueada</span>
+                            } @else {
+                              <button (click)="updateExemplarStatus(book.isbn, copy.number, 'Disponible')"
+                                      [disabled]="copy.status === 'Disponible'"
+                                      [ngClass]="copy.status === 'Disponible' ? 'bg-[#232233] text-white' : 'bg-transparent text-[#232233] hover:bg-[#D9C997]/20'"
+                                      class="px-1.5 py-0.5 border border-[#232233] text-[8px] font-bold uppercase cursor-pointer disabled:opacity-50">
+                                OK
+                              </button>
+                              <button (click)="updateExemplarStatus(book.isbn, copy.number, 'Dañado')"
+                                      [disabled]="copy.status === 'Dañado'"
+                                      [ngClass]="copy.status === 'Dañado' ? 'bg-orange-600 text-white border-orange-600' : 'bg-transparent text-orange-600 hover:bg-orange-50 border-orange-300'"
+                                      class="px-1.5 py-0.5 border text-[8px] font-bold uppercase cursor-pointer disabled:opacity-50">
+                                Dañado
+                              </button>
+                              <button (click)="updateExemplarStatus(book.isbn, copy.number, 'Perdido')"
+                                      [disabled]="copy.status === 'Perdido'"
+                                      [ngClass]="copy.status === 'Perdido' ? 'bg-red-600 text-white border-red-600' : 'bg-transparent text-red-600 hover:bg-red-50 border-red-300'"
+                                      class="px-1.5 py-0.5 border text-[8px] font-bold uppercase cursor-pointer disabled:opacity-50">
+                                Perdido
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+        } @empty {
+          <tr>
+            <td colspan="8" class="p-8 text-center text-[#54546A]/70 font-serif italic">
+              No hay libros registrados con esos criterios.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

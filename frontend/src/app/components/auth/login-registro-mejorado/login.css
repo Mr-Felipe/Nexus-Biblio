@@ -1,0 +1,981 @@
+/*======================================
+    VARIABLES
+======================================*/
+
+:root{
+
+    --bg:#F8F3EA;
+    --card:#FCFAF7;
+    --white:#FFFFFF;
+
+    --primary:#242131;
+    --secondary:#E5D5A3;
+    --secondary-dark:#D2C08D;
+
+    --text:#5C5B70;
+    --border:#D8CCAF;
+    --placeholder:#A4A4B2;
+
+    --radius:24px;
+
+    --shadow:0 20px 45px rgba(0,0,0,.12);
+
+    --transition:.3s ease;
+
+}
+
+
+/*======================================
+RESET
+======================================*/
+
+*{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+}
+
+html{
+
+    scroll-behavior:smooth;
+
+}
+
+body{
+
+    font-family:'Poppins',sans-serif;
+
+    background:var(--bg);
+
+    color:var(--primary);
+
+    min-height:100vh;
+
+}
+
+
+/*======================================
+CONTENEDOR
+======================================*/
+
+.container{
+
+    width:min(1400px,95%);
+
+    margin:auto;
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:stretch;
+
+    padding:20px 0;
+
+}
+
+
+/*======================================
+PANEL LOGIN
+======================================*/
+
+.login-panel{
+
+    flex:1.45;
+
+    background:var(--card);
+
+    border-radius:0 25px 25px 0;
+
+    padding:35px 40px;
+
+    box-shadow:var(--shadow);
+
+    overflow-y:auto;
+
+}
+
+
+.login-panel::-webkit-scrollbar{
+
+    width:5px;
+
+}
+
+.login-panel::-webkit-scrollbar-thumb{
+
+    background:#C4B080;
+
+    border-radius:20px;
+
+}
+
+.login-panel::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+.login-wrapper{
+
+    width:min(650px,100%);
+
+    margin:auto;
+
+}
+
+
+/*======================================
+CABECERA
+======================================*/
+
+.tag{
+
+    display:block;
+
+    text-align:center;
+
+    letter-spacing:4px;
+
+    font-size:11px;
+
+    color:#8A7B56;
+
+    margin-bottom:14px;
+
+}
+
+.login-wrapper h2{
+
+    text-align:center;
+
+    font-size:38px;
+
+    font-family:'Cormorant Garamond',serif;
+
+    margin-bottom:6px;
+
+}
+
+.subtitle{
+
+    text-align:center;
+
+    color:var(--text);
+
+    margin-bottom:28px;
+
+    font-size:14px;
+
+}
+
+
+/*======================================
+FORMULARIO
+======================================*/
+
+form{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+
+/*======================================
+INPUT
+======================================*/
+
+.input-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+}
+
+.input-group label{
+
+    font-size:11px;
+
+    letter-spacing:3px;
+
+    color:#67667C;
+
+    font-weight:600;
+
+}
+
+.input-icon{
+
+    display:flex;
+
+    align-items:center;
+
+    border-bottom:2px solid var(--border);
+
+    padding-bottom:14px;
+
+    transition:.3s;
+
+}
+
+.input-icon:hover{
+
+    border-color:#B9A773;
+
+}
+
+.input-icon:focus-within{
+
+    border-color:var(--primary);
+
+}
+
+.input-icon i{
+
+    width:25px;
+
+    color:#8A8A9D;
+
+}
+
+.input-icon input{
+
+    flex:1;
+
+    border:none;
+
+    outline:none;
+
+    background:none;
+
+    font-size:15px;
+
+    color:var(--primary);
+
+    font-family:'Poppins',sans-serif;
+
+    padding-left:12px;
+
+}
+
+.input-icon input::placeholder{
+
+    color:var(--placeholder);
+
+}
+
+.toggle-password{
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    color:#8D8DA0;
+
+    font-size:18px;
+
+}
+
+
+/*======================================
+RECUPERAR
+======================================*/
+
+.forgot{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    margin-top:-10px;
+
+}
+
+.forgot a{
+
+    text-decoration:none;
+
+    color:var(--text);
+
+    font-size:13px;
+
+}
+
+.forgot a:hover{
+
+    color:var(--primary);
+
+}
+
+
+/*======================================
+BOTON LOGIN
+======================================*/
+
+.btn-login{
+
+    height:52px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:var(--primary);
+
+    color:white;
+
+    letter-spacing:2px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:12px;
+
+    transition:.3s;
+
+}
+
+.btn-login:hover{
+
+    background:#161522;
+
+    transform:translateY(-2px);
+
+}
+
+
+/*======================================
+REGISTRO
+======================================*/
+
+.register-link{
+
+    text-align:center;
+
+    color:var(--text);
+
+    margin-top:-3px;
+
+    font-size:14px;
+
+}
+
+.register-link a{
+
+    color:#7D6331;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+}
+
+.register-link a:hover{
+
+    text-decoration:underline;
+
+}
+
+
+/*======================================
+DIVISOR / CREDENCIALES
+======================================*/
+
+.divider{
+    display:none;
+}
+
+.credentials{
+    display:none;
+}
+
+
+/*=====================================================
+    PANEL IZQUIERDO
+=====================================================*/
+
+.info-panel{
+
+    flex:.82;
+
+    background:var(--secondary);
+
+    border-radius:25px 0 0 25px;
+
+    padding:35px 40px;
+
+    position:relative;
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    box-shadow:var(--shadow);
+
+}
+
+
+/*=====================================================
+LOGO
+=====================================================*/
+
+.logo{
+
+    z-index:2;
+
+}
+
+.logo small{
+
+    display:block;
+
+    letter-spacing:4px;
+
+    font-size:11px;
+
+    color:#7A6A43;
+
+    margin-bottom:14px;
+
+}
+
+.logo h2{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    font-size:42px;
+
+    font-family:'Cormorant Garamond',serif;
+
+}
+
+.logo h2 i{
+
+    font-size:30px;
+
+}
+
+.logo span{
+
+    display:block;
+
+    margin-top:8px;
+
+    letter-spacing:3px;
+
+    font-size:12px;
+
+    color:#776740;
+
+}
+
+
+/*=====================================================
+HERO
+=====================================================*/
+
+.hero{
+
+    max-width:320px;
+
+    z-index:2;
+
+}
+
+.hero h1{
+
+    font-family:'Cormorant Garamond',serif;
+
+    font-size:42px;
+
+    line-height:1;
+
+    margin-bottom:18px;
+
+}
+
+.hero p{
+
+    font-size:14px;
+
+    line-height:1.7;
+
+    color:#5E5A4C;
+
+}
+
+
+/*=====================================================
+REGISTRO
+=====================================================*/
+
+.register-box{
+
+    z-index:2;
+
+}
+
+.register-box p{
+
+    margin-bottom:14px;
+
+    color:#69604A;
+
+    font-size:14px;
+
+}
+
+.btn-outline{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:14px 28px;
+
+    border:2px solid rgba(40,40,40,.25);
+
+    border-radius:14px;
+
+    color:var(--primary);
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    font-size:14px;
+
+    letter-spacing:1px;
+
+    transition:.3s;
+
+}
+
+.btn-outline:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+}
+
+
+/*=====================================================
+DECORACIONES
+=====================================================*/
+
+.background-decoration{
+
+    position:absolute;
+
+    inset:0;
+
+    pointer-events:none;
+
+}
+
+
+/* círculo superior */
+
+.background-decoration::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:430px;
+
+    height:430px;
+
+    border-radius:50%;
+
+    border:2px solid rgba(110,90,40,.14);
+
+    top:-200px;
+
+    right:-120px;
+
+}
+
+
+/* líneas inferiores */
+
+.background-decoration::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:25px;
+
+    bottom:0;
+
+    width:130px;
+
+    height:190px;
+
+    background:repeating-linear-gradient(
+        90deg,
+        rgba(90,80,50,.25),
+        rgba(90,80,50,.25) 5px,
+        transparent 5px,
+        transparent 15px
+    );
+
+}
+
+
+/*=====================================================
+INPUTS
+=====================================================*/
+
+input,
+button{
+
+    transition:.3s;
+
+}
+
+input:focus{
+
+    transform:translateX(3px);
+
+}
+
+
+/*=====================================================
+MOVIL: HEADER Y FOOTER
+=====================================================*/
+
+.mobile-header,
+.mobile-footer{
+    display:none;
+}
+
+.mobile-wrapper{
+    display:block;
+}
+
+
+/*=====================================================
+ANIMACIÓN
+=====================================================*/
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(40px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+.info-panel{
+
+    animation:fadeUp .7s ease;
+
+}
+
+.login-wrapper{
+
+    animation:fadeUp .9s ease;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+
+}
+
+
+/*=====================================================
+LAPTOP
+=====================================================*/
+
+@media(max-width:1300px){
+
+    .login-panel{
+        padding:40px;
+    }
+
+    .info-panel{
+        padding:32px;
+    }
+
+}
+
+
+/*=====================================================
+TABLET
+=====================================================*/
+
+@media(max-width:992px){
+
+    .mobile-wrapper{
+        display:flex;
+        flex-direction:column;
+        min-height:100vh;
+    }
+
+    .container{
+        flex:1;
+        display:flex;
+        flex-direction:column;
+        min-height:auto;
+        padding:12px 0;
+    }
+
+    .info-panel{
+        display:none;
+    }
+
+    .login-panel{
+        flex:1;
+        width:100%;
+        border-radius:0;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+    }
+
+    .mobile-header{
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        background:var(--secondary);
+        padding:24px;
+        border-radius:25px 25px 0 0;
+    }
+
+    .mobile-header .logo{
+        text-align:center;
+    }
+
+    .mobile-header .logo h2{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        font-size:38px;
+        font-family:'Cormorant Garamond',serif;
+        color:var(--primary);
+    }
+
+    .mobile-header .logo h2 i{
+        font-size:28px;
+    }
+
+    .mobile-footer{
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        background:var(--secondary);
+        padding:28px 24px;
+        border-radius:0 0 25px 25px;
+        text-align:center;
+    }
+
+    .mobile-footer p{
+        margin-bottom:16px;
+        color:#69604A;
+        font-size:15px;
+    }
+
+    .mobile-footer .btn-outline{
+        display:inline-flex;
+        align-items:center;
+        gap:12px;
+        padding:16px 30px;
+        border:2px solid rgba(40,40,40,.25);
+        border-radius:14px;
+        color:var(--primary);
+        text-decoration:none;
+        font-weight:600;
+        font-size:15px;
+        transition:.3s;
+    }
+
+    .mobile-footer .btn-outline:hover{
+        background:var(--primary);
+        color:white;
+    }
+
+    .hero h1{
+        font-size:36px;
+    }
+
+}
+
+
+/*=====================================================
+MÓVIL
+=====================================================*/
+
+@media(max-width:768px){
+
+    .mobile-header{
+        padding:20px;
+    }
+
+    .mobile-header .logo h2{
+        font-size:32px;
+    }
+
+    .mobile-header .logo h2 i{
+        font-size:24px;
+    }
+
+    .login-panel{
+        padding:30px 24px;
+    }
+
+    .login-wrapper h2{
+        font-size:32px;
+    }
+
+    .mobile-footer{
+        padding:24px 20px;
+    }
+
+}
+
+
+/*=====================================================
+390 PX
+=====================================================*/
+
+@media(max-width:390px){
+
+    body{
+        padding:0;
+        min-height:auto;
+    }
+
+    .mobile-wrapper{
+        min-height:auto;
+    }
+
+    .container{
+        width:100%;
+        min-height:auto;
+        padding:0;
+    }
+
+    .info-panel{
+        display:none;
+    }
+
+    .login-panel{
+        border-radius:0;
+        padding:22px 18px;
+    }
+
+    .mobile-header{
+        display:flex;
+        padding:16px;
+        border-radius:0 0 20px 20px;
+    }
+
+    .mobile-header .logo h2{
+        font-size:28px;
+    }
+
+    .mobile-header .logo h2 i{
+        font-size:20px;
+    }
+
+    .login-wrapper h2{
+        font-size:28px;
+    }
+
+    .subtitle{
+        font-size:12px;
+        margin-bottom:18px;
+    }
+
+    .btn-login{
+        height:44px;
+        font-size:14px;
+    }
+
+    .mobile-footer{
+        display:flex;
+        padding:20px 16px;
+        border-radius:20px 20px 0 0;
+    }
+
+}
+
+
+/*=====================================================
+EXTRA
+=====================================================*/
+
+::selection{
+
+    background:#272435;
+
+    color:white;
+
+}
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#BFA76A;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#F5F0E4;
+
+}

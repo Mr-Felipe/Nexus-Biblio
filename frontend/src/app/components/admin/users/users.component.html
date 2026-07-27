@@ -1,0 +1,155 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Gestión de Usuarios</h1>
+    <button (click)="openAddUserModal()" class="bg-[#232233] hover:bg-[#1a1928] text-white px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+      <mat-icon class="text-sm">person_add</mat-icon> Registrar Usuario
+    </button>
+  </div>
+
+  <!-- Search bar & role filter -->
+  <div class="flex flex-col sm:flex-row gap-4 p-4 border-2 border-[#232233] bg-transparent">
+    <div class="flex-1 relative">
+      <mat-icon class="absolute left-3 top-3 text-[#54546A]/80 text-lg">search</mat-icon>
+      <input type="text" placeholder="Buscar por nombre, correo o ID..."
+             [value]="userSearchQuery()" (input)="userSearchQuery.set($any($event.target).value)"
+             class="w-full pl-10 pr-4 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+    </div>
+    <select [value]="userRoleFilter()" (change)="userRoleFilter.set($any($event.target).value)"
+            class="text-xs px-4 py-2.5 bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
+      <option value="ALL">Todos los Roles</option>
+      <option value="ADMIN">Administradores</option>
+      <option value="BIBL">Bibliotecarios</option>
+      <option value="DOC">Docentes</option>
+      <option value="EST">Estudiantes</option>
+    </select>
+  </div>
+
+  <!-- Table of users -->
+  <div class="border-2 border-[#232233] bg-transparent">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="bg-[#D9C997] text-[#232233] font-bold uppercase tracking-wider text-[10px] border-b-2 border-[#232233]">
+            <th class="p-4 font-bold">ID</th>
+            <th class="p-4 font-bold">Nombre Completo</th>
+            <th class="p-4 font-bold">Email Académico</th>
+            <th class="p-4 font-bold">Rol</th>
+            <th class="p-4 font-bold">Estado</th>
+            <th class="p-4 font-bold text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y-2 divide-[#232233]/12 font-sans">
+          @for (user of filteredUsers(); track user.id) {
+            <tr class="hover:bg-[#D9C997]/15">
+              <td class="p-4 font-mono font-bold">{{ user.id }}</td>
+              <td class="p-4 font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ user.name }}</td>
+              <td class="p-4 text-[#54546A] font-serif italic">{{ user.email }}</td>
+              <td class="p-4">
+                <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                      [ngClass]="{
+                        'bg-[#232233] text-white': user.role === 'ADMIN',
+                        'border border-[#232233] text-[#232233]': user.role === 'BIBL',
+                        'border border-[#232233]/35 bg-[#D9C997]/15 text-[#54546A]': user.role === 'DOC',
+                        'border border-[#232233]/8 bg-transparent text-[#54546A]/70': user.role === 'EST'
+                      }">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="p-4">
+                <button (click)="toggleUserStatus(user)" class="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold hover:opacity-85 uppercase tracking-wider cursor-pointer"
+                        [ngClass]="user.status === 'Activo' ? 'border border-[#232233] text-[#232233]' : 'bg-red-600 text-white border border-red-600'">
+                  <span class="w-1.5 h-1.5" [ngClass]="user.status === 'Activo' ? 'bg-[#232233]' : 'bg-white'"></span>
+                  {{ user.status }}
+                </button>
+              </td>
+              <td class="p-4 text-right flex items-center justify-end gap-1.5">
+                <button (click)="openEditUserModal(user)" class="p-1.5 text-[#232233] hover:bg-[#D9C997]/20 border border-[#232233]/8 cursor-pointer" title="Editar">
+                  <mat-icon class="text-sm">edit</mat-icon>
+                </button>
+                <button (click)="deleteUser(user.id)" class="p-1.5 text-red-600 hover:bg-red-50 border border-red-200 cursor-pointer" title="Eliminar">
+                  <mat-icon class="text-sm">delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="p-8 text-center text-[#A0A0B2] font-serif italic">No se encontraron usuarios que coincidan con la búsqueda.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 1: ADD/EDIT USER -->
+@if (showAddUserModal()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-md p-6 relative">
+      <div class="flex justify-between items-center pb-4 border-b-2 border-[#232233] mb-4">
+        <h3 class="font-serif text-lg font-bold text-[#232233] uppercase tracking-tight">
+          {{ editingUser() ? 'Editar Usuario Académico' : 'Registrar Nuevo Usuario' }}
+        </h3>
+        <button (click)="showAddUserModal.set(false)" class="text-[#54546A]/80 hover:text-[#232233] cursor-pointer">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="space-y-4">
+        <div>
+          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">ID de Usuario (Solo Números)</span>
+          <input type="text" formControlName="id" placeholder="Ej. 1005"
+                 class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+        </div>
+
+        <div>
+          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Nombre Completo</span>
+          <input type="text" formControlName="name" placeholder="Ej. Andrea Gómez"
+                 class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+        </div>
+
+        <div>
+          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Correo Electrónico Institucional</span>
+          <input type="email" formControlName="email" placeholder="Ej. andrea@bibliolib.edu"
+                 class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+        </div>
+
+        <div>
+          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Rol Académico</span>
+          <select formControlName="role" class="w-full px-3 py-2.5 text-xs bg-[#F8F3EA] border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
+            <option value="ADMIN">Administrador</option>
+            <option value="BIBL">Bibliotecario</option>
+            <option value="DOC">Docente</option>
+            <option value="EST">Estudiante</option>
+          </select>
+        </div>
+
+        <div>
+          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Contraseña (opcional)</span>
+          <input type="password" formControlName="password" placeholder="Dejar vacío para usar contraseña por defecto"
+                 class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Teléfono</span>
+            <input type="text" formControlName="phone" placeholder="Ej. 555-1234"
+                   class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+          </div>
+          <div>
+            <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Dirección</span>
+            <input type="text" formControlName="address" placeholder="Ej. Calle 123"
+                   class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+          </div>
+        </div>
+
+        <div class="pt-4 border-t-2 border-[#232233] flex justify-end gap-2">
+          <button type="button" (click)="showAddUserModal.set(false)" class="border-2 border-[#232233] px-4 py-2 text-xs text-[#232233] hover:bg-[#D9C997]/20 font-bold uppercase tracking-wider cursor-pointer transition-all">Cancelar</button>
+          <button type="submit" [disabled]="userForm.invalid" class="border-2 border-[#232233] bg-[#232233] hover:bg-[#1a1928] disabled:opacity-30 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer">
+            <mat-icon class="text-sm">save</mat-icon> Guardar Usuario
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

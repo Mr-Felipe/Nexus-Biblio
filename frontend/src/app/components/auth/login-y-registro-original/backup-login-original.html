@@ -1,0 +1,173 @@
+<!-- ============================================================
+     ARCHIVO DE RESPALDO - Login y Registro Original (Inline)
+     Fecha: Antes del 24/07/2026
+     Descripción: Código original del login/registro que estaba
+     integrado directamente en app.html antes de ser extraído
+     a un componente separado.
+     ============================================================ -->
+
+<!-- ESTE ARCHIVO ES SOLO PARA REFERENCIA - NO SE USA EN LA APLICACIÓN -->
+
+<!--
+  El código original estaba integrado en app.html dentro de:
+  @if (!state.currentUser()) {
+    <div class="min-h-screen flex flex-col justify-center items-center px-4 bg-[#F5F2ED] py-12 relative overflow-hidden">
+      ...
+      <div class="w-full max-w-md bg-[#F5F2ED] border-2 border-[#1A1A1A] p-10 relative z-10">
+        
+        @if (!showRegisterForm()) {
+          <!-- LOGIN FORM -->
+          <div class="text-center mb-8">
+            <span class="text-[9px] font-bold tracking-[0.3em] uppercase block text-[#1A1A1A]/60 mb-2">Fundación Académica</span>
+            <h1 class="font-serif text-4xl text-[#1A1A1A] font-bold tracking-tight italic flex items-center justify-center gap-2">
+              <mat-icon class="text-3xl">local_library</mat-icon> BiblioLib
+            </h1>
+            <p class="text-[10px] text-[#1A1A1A]/60 tracking-[0.2em] uppercase font-semibold mt-3">Sistema de Gestión & Archivo</p>
+          </div>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="space-y-6">
+            <div>
+              <span class="block text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest mb-2">ID de Usuario</span>
+              <div class="relative border-b border-[#1A1A1A] pb-1">
+                <mat-icon class="absolute left-1 top-2 text-[#1A1A1A]/50 text-lg">person</mat-icon>
+                <input type="text" formControlName="id" placeholder="Ej. 1001"
+                       class="w-full pl-8 pr-2 py-1.5 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 text-[#1A1A1A]" />
+              </div>
+            </div>
+
+            <div>
+              <span class="block text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest mb-2">Contraseña</span>
+              <div class="relative border-b border-[#1A1A1A] pb-1">
+                <mat-icon class="absolute left-1 top-2 text-[#1A1A1A]/50 text-lg">lock</mat-icon>
+                <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="••••••••"
+                       class="w-full pl-8 pr-10 py-1.5 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 text-[#1A1A1A]" />
+                <button type="button" (click)="showPassword.set(!showPassword())" class="absolute right-1 top-1.5 text-[#1A1A1A]/50 hover:text-[#1A1A1A]">
+                  <mat-icon class="text-lg">{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" [disabled]="loginForm.invalid"
+                    class="w-full bg-[#1A1A1A] hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 text-[#F5F2ED] font-bold text-xs uppercase tracking-[0.2em] py-3 shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#1A1A1A]">
+              <mat-icon class="text-sm">login</mat-icon> Ingresar a BiblioLib
+            </button>
+          </form>
+
+          <div class="mt-4 text-center">
+            <button (click)="openRegisterForm()" class="text-[10px] font-bold text-[#1A1A1A]/60 hover:text-[#1A1A1A] uppercase tracking-widest transition-all cursor-pointer underline underline-offset-2">
+              ¿No tienes cuenta? Regístrate aquí
+            </button>
+          </div>
+
+          <!-- Test Credentials Drawer inside Login -->
+          <div class="mt-8 border-t border-[#1A1A1A]/10 pt-6">
+            <p class="text-[10px] font-bold text-[#1A1A1A] mb-3 uppercase tracking-wider flex items-center gap-1">
+              <mat-icon class="text-sm">vpn_key</mat-icon> Credenciales de prueba:
+            </p>
+            <div class="grid grid-cols-2 gap-2 text-[10px]">
+              <button (click)="useCredentials('1001', 'ADMIN')" class="text-left p-3 bg-transparent border border-[#1A1A1A]/20 hover:border-[#1A1A1A] transition-all">
+                <span class="font-serif italic font-bold text-[#1A1A1A]">Administrador</span><br/>ID: <span class="font-mono">1001</span>
+              </button>
+              <button (click)="useCredentials('1002', 'BIBL')" class="text-left p-3 bg-transparent border border-[#1A1A1A]/20 hover:border-[#1A1A1A] transition-all">
+                <span class="font-serif italic font-bold text-[#1A1A1A]">Bibliotecario</span><br/>ID: <span class="font-mono">1002</span>
+              </button>
+              <button (click)="useCredentials('1003', 'DOC')" class="text-left p-3 bg-transparent border border-[#1A1A1A]/20 hover:border-[#1A1A1A] transition-all">
+                <span class="font-serif italic font-bold text-[#1A1A1A]">Docente</span><br/>ID: <span class="font-mono">1003</span>
+              </button>
+              <button (click)="useCredentials('1004', 'EST')" class="text-left p-3 bg-transparent border border-[#1A1A1A]/20 hover:border-[#1A1A1A] transition-all">
+                <span class="font-serif italic font-bold text-[#1A1A1A]">Estudiante</span><br/>ID: <span class="font-mono">1004</span>
+              </button>
+            </div>
+          </div>
+
+        } @else {
+          <!-- REGISTER FORM -->
+          <div class="text-center mb-6">
+            <span class="text-[9px] font-bold tracking-[0.3em] uppercase block text-[#1A1A1A]/60 mb-2">Nuevo Usuario</span>
+            <h1 class="font-serif text-2xl text-[#1A1A1A] font-bold tracking-tight italic flex items-center justify-center gap-2">
+              <mat-icon class="text-2xl">person_add</mat-icon> Registro
+            </h1>
+            <p class="text-[10px] text-[#1A1A1A]/60 tracking-[0.15em] uppercase font-semibold mt-2">Crea tu cuenta en BiblioLib</p>
+          </div>
+
+          <form [formGroup]="registerForm" (ngSubmit)="registerUser()" class="space-y-4">
+            <div>
+              <span class="block text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest mb-1.5">ID de Usuario (Solo Números)</span>
+              <div class="relative border-b pb-1" [ngClass]="registerForm.get('id')?.invalid && registerForm.get('id')?.touched ? 'border-red-500' : 'border-[#1A1A1A]'">
+                <mat-icon class="absolute left-1 top-2 text-[#1A1A1A]/50 text-lg">badge</mat-icon>
+                <input type="text" formControlName="id" placeholder="Ej. 2001"
+                       class="w-full pl-8 pr-2 py-1.5 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 text-[#1A1A1A]" />
+              </div>
+              @if (registerForm.get('id')?.invalid && registerForm.get('id')?.touched) {
+                <p class="text-[9px] text-red-600 mt-1 font-bold">Ingrese solo números (ej. 2001)</p>
+              }
+            </div>
+
+            <div>
+              <span class="block text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest mb-1.5">Nombre Completo</span>
+              <div class="relative border-b pb-1" [ngClass]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched ? 'border-red-500' : 'border-[#1A1A1A]'">
+                <mat-icon class="absolute left-1 top-2 text-[#1A1A1A]/50 text-lg">person</mat-icon>
+                <input type="text" formControlName="name" placeholder="Ej. María García"
+                       class="w-full pl-8 pr-2 py-1.5 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 text-[#1A1A1A]" />
+              </div>
+              @if (registerForm.get('name')?.invalid && registerForm.get('name')?.touched) {
+                <p class="text-[9px] text-red-600 mt-1 font-bold">Mínimo 3 caracteres</p>
+              }
+            </div>
+
+            <div>
+              <span class="block text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest mb-1.5">Correo Electrónico</span>
+              <div class="relative border-b pb-1" [ngClass]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched ? 'border-red-500' : 'border-[#1A1A1A]'">
+                <mat-icon class="absolute left-1 top-2 text-[#1A1A1A]/50 text-lg">email</mat-icon>
+                <input type="email" formControlName="email" placeholder="Ej. maria@universidad.edu"
+                       class="w-full pl-8 pr-2 py-1.5 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 text-[#1A1A1A]" />
+              </div>
+              @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+                <p class="text-[9px] text-red-600 mt-1 font-bold">Ingrese un correo válido (ej. usuario@dominio.com)</p>
+              }
+            </div>
+
+            <div>
+              <span class="block text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest mb-1.5">Contraseña</span>
+              <div class="relative border-b pb-1" [ngClass]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched ? 'border-red-500' : 'border-[#1A1A1A]'">
+                <mat-icon class="absolute left-1 top-2 text-[#1A1A1A]/50 text-lg">lock</mat-icon>
+                <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="Mínimo 4 caracteres"
+                       class="w-full pl-8 pr-10 py-1.5 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 text-[#1A1A1A]" />
+                <button type="button" (click)="showPassword.set(!showPassword())" class="absolute right-1 top-1.5 text-[#1A1A1A]/50 hover:text-[#1A1A1A]">
+                  <mat-icon class="text-lg">{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </div>
+              @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+                <p class="text-[9px] text-red-600 mt-1 font-bold">Mínimo 4 caracteres</p>
+              }
+            </div>
+
+            <div>
+              <span class="block text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest mb-1.5">Rol Académico</span>
+              <div class="relative border-b border-[#1A1A1A] pb-1">
+                <mat-icon class="absolute left-1 top-2 text-[#1A1A1A]/50 text-lg">school</mat-icon>
+                <select formControlName="role"
+                        class="w-full pl-8 pr-2 py-1.5 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 text-[#1A1A1A] cursor-pointer">
+                  <option value="EST">Estudiante</option>
+                  <option value="DOC">Docente</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pt-4 space-y-3">
+              <button type="submit" [disabled]="registerForm.invalid"
+                      class="w-full bg-[#1A1A1A] hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 text-[#F5F2ED] font-bold text-xs uppercase tracking-[0.2em] py-3 shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#1A1A1A]">
+                <mat-icon class="text-sm">person_add</mat-icon> Crear Cuenta
+              </button>
+              <button type="button" (click)="showRegisterForm.set(false)"
+                      class="w-full border border-[#1A1A1A]/30 text-[#1A1A1A]/70 hover:text-[#1A1A1A] hover:border-[#1A1A1A] font-bold text-[10px] uppercase tracking-widest py-2.5 transition-all cursor-pointer">
+                Volver al Inicio de Sesión
+              </button>
+            </div>
+          </form>
+        }
+
+      </div>
+    </div>
+  }
+-->

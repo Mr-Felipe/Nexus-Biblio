@@ -1,0 +1,150 @@
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Gestión de Sanciones</h1>
+    <button (click)="openAddSanctionModal()" class="bg-[#232233] hover:bg-[#1a1928] text-white px-4 py-2.5 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+      <mat-icon class="text-sm">gavel</mat-icon> Registrar Sanción Manual
+    </button>
+  </div>
+
+  <!-- Search filters -->
+  <div class="flex flex-col sm:flex-row gap-4 p-4 border-2 border-[#232233] bg-transparent">
+    <div class="flex-1 relative">
+      <mat-icon class="absolute left-3 top-3 text-[#54546A]/80 text-lg">search</mat-icon>
+      <input type="text" placeholder="Buscar por usuario sancionado o motivo..."
+             [value]="sanctionSearchQuery()" (input)="sanctionSearchQuery.set($any($event.target).value)"
+             class="w-full pl-10 pr-4 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
+    </div>
+    <select [value]="sanctionStatusFilter()" (change)="sanctionStatusFilter.set($any($event.target).value)"
+            class="text-xs px-4 py-2.5 bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
+      <option value="ALL">Todos los Estados</option>
+      <option value="Activa">Activas (Pendientes)</option>
+      <option value="Pagada">Pagadas (Levantadas)</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="border-2 border-[#232233] bg-transparent">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="bg-[#D9C997] text-[#232233] font-bold uppercase tracking-wider text-[10px] border-b-2 border-[#232233]">
+            <th class="p-4 font-bold">ID</th>
+            <th class="p-4 font-bold">Usuario</th>
+            <th class="p-4 font-bold">Tipo Sanción</th>
+            <th class="p-4 font-bold">Multa Económica</th>
+            <th class="p-4 font-bold">Detalle / Motivo</th>
+            <th class="p-4 font-bold">Fecha Registro</th>
+            <th class="p-4 font-bold">Estado</th>
+            <th class="p-4 font-bold text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y-2 divide-[#232233]/12 font-sans">
+          @for (sanc of filteredSanctions(); track sanc.id) {
+            <tr class="hover:bg-[#D9C997]/15">
+              <td class="p-4 font-mono font-bold">{{ sanc.id }}</td>
+              <td class="p-4">
+                <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ sanc.userName }}</p>
+                <span class="text-[10px] text-[#54546A]/80">ID: {{ sanc.userId }}</span>
+              </td>
+              <td class="p-4">
+                <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                      [ngClass]="sanc.type === 'Económica' ? 'bg-[#232233] text-white' : 'border border-[#232233] text-[#232233]'">
+                  {{ sanc.type }}
+                </span>
+              </td>
+              <td class="p-4 font-mono font-bold text-red-600">
+                {{ sanc.fine > 0 ? '$' + (sanc.fine | number) : '$0 (Social/Temporal)' }}
+              </td>
+              <td class="p-4 text-[#232233] font-serif italic max-w-xs truncate" [title]="sanc.reason">{{ sanc.reason }}</td>
+              <td class="p-4 font-mono">{{ sanc.date }}</td>
+              <td class="p-4">
+                <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                      [ngClass]="sanc.status === 'Activa' ? 'bg-red-600 text-white' : 'border border-[#232233] text-[#232233]'">
+                  {{ sanc.status }}
+                </span>
+              </td>
+              <td class="p-4 text-right">
+                @if (sanc.status === 'Activa') {
+                  <button (click)="paySanction(sanc.id)" class="border border-[#232233] text-[#232233] hover:bg-[#232233] hover:text-white px-2.5 py-1 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 ml-auto cursor-pointer transition-all">
+                    <mat-icon class="text-xs">done_all</mat-icon> Levantar Sanción
+                  </button>
+                } @else {
+                  <span class="text-[#232233] font-bold uppercase tracking-wider text-[10px] flex items-center justify-end gap-1"><mat-icon class="text-sm">verified</mat-icon> Saldada</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="p-8 text-center text-[#A0A0B2] font-serif italic">Ningún usuario sancionado que coincida.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 4: ADD SANCTION MANUAL -->
+@if (showAddSanctionModal()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-md p-6 relative">
+      <div class="flex justify-between items-center pb-4 border-b-2 border-[#232233] mb-4">
+        <h3 class="font-serif text-lg font-bold text-[#232233] uppercase tracking-tight">Registrar Sanción / Penalidad</h3>
+        <button (click)="showAddSanctionModal.set(false)" class="text-[#54546A]/80 hover:text-[#232233] cursor-pointer">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="sanctionForm" (ngSubmit)="saveSanction()" class="space-y-3">
+        <div>
+          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Usuario Infractor</span>
+          <select formControlName="userId" class="w-full px-3 py-2.5 text-xs bg-[#F8F3EA] border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
+            <option value="">-- Seleccionar Usuario Sancionable --</option>
+            @for (u of state.users(); track u.id) {
+              <option [value]="u.id">{{ u.name }} (ID: {{ u.id }} - {{ u.role }})</option>
+            }
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Tipo de Sanción</span>
+            <select formControlName="type" class="w-full px-3 py-2.5 text-xs bg-[#F8F3EA] border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
+              <option value="Disciplinaria">Disciplinaria</option>
+              <option value="Económica">Económica</option>
+              <option value="Daño">Por Daño de Libro</option>
+              <option value="Pérdida">Por Pérdida de Libro</option>
+            </select>
+          </div>
+          <div>
+            <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Multa Monetaria ($)</span>
+            <input type="number" formControlName="fine" class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
+          </div>
+        </div>
+
+        <div>
+          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Razón de la Sanción</span>
+          <textarea formControlName="reason" rows="3" placeholder="Ej. Ejemplar devuelto con rotura de páginas..."
+                    class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-medium text-[#232233] placeholder-[#A0A0B2] resize-none"></textarea>
+        </div>
+
+        <div class="border-2 border-[#232233] text-[#232233] text-[9px] p-4 font-mono mt-0.5 bg-transparent">
+          <span class="font-bold uppercase tracking-wide">Valores de Referencia Oficiales:</span>
+          <ul class="list-disc pl-4 mt-2 space-y-0.5">
+            <li>Retraso (3+ días): Disciplinaria ($0 multa)</li>
+            <li>Atraso grave (10+ days): Económica ($500/día de retraso)</li>
+            <li>Daño físico: Multa fija de $20,000</li>
+            <li>Pérdida material: Multa de reposición de $50,000</li>
+          </ul>
+        </div>
+
+        <div class="pt-4 border-t-2 border-[#232233] flex justify-end gap-2">
+          <button type="button" (click)="showAddSanctionModal.set(false)" class="border-2 border-[#232233] px-4 py-2 text-xs text-[#232233] hover:bg-[#D9C997]/20 font-bold uppercase tracking-wider cursor-pointer transition-all">Cancelar</button>
+          <button type="submit" [disabled]="sanctionForm.invalid" class="border-2 border-[#232233] bg-[#232233] hover:bg-[#1a1928] disabled:opacity-30 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer">
+            <mat-icon class="text-sm">gavel</mat-icon> Aplicar Sanción
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

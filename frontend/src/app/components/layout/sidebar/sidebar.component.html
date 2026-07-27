@@ -1,0 +1,154 @@
+@if (state.currentUser() || (state.activeView() !== 'login' && state.activeView() !== 'register')) {
+<aside [ngClass]="{'translate-x-0': isOpen, '-translate-x-full': !isOpen}"
+       class="fixed lg:hidden inset-y-0 left-0 w-64 bg-[#EDE5D0] border-r-2 border-[#232233] z-50 transition-transform duration-300 flex flex-col justify-between shadow-2xl overflow-y-auto">
+
+  <div>
+    <!-- Sidebar Brand Logo -->
+    <div class="h-16 flex flex-col justify-center px-6 border-b border-[#232233]/12">
+      <span class="text-[8px] font-bold tracking-[0.3em] uppercase block text-[#54546A]/70">Fundación Cultural</span>
+      <h1 class="font-serif text-lg text-[#232233] font-bold italic tracking-tight flex items-center gap-2">
+        <mat-icon class="text-xl">local_library</mat-icon> BiblioLib
+      </h1>
+    </div>
+
+    <!-- Sidebar Navigation Menu Links -->
+    <nav class="p-4 space-y-1">
+      <!-- All Roles: Home -->
+      <button (click)="navigate.emit('home')"
+              [ngClass]="state.activeView() === 'home' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+              class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+        <mat-icon class="text-lg">home</mat-icon> Inicio
+      </button>
+
+      @if (state.currentUser()) {
+        <!-- Admin & Librarian Navigation -->
+        @if (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL') {
+          <p class="text-[9px] uppercase tracking-[0.25em] text-[#54546A]/70 font-bold px-4 pt-5 pb-1 border-b border-[#232233]/8 mb-2">Administración</p>
+
+          <button (click)="navigate.emit('dashboard')"
+                  [ngClass]="state.activeView() === 'dashboard' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">space_dashboard</mat-icon> Panel de Control
+          </button>
+
+          @if (state.currentUser()?.role === 'ADMIN') {
+            <button (click)="navigate.emit('users')"
+                    [ngClass]="state.activeView() === 'users' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+              <mat-icon class="text-lg">people</mat-icon> Gestión Usuarios
+            </button>
+          }
+
+          <button (click)="navigate.emit('books')"
+                  [ngClass]="state.activeView() === 'books' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">book</mat-icon> Gestión Catálogo
+          </button>
+
+          <button (click)="navigate.emit('inventory')"
+                  [ngClass]="state.activeView() === 'inventory' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">inventory_2</mat-icon> Gestión Inventario
+          </button>
+
+          <button (click)="navigate.emit('loans')"
+                  [ngClass]="state.activeView() === 'loans' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">swap_horiz</mat-icon> Préstamos
+          </button>
+
+          <button (click)="navigate.emit('reservations')"
+                  [ngClass]="state.activeView() === 'reservations' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">bookmark_border</mat-icon> Reservas
+          </button>
+
+          <button (click)="navigate.emit('sanctions')"
+                  [ngClass]="state.activeView() === 'sanctions' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">gavel</mat-icon> Sanciones
+          </button>
+
+          @if (state.currentUser()?.role === 'ADMIN') {
+            <p class="text-[9px] uppercase tracking-[0.25em] text-[#54546A]/70 font-bold px-4 pt-5 pb-1 border-b border-[#232233]/8 mb-2">Reportes & Auditoría</p>
+
+            <button (click)="navigate.emit('reports')"
+                    [ngClass]="state.activeView() === 'reports' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+              <mat-icon class="text-lg">analytics</mat-icon> Estadísticas
+            </button>
+
+            <button (click)="navigate.emit('audit')"
+                    [ngClass]="state.activeView() === 'audit' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+              <mat-icon class="text-lg">security</mat-icon> Registro de Auditoría
+            </button>
+          }
+        }
+
+        <!-- Teacher / Student Navigation -->
+        @if (state.currentUser()?.role === 'DOC' || state.currentUser()?.role === 'EST') {
+          <p class="text-[9px] uppercase tracking-[0.25em] text-[#54546A]/70 font-bold px-4 pt-5 pb-1 border-b border-[#232233]/8 mb-2">Servicios Estudiantiles</p>
+
+          <button (click)="navigate.emit('catalogue')"
+                  [ngClass]="state.activeView() === 'catalogue' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">search</mat-icon> Catálogo de Libros
+          </button>
+
+          <button (click)="navigate.emit('my-loans')"
+                  [ngClass]="state.activeView() === 'my-loans' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">library_books</mat-icon> Mis Préstamos
+          </button>
+
+          <button (click)="navigate.emit('my-reservations')"
+                  [ngClass]="state.activeView() === 'my-reservations' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">bookmark</mat-icon> Mis Reservas
+          </button>
+
+          <button (click)="navigate.emit('my-sanctions')"
+                  [ngClass]="state.activeView() === 'my-sanctions' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">report_problem</mat-icon> Mis Sanciones
+          </button>
+        }
+      } @else {
+        <button (click)="navigate.emit('catalogue')"
+                [ngClass]="state.activeView() === 'catalogue' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+          <mat-icon class="text-lg">search</mat-icon> Catálogo
+        </button>
+        <div class="pt-4 border-t border-[#232233]/12 mt-3">
+          <button (click)="navigate.emit('login')"
+                  [ngClass]="state.activeView() === 'login' || state.activeView() === 'register' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">login</mat-icon> Iniciar Sesión
+          </button>
+        </div>
+      }
+    </nav>
+  </div>
+
+  <!-- Logged User Footer Widget -->
+  @if (state.currentUser()) {
+    <div class="p-4 border-t border-[#232233]/12 bg-[#D9C997]/15">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 bg-[#232233] text-white flex items-center justify-center font-bold text-sm border border-[#232233]">
+          {{ state.currentUser()?.name?.substring(0, 2)?.toUpperCase() }}
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-[#232233] truncate w-36 font-serif">{{ state.currentUser()?.name }}</h4>
+          <span class="text-[9px] uppercase font-bold px-2 py-0.5 border border-[#232233]/8 text-[#54546A] inline-block mt-0.5">
+            {{ state.currentUser()?.role }}
+          </span>
+        </div>
+      </div>
+      <button (click)="logout.emit()" class="w-full flex items-center justify-center gap-2 py-2 text-[10px] uppercase tracking-widest border border-[#232233]/8 hover:bg-[#232233] hover:text-white text-[#232233] transition-all font-bold cursor-pointer">
+        <mat-icon class="text-sm">logout</mat-icon> Cerrar Sesión
+      </button>
+    </div>
+  }
+</aside>
+}

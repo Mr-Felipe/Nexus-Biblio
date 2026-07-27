@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Poppins", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* BiblioLib Design System - DISENO.md palette */
+  --color-primary: #232233;
+  --color-primary-dark: #1a1928;
+  --color-primary-light: #F8F3EA;
+  --color-secondary: #D9C997;
+  --color-secondary-dark: #CDBA84;
+  --color-bg: #F8F3EA;
+  --color-card: #FCFAF7;
+  --color-text-main: #54546A;
+  --color-placeholder: #A0A0B2;
+  --color-border-custom: #DDD4BE;
+
+  /* Border radius - round-friendly */
+  --radius-sm: 14px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 25px;
+  --radius-2xl: 25px;
+  --radius-3xl: 25px;
+  --radius-full: 9999px;
+
+  /* Shadows - subtle low opacity */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 18px 40px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.15);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #F8F3EA;
+  color: #232233;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars - DISENO.md palette */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F5F0E4;
+}
+::-webkit-scrollbar-thumb {
+  background: #BFA76A;
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #CDBA84;
+}
+
+/* Input focus */
+input:focus, select:focus, textarea:focus {
+  border-color: #CDBA84 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Inputs - DISENO.md */
+input, select, textarea {
+  border-radius: 14px !important;
+  border-color: #DDD4BE !important;
+}
+
+/* FadeUp animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeUp {
+  animation: fadeUp .8s ease both;
+}
+
+/* Selection */
+::selection {
+  background: #232233;
+  color: white;
+}
+
+/* Hide scrollbar on nav links */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Carousel auto-scroll */
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.carousel-track {
+  display: flex;
+  gap: 1rem;
+  animation: scroll-left 30s linear infinite;
+  width: max-content;
+}
+
+.carousel-track:hover {
+  animation-play-state: paused;
+}

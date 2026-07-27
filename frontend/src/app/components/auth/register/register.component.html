@@ -1,0 +1,162 @@
+<div class="w-full h-full font-sans bg-[#F8F3EA] text-[#232233] overflow-hidden">
+  <main class="w-[min(1200px,95%)] h-full mx-auto flex items-stretch py-4 register-container">
+
+    <!-- MOVIL: HEADER -->
+    <header class="register-mobile-header hidden justify-center items-center bg-[#D9C997] p-6 rounded-t-[25px]">
+      <div class="text-center">
+        <h2 class="flex items-center gap-3 text-[38px] font-serif font-bold text-[#232233]">
+          <mat-icon class="text-[28px] w-[28px] h-[28px]">local_library</mat-icon>
+          BiblioLib
+        </h2>
+      </div>
+    </header>
+
+    <!-- FORMULARIO -->
+    <section class="register-form-section flex-1 bg-[#FCFAF7] rounded-l-[25px] shadow-lg p-[32px_36px] overflow-y-auto flex flex-col justify-center register-scroll">
+      <div class="w-[min(650px,100%)] mx-auto animate-fadeUp register-wrapper-anim">
+        <button (click)="goBack.emit()" class="flex items-center gap-2 text-[11px] text-[#54546A] hover:text-[#232233] transition-colors cursor-pointer mb-6 self-start">
+          <mat-icon class="text-sm">arrow_back</mat-icon> Volver al inicio
+        </button>
+        <span class="block text-center tracking-[4px] text-[11px] text-[#CDBA84] mb-[14px]">NUEVO USUARIO</span>
+        <h1 class="font-serif text-[38px] font-bold text-center mb-2">Crea tu cuenta</h1>
+        <p class="text-center text-[#54546A] mb-[22px] text-sm">Regístrate para acceder a BiblioLib</p>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="flex flex-col gap-4">
+
+          <!-- FILA: NOMBRE + CELULAR -->
+          <div class="grid grid-cols-2 gap-4 register-row">
+            <div class="flex flex-col gap-3">
+              <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">NOMBRE COMPLETO</label>
+              <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+                <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">person</mat-icon>
+                <input
+                  type="text"
+                  formControlName="name"
+                  placeholder="María García"
+                  class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">NÚMERO DE CELULAR</label>
+              <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+                <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">phone</mat-icon>
+                <input
+                  type="tel"
+                  formControlName="phone"
+                  placeholder="Ej. 55 1234 5678"
+                  class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
+              </div>
+            </div>
+          </div>
+
+          <!-- CORREO -->
+          <div class="w-full flex flex-col gap-3">
+            <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">CORREO ELECTRÓNICO</label>
+            <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+              <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">mail</mat-icon>
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="maria@universidad.edu"
+                class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
+            </div>
+          </div>
+
+          <!-- DIRECCIÓN -->
+          <div class="w-full flex flex-col gap-3">
+            <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">DIRECCIÓN</label>
+            <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+              <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">location_on</mat-icon>
+              <input
+                type="text"
+                formControlName="address"
+                placeholder="Calle, número, colonia, ciudad"
+                class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
+            </div>
+          </div>
+
+          <!-- FILA: ROL Y CONTRASEÑA -->
+          <div class="grid grid-cols-2 gap-4 register-row">
+            <div class="flex flex-col gap-3">
+              <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">ROL ACADÉMICO</label>
+              <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+                <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">school</mat-icon>
+                <select formControlName="role"
+                  class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 cursor-pointer focus:translate-x-[2px] transition-transform duration-300">
+                  <option value="EST">Estudiante</option>
+                  <option value="DOC">Docente</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">CONTRASEÑA</label>
+              <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+                <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">lock</mat-icon>
+                <input
+                  [type]="showPassword() ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Mínimo 4 caracteres"
+                  class="flex-1 border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
+                <button
+                  type="button"
+                  (click)="showPassword.set(!showPassword())"
+                  class="border-none bg-transparent cursor-pointer text-[#A0A0B2] text-[18px] p-0 flex items-center">
+                  <mat-icon class="text-[18px] w-[18px] h-[18px]">{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTÓN -->
+          <button type="submit" [disabled]="registerForm.invalid"
+            class="h-[52px] border-none rounded-[14px] bg-[#232233] text-white font-semibold text-[15px] tracking-[2px] cursor-pointer transition-all duration-300 flex justify-center items-center gap-3 mt-2 hover:-translate-y-0.5 hover:bg-[#1a1928] disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none">
+            <mat-icon>person_add</mat-icon>
+            Crear Cuenta
+          </button>
+
+        </form>
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO -->
+    <aside class="register-info-aside flex-[.65] bg-[#D9C997] rounded-r-[25px] p-[32px_36px] relative overflow-hidden flex flex-col justify-between shadow-lg register-info">
+
+      <div class="z-[2]">
+        <small class="block tracking-[4px] text-[11px] text-[#232233] mb-[14px] font-semibold">COMUNIDAD ACADÉMICA</small>
+        <h2 class="font-serif text-[40px] font-bold flex items-center gap-3 text-[#232233]">
+          <mat-icon class="text-[32px] w-[32px] h-[32px]">local_library</mat-icon>
+          BiblioLib
+        </h2>
+        <span class="block mt-2 text-[12px] tracking-[4px] text-[#232233] font-medium">SISTEMA DE GESTIÓN &amp; ARCHIVO</span>
+      </div>
+
+      <div class="max-w-[380px] z-[2]">
+        <h3 class="font-serif text-[42px] font-bold leading-none mb-4">Únete a<br>BiblioLib</h3>
+        <p class="text-sm leading-[1.7] text-[#232233]/70">Crea tu cuenta y empieza a gestionar tus préstamos, reservas y notificaciones desde hoy.</p>
+      </div>
+
+      <div class="z-[2]">
+        <p class="mb-[14px] text-[#232233]/70 text-sm">¿Ya tienes una cuenta?</p>
+        <button (click)="openLogin.emit()" class="inline-flex items-center gap-3 px-7 py-[14px] border-2 border-[#232233]/35 rounded-[14px] bg-transparent text-[#232233] font-semibold text-sm cursor-pointer transition-all duration-300 hover:bg-[#232233] hover:text-white">
+          Inicia Sesión
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <!-- Decoraciones -->
+      <div class="absolute inset-0 pointer-events-none register-decorations"></div>
+    </aside>
+
+    <!-- MOVIL: FOOTER -->
+    <footer class="register-mobile-footer hidden flex-col items-center bg-[#D9C997] p-7 rounded-b-[25px] text-center">
+      <p class="mb-4 text-[#232233] text-[15px]">¿Ya tienes una cuenta?</p>
+      <button (click)="openLogin.emit()" class="inline-flex items-center gap-3 px-[30px] py-4 border-2 border-[#232233]/25 rounded-[14px] bg-transparent text-[#232233] no-underline font-semibold text-[15px] transition-all duration-300 cursor-pointer hover:bg-[#232233] hover:text-white">
+        Inicia Sesión
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </footer>
+
+  </main>
+</div>

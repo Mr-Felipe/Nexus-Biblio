@@ -1,0 +1,228 @@
+﻿<!-- Toast Notification (Global) -->
+<app-toast></app-toast>
+
+<!-- PRINCIPAL APPLICATION LAYOUT -->
+<div class="h-screen flex flex-col lg:flex-row overflow-y-auto">
+
+    <!-- MOBILE SIDEBAR -->
+    @if (state.currentUser() || (state.activeView() !== 'login' && state.activeView() !== 'register')) {
+      <app-sidebar [isOpen]="mobileSidebarOpen()" (close)="mobileSidebarOpen.set(false)" (navigate)="navigateTo($event)" (logout)="onLogout()"></app-sidebar>
+    }
+
+    <!-- BACKDROP OVERLAY (Mobile Sidebar) -->
+    @if (mobileSidebarOpen()) {
+      <div (click)="mobileSidebarOpen.set(false)"
+           class="fixed inset-0 bg-black/40 z-40 lg:hidden transition-opacity duration-300"
+           [ngClass]="mobileSidebarOpen() ? 'opacity-100' : 'opacity-0 pointer-events-none'"></div>
+    }
+
+    <!-- CLOSE BUTTON (Floating X - top right, mobile only) -->
+    @if (mobileSidebarOpen()) {
+      <button (click)="mobileSidebarOpen.set(false)"
+              class="fixed top-4 right-4 z-60 lg:hidden p-2 bg-[#232233] text-white hover:bg-[#54546A] transition-colors cursor-pointer shadow-lg">
+        <mat-icon class="text-xl">close</mat-icon>
+      </button>
+    }
+
+    <!-- MAIN BODY CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 bg-[#F8F3EA] relative">
+
+      <!-- NAVBAR -->
+      @if (state.currentUser() || (state.activeView() !== 'login' && state.activeView() !== 'register')) {
+        <app-header [mobileSidebarOpen]="mobileSidebarOpen" (navigate)="navigateTo($event)" (logout)="onLogout()" (openSupabaseModal)="showSupabaseModal.set(true)"></app-header>
+      }
+
+      <!-- CONTENT DISPLAY -->
+      <main [class]="(!state.currentUser() && (state.activeView() === 'login' || state.activeView() === 'register')) ? 'flex-1 flex flex-col' : 'flex-1 p-6 overflow-y-auto'">
+
+        <!-- LOGIN VIEW -->
+        @if (!state.currentUser() && state.activeView() === 'login') {
+          <div class="flex-1">
+            @if (!showNewRegister()) {
+              <app-login (loginSuccess)="handleLogin($event)" (openRegister)="toggleNewAuthView()" (goBack)="navigateTo('home')"></app-login>
+            } @else {
+              <app-register (registerSuccess)="handleNewRegister($event)" (openLogin)="toggleNewAuthView()" (goBack)="navigateTo('home')"></app-register>
+            }
+          </div>
+        }
+
+        <!-- HOME -->
+        @if (state.activeView() === 'home') {
+          <app-home (navigate)="navigateTo($event)"></app-home>
+        }
+
+        <!-- DASHBOARD (ADMIN & BIBL) -->
+        @if (state.activeView() === 'dashboard' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+          <app-dashboard></app-dashboard>
+        }
+
+        <!-- USERS (ADMIN ONLY) -->
+        @if (state.activeView() === 'users' && state.currentUser()?.role === 'ADMIN') {
+          <app-users></app-users>
+        }
+
+        <!-- BOOKS (ADMIN & BIBL) -->
+        @if (state.activeView() === 'books' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+          <app-books></app-books>
+        }
+
+        <!-- INVENTORY (ADMIN & BIBL) -->
+        @if (state.activeView() === 'inventory' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+          <app-inventory></app-inventory>
+        }
+
+        <!-- LOANS (ADMIN & BIBL) -->
+        @if (state.activeView() === 'loans' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+          <app-loans></app-loans>
+        }
+
+        <!-- RESERVATIONS (ADMIN & BIBL) -->
+        @if (state.activeView() === 'reservations' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+          <app-reservations></app-reservations>
+        }
+
+        <!-- SANCTIONS (ADMIN & BIBL) -->
+        @if (state.activeView() === 'sanctions' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+          <app-sanctions></app-sanctions>
+        }
+
+        <!-- CATALOGUE (PUBLIC ACCESS) -->
+        @if (state.activeView() === 'catalogue') {
+          <app-catalogue></app-catalogue>
+        }
+
+        <!-- MY LOANS (EST/DOC) -->
+        @if (state.activeView() === 'my-loans' && (state.currentUser()?.role === 'DOC' || state.currentUser()?.role === 'EST')) {
+          <app-my-loans></app-my-loans>
+        }
+
+        <!-- MY RESERVATIONS (EST/DOC) -->
+        @if (state.activeView() === 'my-reservations' && (state.currentUser()?.role === 'DOC' || state.currentUser()?.role === 'EST')) {
+          <app-my-reservations></app-my-reservations>
+        }
+
+        <!-- MY SANCTIONS (EST/DOC) -->
+        @if (state.activeView() === 'my-sanctions' && (state.currentUser()?.role === 'DOC' || state.currentUser()?.role === 'EST')) {
+          <app-my-sanctions></app-my-sanctions>
+        }
+
+        <!-- REPORTS (ADMIN ONLY) -->
+        @if (state.activeView() === 'reports' && state.currentUser()?.role === 'ADMIN') {
+          <app-reports></app-reports>
+        }
+
+        <!-- AUDIT (ADMIN ONLY) -->
+        @if (state.activeView() === 'audit' && state.currentUser()?.role === 'ADMIN') {
+          <app-audit></app-audit>
+        }
+
+        <!-- FOOTER -->
+        @if (state.activeView() !== 'login' && state.activeView() !== 'register') {
+          <app-footer (navigate)="navigateTo($event)"></app-footer>
+        }
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: SUPABASE INTEGRATION DETAILS & MANAGEMENT -->
+  @if (showSupabaseModal()) {
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+      <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-lg p-6 relative flex flex-col max-h-[90vh]">
+        <div class="flex justify-between items-center pb-4 border-b-2 border-[#232233] mb-4">
+          <h3 class="font-serif text-lg font-bold text-[#232233] uppercase tracking-tight flex items-center gap-2">
+            <mat-icon class="text-xl">database</mat-icon> Nexus Corp DB - Supabase
+          </h3>
+          <button (click)="showSupabaseModal.set(false)" class="text-[#54546A]/80 hover:text-[#232233] cursor-pointer">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="space-y-4 overflow-y-auto flex-1 pr-2">
+          <div class="border-2 border-[#232233] p-4 bg-[#D9C997]/15 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <p class="text-xs font-bold text-[#232233] uppercase tracking-wide">Estado de la Conexión</p>
+              <div class="flex items-center gap-2 mt-1">
+                @if (state.supabaseConnected()) {
+                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span class="text-xs font-mono font-bold text-emerald-800 uppercase">Conectado y Sincronizado</span>
+                } @else if (state.supabaseConnecting()) {
+                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span class="text-xs font-mono font-bold text-amber-800 uppercase">Estableciendo Conexión...</span>
+                } @else {
+                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                  <span class="text-xs font-mono font-bold text-red-800 uppercase">Sin conexión / Error</span>
+                }
+              </div>
+            </div>
+
+            <div class="flex gap-2 w-full md:w-auto">
+              <button (click)="retrySupabaseConnection()" [disabled]="state.supabaseConnecting()"
+                      class="flex-1 md:flex-initial border-2 border-[#232233] bg-[#232233] text-white hover:bg-[#1a1928] disabled:opacity-50 px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                <mat-icon class="text-xs">sync</mat-icon> Re-Conectar
+              </button>
+              <button (click)="syncLocalToSupabaseDb()" [disabled]="state.supabaseConnecting()"
+                      class="flex-1 md:flex-initial border-2 border-[#232233] bg-transparent text-[#232233] hover:bg-[#D9C997]/20 disabled:opacity-50 px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                <mat-icon class="text-xs">cloud_upload</mat-icon> Sincronizar Locales
+              </button>
+            </div>
+          </div>
+
+          @if (!state.supabaseConnected() && state.supabaseError()) {
+            <div class="border-2 border-red-500 bg-red-50 text-red-800 p-4 font-mono text-[11px]">
+              <p class="font-bold uppercase tracking-wider flex items-center gap-1">
+                <mat-icon class="text-sm">error_outline</mat-icon> Error detectado:
+              </p>
+              <p class="mt-1">{{ state.supabaseError() }}</p>
+              <p class="mt-3 font-semibold text-red-700 bg-red-100/50 p-2 border border-red-200">
+                Nota: Verifica que las tablas (usuarios, libros, ejemplares, prestamos, reservas, sanciones, bitacora_auditoria) existan en tu base de datos de Supabase.
+              </p>
+            </div>
+          }
+
+          <div class="border border-[#232233]/8 p-4 text-xs space-y-1 bg-transparent">
+            <h4 class="font-serif italic font-bold text-[#232233] uppercase tracking-wide mb-2 text-[10px]">Credenciales de Base de Datos</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono">
+              <div>
+                <span class="text-[#54546A]/80 block text-[9px] uppercase font-bold tracking-wider">Proyecto:</span>
+                <span class="text-[#232233] font-semibold">Nexus Corp DB (yedsibiotgjcwkhorifr)</span>
+              </div>
+              <div>
+                <span class="text-[#54546A]/80 block text-[9px] uppercase font-bold tracking-wider">API URL:</span>
+                <span class="text-[#232233] font-semibold truncate block">https://yedsibiotgjcwkhorifr.supabase.co</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t-2 border-[#232233] flex justify-end">
+          <button (click)="showSupabaseModal.set(false)" class="border-2 border-[#232233] bg-[#232233] hover:bg-[#1a1928] text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer">Cerrar Configuración</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: LOGIN REQUIRED PROMPT -->
+  @if (showLoginRequiredModal()) {
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+      <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-sm p-6 relative text-center">
+        <div class="flex justify-center mb-4">
+          <div class="w-14 h-14 bg-[#D9C997]/30 border-2 border-[#232233] flex items-center justify-center">
+            <mat-icon class="text-3xl text-[#232233]">lock</mat-icon>
+          </div>
+        </div>
+        <h3 class="font-serif text-lg font-bold text-[#232233] mb-2">Inicia sesión para continuar</h3>
+        <p class="text-xs text-[#54546A] mb-6 leading-relaxed">Debes iniciar sesión para realizar préstamos o reservas de libros en BiblioLib.</p>
+        <div class="flex flex-col gap-2">
+          <button (click)="showLoginRequiredModal.set(false); navigateTo('login')"
+                  class="w-full bg-[#232233] hover:bg-[#1a1928] text-white px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <mat-icon class="text-sm">login</mat-icon> Iniciar Sesión
+          </button>
+          <button (click)="showLoginRequiredModal.set(false)"
+                  class="w-full border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }

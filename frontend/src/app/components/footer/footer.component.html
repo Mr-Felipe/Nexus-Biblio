@@ -1,0 +1,66 @@
+<footer class="bg-[#232233] text-white p-8 -mx-6 -mb-6 mt-4">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+    <!-- Marca -->
+    <div>
+      <h4 class="font-serif text-lg font-bold italic tracking-tight flex items-center gap-2 mb-3">
+        <mat-icon class="text-xl">local_library</mat-icon> BiblioLib
+      </h4>
+      <p class="text-[10px] text-white/60 leading-relaxed">Sistema de gestión bibliotecaria para la comunidad educativa. Accede al catálogo, gestiona préstamos y más.</p>
+    </div>
+
+    <!-- Navegación (centro) -->
+    <div class="sm:flex sm:flex-col sm:items-center">
+      <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-3">Navegación</h5>
+      <ul class="space-y-2">
+        <li><button (click)="navigate.emit('home')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">home</mat-icon> Inicio</button></li>
+        @if (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL') {
+          <li><button (click)="navigate.emit('dashboard')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">space_dashboard</mat-icon> Panel de Control</button></li>
+          <li><button (click)="navigate.emit('books')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">library_add</mat-icon> Catálogo</button></li>
+          <li><button (click)="navigate.emit('inventory')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">inventory_2</mat-icon> Inventario</button></li>
+        }
+        @if (state.currentUser()?.role === 'DOC' || state.currentUser()?.role === 'EST') {
+          <li><button (click)="navigate.emit('catalogue')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">search</mat-icon> Catálogo</button></li>
+        }
+      </ul>
+    </div>
+
+    <!-- Servicios (derecha) -->
+    <div class="sm:flex sm:flex-col sm:items-end">
+      <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-3">Servicios</h5>
+      <ul class="space-y-2">
+        @if (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL') {
+          <li><button (click)="navigate.emit('loans')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">swap_horiz</mat-icon> Préstamos</button></li>
+          <li><button (click)="navigate.emit('reservations')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">bookmark_border</mat-icon> Reservas</button></li>
+          <li><button (click)="navigate.emit('sanctions')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">gavel</mat-icon> Sanciones</button></li>
+        }
+        @if (state.currentUser()?.role === 'DOC' || state.currentUser()?.role === 'EST') {
+          <li><button (click)="navigate.emit('my-loans')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">library_books</mat-icon> Mis Préstamos</button></li>
+          <li><button (click)="navigate.emit('my-reservations')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">bookmark</mat-icon> Mis Reservas</button></li>
+          <li><button (click)="navigate.emit('my-sanctions')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">report_problem</mat-icon> Mis Sanciones</button></li>
+        }
+      </ul>
+    </div>
+  </div>
+
+  @if (state.currentUser()?.role === 'ADMIN') {
+    <div class="mt-6 pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-8">
+      <div class="sm:col-start-2 sm:flex sm:flex-col sm:items-center">
+        <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-3">Administración</h5>
+        <ul class="space-y-2">
+          <li><button (click)="navigate.emit('users')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">people</mat-icon> Usuarios</button></li>
+          <li><button (click)="navigate.emit('reports')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">analytics</mat-icon> Estadísticas</button></li>
+          <li><button (click)="navigate.emit('audit')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">security</mat-icon> Auditoría</button></li>
+        </ul>
+      </div>
+    </div>
+  }
+
+  <!-- Línea inferior -->
+  <div class="mt-8 pt-4 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-2">
+    <p class="text-[9px] text-white/40 uppercase tracking-widest">&copy; 2026 BiblioLib — Fundación Cultural</p>
+    <div class="flex items-center gap-1 text-[9px] text-white/40">
+      <mat-icon class="text-xs">favorite</mat-icon>
+      <span>Hecho para la comunidad educativa</span>
+    </div>
+  </div>
+</footer>
