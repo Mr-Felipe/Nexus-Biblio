@@ -14,7 +14,7 @@
       <ul class="space-y-2">
         <li><button (click)="navigate.emit('home')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">home</mat-icon> Inicio</button></li>
         @if (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL') {
-          <li><button (click)="navigate.emit('dashboard')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">space_dashboard</mat-icon> Panel de Control</button></li>
+          <li><button (click)="navigate.emit('reports')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">analytics</mat-icon> Estadísticas</button></li>
           <li><button (click)="navigate.emit('books')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">library_add</mat-icon> Catálogo</button></li>
           <li><button (click)="navigate.emit('inventory')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">inventory_2</mat-icon> Inventario</button></li>
         }
@@ -30,6 +30,7 @@
       <ul class="space-y-2">
         @if (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL') {
           <li><button (click)="navigate.emit('loans')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">swap_horiz</mat-icon> Préstamos</button></li>
+          <li><button (click)="navigate.emit('returns')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">assignment_late</mat-icon> Devoluciones</button></li>
           <li><button (click)="navigate.emit('reservations')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">bookmark_border</mat-icon> Reservas</button></li>
           <li><button (click)="navigate.emit('sanctions')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-end"><mat-icon class="text-sm">gavel</mat-icon> Sanciones</button></li>
         }
@@ -48,7 +49,6 @@
         <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-3">Administración</h5>
         <ul class="space-y-2">
           <li><button (click)="navigate.emit('users')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">people</mat-icon> Usuarios</button></li>
-          <li><button (click)="navigate.emit('reports')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">analytics</mat-icon> Estadísticas</button></li>
           <li><button (click)="navigate.emit('audit')" class="text-xs text-white/80 hover:text-white transition-colors cursor-pointer flex items-center gap-2 justify-center"><mat-icon class="text-sm">security</mat-icon> Auditoría</button></li>
         </ul>
       </div>

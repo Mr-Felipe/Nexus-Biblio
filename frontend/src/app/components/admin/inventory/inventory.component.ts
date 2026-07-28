@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { LibraryState, Book, BookCopy } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
@@ -8,7 +9,7 @@ import { ToastService } from '../../../services/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.css',
 })
@@ -18,6 +19,23 @@ export class InventoryComponent {
 
   bookSearchQuery = signal('');
   expandedBookIsbn = signal<string | null>(null);
+  showEditBookModal = signal(false);
+  editingBook = signal<Book | null>(null);
+  showAddBookModal = signal(false);
+  showDeleteModal = signal(false);
+  deleteTarget = signal<Book | null>(null);
+  deleteBlocked = signal(false);
+  deleteBlockedReason = signal('');
+
+  bookForm = new FormGroup({
+    isbn: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    title: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    author: new FormControl('', { validators: [Validators.required], nonNullable: true }),
+    description: new FormControl('', { nonNullable: true }),
+    copies: new FormControl<number>(1, { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+    stockMinimo: new FormControl<number>(0, { validators: [Validators.required, Validators.min(0)], nonNullable: true }),
+    coverUrl: new FormControl('', { nonNullable: true }),
+  });
 
   filteredBooks = computed(() => {
     const q = this.bookSearchQuery().toLowerCase().trim();
@@ -35,13 +53,15 @@ export class InventoryComponent {
   });
 
   totalLoanedCopiesCount = computed(() => {
-    return this.state.books().reduce((acc, b) => acc + (b.copies - b.availableCopies), 0);
+    return this.state.loans().filter(
+      (l) => l.status === 'Activo' || l.status === 'Pendiente devolución'
+    ).length;
   });
 
   getLoanedCopiesCount(isbn: string): number {
-    const book = this.state.books().find((b) => b.isbn === isbn);
-    if (!book) return 0;
-    return Math.max(0, book.copies - book.availableCopies);
+    return this.state.loans().filter(
+      (l) => l.bookIsbn === isbn && (l.status === 'Activo' || l.status === 'Pendiente devolución')
+    ).length;
   }
 
   incrementCopies(book: Book) {
@@ -68,25 +88,39 @@ export class InventoryComponent {
   }
 
   getBookCopies(book: Book): BookCopy[] {
-    const copies: BookCopy[] = [];
-    const customStatuses = book.customCopyStatuses || {};
+    const ejemplares = book.ejemplares || [];
+    if (ejemplares.length === 0) return [];
 
+    const copies: BookCopy[] = [];
     const activeLoans = this.state.loans().filter(l => l.bookIsbn === book.isbn && (l.status === 'Activo' || l.status === 'Pendiente devolución'));
     const activeReservations = this.state.reservations().filter(
       r => r.bookIsbn === book.isbn && (r.status === 'Listo para retirar' || (r.status === 'En cola' && r.queuePosition === 1))
     );
 
+    const loanedEjemplarIds = new Set<number>();
+    for (const loan of activeLoans) {
+      const ejId = parseInt(loan.id, 10);
+      if (!isNaN(ejId)) loanedEjemplarIds.add(ejId);
+    }
+
+    const reservedEjemplarIds = new Set<number>();
+    for (const res of activeReservations) {
+      const ejId = parseInt(res.id, 10);
+      if (!isNaN(ejId)) reservedEjemplarIds.add(ejId);
+    }
+
     let loanIndex = 0;
     let resIndex = 0;
 
-    for (let i = 1; i <= book.copies; i++) {
-      const customStatus = customStatuses[i];
-      let status: 'Disponible' | 'Prestado' | 'En reserva' | 'Perdido' | 'Dañado' = 'Disponible';
+    for (const ej of ejemplares) {
+      let status: BookCopy['status'] = 'Disponible';
       let loanDetails: BookCopy['loanDetails'] = undefined;
       let reservationDetails: BookCopy['reservationDetails'] = undefined;
 
-      if (customStatus === 'Perdido' || customStatus === 'Dañado') {
-        status = customStatus;
+      if (ej.estado === 'PERDIDO') {
+        status = 'Perdido';
+      } else if (ej.estado === 'DAÑADO') {
+        status = 'Dañado';
       } else if (loanIndex < activeLoans.length) {
         status = 'Prestado';
         const loan = activeLoans[loanIndex++];
@@ -107,8 +141,10 @@ export class InventoryComponent {
       }
 
       copies.push({
-        id: `${book.isbn}-${i}`,
-        number: i,
+        id: ej.codigo,
+        ejemplarId: ej.id,
+        number: ej.numero,
+        codigo: ej.codigo,
         status,
         loanDetails,
         reservationDetails
@@ -118,8 +154,8 @@ export class InventoryComponent {
     return copies;
   }
 
-  updateExemplarStatus(isbn: string, copyNumber: number, newStatus: 'Disponible' | 'Perdido' | 'Dañado') {
-    const error = this.state.updateCopyStatus(isbn, copyNumber, newStatus);
+  async updateExemplarStatus(isbn: string, copyNumber: number, newStatus: 'Disponible' | 'Perdido' | 'Dañado') {
+    const error = await this.state.updateCopyStatus(isbn, copyNumber, newStatus);
     if (error) {
       this.toast.show('error', error);
     } else {
@@ -134,15 +170,125 @@ export class InventoryComponent {
   }
 
   openAddBookModal() {
-    this.state.activeView.set('books');
+    this.bookForm.reset({
+      isbn: '',
+      title: '',
+      author: '',
+      description: '',
+      copies: 1,
+      stockMinimo: 0,
+      coverUrl: '',
+    });
+    this.showAddBookModal.set(true);
+  }
+
+  saveNewBook() {
+    if (this.bookForm.invalid) {
+      this.toast.show('error', 'Por favor complete todos los datos requeridos.');
+      return;
+    }
+
+    const raw = this.bookForm.getRawValue();
+    const exists = this.state.books().some((b) => b.isbn === raw.isbn);
+    if (exists) {
+      this.toast.show('error', `Ya existe un libro con el ISBN ${raw.isbn}`);
+      return;
+    }
+
+    const finalCover = raw.coverUrl ? raw.coverUrl : `https://picsum.photos/seed/${encodeURIComponent(raw.title)}/200/300`;
+
+    this.state.addBook({
+      isbn: raw.isbn,
+      title: raw.title,
+      author: raw.author,
+      description: raw.description,
+      copies: raw.copies,
+      stockMinimo: raw.stockMinimo,
+      coverUrl: finalCover,
+    });
+    this.toast.show('success', 'Libro registrado exitosamente en el catálogo.');
+    this.showAddBookModal.set(false);
   }
 
   openEditBookModal(book: Book) {
-    this.state.activeView.set('books');
+    this.editingBook.set(book);
+    this.bookForm.setValue({
+      isbn: book.isbn,
+      title: book.title,
+      author: book.author,
+      description: book.description,
+      copies: book.copies,
+      stockMinimo: book.stockMinimo ?? 0,
+      coverUrl: book.coverUrl,
+    });
+    this.showEditBookModal.set(true);
+  }
+
+  saveBook() {
+    if (this.bookForm.invalid) {
+      this.toast.show('error', 'Por favor complete todos los datos requeridos.');
+      return;
+    }
+
+    const raw = this.bookForm.getRawValue();
+    const editMode = this.editingBook();
+    if (!editMode) return;
+
+    if (raw.isbn !== editMode.isbn) {
+      const isbnExists = this.state.books().some((b) => b.isbn === raw.isbn);
+      if (isbnExists) {
+        this.toast.show('error', `Ya existe otro libro con el ISBN ${raw.isbn}`);
+        return;
+      }
+    }
+
+    const finalCover = raw.coverUrl ? raw.coverUrl : `https://picsum.photos/seed/${encodeURIComponent(raw.title)}/200/300`;
+
+    this.state.updateBook(editMode.isbn, {
+      isbn: raw.isbn,
+      title: raw.title,
+      author: raw.author,
+      description: raw.description,
+      copies: raw.copies,
+      stockMinimo: raw.stockMinimo,
+      coverUrl: finalCover,
+    });
+    this.toast.show('success', 'Libro actualizado correctamente.');
+    this.showEditBookModal.set(false);
   }
 
   deleteBook(isbn: string) {
-    this.state.deleteBook(isbn);
-    this.toast.show('success', 'Libro removido de la biblioteca.');
+    const book = this.state.books().find((b) => b.isbn === isbn);
+    if (!book) return;
+
+    const loaned = this.getLoanedCopiesCount(isbn);
+    const reserved = this.getReservationsCount(isbn);
+
+    if (loaned > 0 || reserved > 0) {
+      const parts: string[] = [];
+      if (loaned > 0) parts.push(`${loaned} préstamo(s) activo(s)`);
+      if (reserved > 0) parts.push(`${reserved} reserva(s) en cola`);
+      this.deleteBlockedReason.set(parts.join(' y '));
+      this.deleteBlocked.set(true);
+    } else {
+      this.deleteBlocked.set(false);
+    }
+
+    this.deleteTarget.set(book);
+    this.showDeleteModal.set(true);
+  }
+
+  confirmDelete() {
+    const book = this.deleteTarget();
+    if (!book) return;
+    this.state.deleteBook(book.isbn);
+    this.showDeleteModal.set(false);
+    this.deleteTarget.set(null);
+    this.toast.show('success', `Libro "${book.title}" removido de la biblioteca.`);
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.deleteTarget.set(null);
   }
 }

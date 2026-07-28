@@ -73,7 +73,12 @@
                 } @else if (loan.status === 'Pendiente devolución') {
                   <span class="text-amber-600 text-[10px] font-bold uppercase tracking-wider">Pendiente evaluación</span>
                 } @else {
-                  <span class="text-[#54546A]/80 text-[10px] font-serif italic">Devuelto ({{ loan.returnDate }})</span>
+                  <div class="text-right">
+                    <span class="text-[#54546A]/80 text-[10px] font-serif italic block">Devuelto ({{ loan.returnDate }})</span>
+                    @if (loan.observaciones) {
+                      <span class="text-[9px] text-[#54546A]/60 font-serif italic block mt-0.5 max-w-[160px] truncate" title="{{ loan.observaciones }}">📝 {{ loan.observaciones }}</span>
+                    }
+                  </div>
                 }
               </td>
             </tr>
@@ -88,47 +93,7 @@
   </div>
 </div>
 
-<!-- SECTION 6b: DEVOLUCIONES PENDIENTES -->
-@if (filteredPendingReturns().length > 0) {
-  <div class="space-y-4">
-    <h2 class="font-serif text-xl text-[#232233] font-bold tracking-tight flex items-center gap-2">
-      <mat-icon class="text-amber-600">assignment_late</mat-icon>
-      Devoluciones Pendientes de Evaluación
-      <span class="bg-amber-500 text-white text-[10px] px-2 py-0.5 font-bold rounded-full">{{ filteredPendingReturns().length }}</span>
-    </h2>
-
-    <div class="border-2 border-amber-500 bg-amber-50/50">
-      <table class="w-full text-left text-xs">
-        <thead>
-          <tr class="border-b-2 border-amber-500 bg-amber-500/10">
-            <th class="p-3 font-bold uppercase tracking-wider text-[#232233]">ID</th>
-            <th class="p-3 font-bold uppercase tracking-wider text-[#232233]">Usuario</th>
-            <th class="p-3 font-bold uppercase tracking-wider text-[#232233]">Libro</th>
-            <th class="p-3 font-bold uppercase tracking-wider text-[#232233]">Fecha Límite</th>
-            <th class="p-3 text-right font-bold uppercase tracking-wider text-[#232233]">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (ret of filteredPendingReturns(); track ret.id) {
-            <tr class="border-b border-amber-500/30 hover:bg-amber-100/50 transition-colors">
-              <td class="p-3 font-mono font-bold text-[#232233]">#{{ ret.id }}</td>
-              <td class="p-3 font-bold text-[#232233]">{{ ret.userName }}</td>
-              <td class="p-3 text-[#232233]">{{ ret.bookTitle }}</td>
-              <td class="p-3 font-mono text-[#232233]">{{ ret.dueDate }}</td>
-              <td class="p-3 text-right">
-                <button (click)="openEvalReturnModal(ret)" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 ml-auto cursor-pointer transition-all">
-                  <mat-icon class="text-xs">rate_review</mat-icon> Evaluar
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </div>
-}
-
-<!-- MODAL 3: ADD LOAN -->
+<!-- MODAL: ADD LOAN -->
 @if (showAddLoanModal()) {
   <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-md p-6 relative">
@@ -177,90 +142,6 @@
           <button type="button" (click)="showAddLoanModal.set(false)" class="border-2 border-[#232233] px-4 py-2 text-xs text-[#232233] hover:bg-[#D9C997]/20 font-bold uppercase tracking-wider cursor-pointer transition-all">Cancelar</button>
           <button type="submit" [disabled]="loanForm.invalid" class="border-2 border-[#232233] bg-[#232233] hover:bg-[#1a1928] disabled:opacity-30 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer">
             <mat-icon class="text-sm">check_circle</mat-icon> Conceder Préstamo
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-<!-- MODAL 7: EVALUAR DEVOLUCIÓN -->
-@if (showEvalReturnModal()) {
-  <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-    <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-lg p-6 relative">
-      <div class="flex justify-between items-center pb-4 border-b-2 border-[#232233] mb-4">
-        <h3 class="font-serif text-lg font-bold text-[#232233] uppercase tracking-tight">Evaluar Devolución</h3>
-        <button (click)="showEvalReturnModal.set(false)" class="text-[#54546A]/80 hover:text-[#232233] cursor-pointer">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-
-      @if (evaluatingLoan(); as loan) {
-        <div class="mb-4 p-3 bg-white border-2 border-[#232233] text-xs space-y-1">
-          <div class="flex justify-between">
-            <span class="font-bold uppercase tracking-wider text-[#54546A]">Préstamo #</span>
-            <span class="font-bold text-[#232233]">{{ loan.id }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="font-bold uppercase tracking-wider text-[#54546A]">Usuario:</span>
-            <span class="font-bold text-[#232233]">{{ loan.userName }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="font-bold uppercase tracking-wider text-[#54546A]">Libro:</span>
-            <span class="font-bold text-[#232233]">{{ loan.bookTitle }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="font-bold uppercase tracking-wider text-[#54546A]">Fecha límite:</span>
-            <span class="font-bold text-[#232233]">{{ loan.dueDate }}</span>
-          </div>
-        </div>
-      }
-
-      <form [formGroup]="evalReturnForm" (ngSubmit)="submitEvalReturn()" class="space-y-3">
-        <div>
-          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Estado del Ejemplar</span>
-          <select formControlName="ejemplarEstado" class="w-full px-3 py-2.5 text-xs bg-[#F8F3EA] border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
-            <option value="DISPONIBLE">Buen estado (Disponible)</option>
-            <option value="DAÑADO">Dañado</option>
-            <option value="PERDIDO">Perdido</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Multa ($)</span>
-            <input type="number" formControlName="multa" class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
-          </div>
-          <div>
-            <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Tipo Sanción</span>
-            <select formControlName="tipoSancion" class="w-full px-3 py-2.5 text-xs bg-[#F8F3EA] border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wider cursor-pointer">
-              <option value="">Ninguna</option>
-              <option value="DISCIPLINARIA">Disciplinaria</option>
-              <option value="ECONOMICA">Económica</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Observaciones</span>
-          <textarea formControlName="observaciones" rows="3" placeholder="Ej. Ejemplar devuelto con rotura de páginas..."
-                    class="w-full px-3 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-medium text-[#232233] placeholder-[#A0A0B2] resize-none"></textarea>
-        </div>
-
-        <div class="border-2 border-[#232233] text-[#232233] text-[9px] p-3 font-mono bg-transparent">
-          <span class="font-bold uppercase tracking-wide">Valores de Referencia:</span>
-          <ul class="list-disc pl-4 mt-1 space-y-0.5">
-            <li>Buen estado → Sin multa, ejemplar DISPONIBLE</li>
-            <li>Daño → Multa $20,000, ejemplar DAÑADO</li>
-            <li>Pérdida → Multa $50,000, ejemplar PERDIDO</li>
-            <li>Retraso 3+ días → Disciplinaria ($0)</li>
-          </ul>
-        </div>
-
-        <div class="pt-4 border-t-2 border-[#232233] flex justify-end gap-2">
-          <button type="button" (click)="showEvalReturnModal.set(false)" class="border-2 border-[#232233] px-4 py-2 text-xs text-[#232233] hover:bg-[#D9C997]/20 font-bold uppercase tracking-wider cursor-pointer transition-all">Cancelar</button>
-          <button type="submit" [disabled]="evalReturnForm.invalid" class="border-2 border-[#232233] bg-[#232233] hover:bg-[#1a1928] disabled:opacity-30 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer">
-            <mat-icon class="text-sm">check_circle</mat-icon> Confirmar Devolución
           </button>
         </div>
       </form>

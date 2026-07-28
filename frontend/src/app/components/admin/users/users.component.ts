@@ -21,6 +21,9 @@ export class UsersComponent {
   userRoleFilter = signal('ALL');
   showAddUserModal = signal(false);
   editingUser = signal<User | null>(null);
+  showDeleteConfirmModal = signal(false);
+  userToDelete = signal<User | null>(null);
+  deleteBlockReasons = signal<string[]>([]);
 
   filteredUsers = computed(() => {
     const q = this.userSearchQuery().toLowerCase().trim();
@@ -33,7 +36,6 @@ export class UsersComponent {
   });
 
   userForm = new FormGroup({
-    id: new FormControl('', { validators: [Validators.required, Validators.pattern(/^\d+$/)], nonNullable: true }),
     name: new FormControl('', { validators: [Validators.required, Validators.minLength(3)], nonNullable: true }),
     email: new FormControl('', { validators: [Validators.required, Validators.email], nonNullable: true }),
     role: new FormControl<'ADMIN' | 'BIBL' | 'DOC' | 'EST'>('EST', { validators: [Validators.required], nonNullable: true }),
@@ -45,7 +47,6 @@ export class UsersComponent {
   openAddUserModal() {
     this.editingUser.set(null);
     this.userForm.reset({
-      id: '',
       name: '',
       email: '',
       role: 'EST',
@@ -53,14 +54,12 @@ export class UsersComponent {
       phone: '',
       address: '',
     });
-    this.userForm.get('id')?.enable();
     this.showAddUserModal.set(true);
   }
 
   openEditUserModal(user: User) {
     this.editingUser.set(user);
     this.userForm.setValue({
-      id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -68,7 +67,6 @@ export class UsersComponent {
       phone: user.phone || '',
       address: user.address || '',
     });
-    this.userForm.get('id')?.disable();
     this.showAddUserModal.set(true);
   }
 
@@ -92,13 +90,7 @@ export class UsersComponent {
       });
       this.toast.show('success', 'Usuario actualizado correctamente.');
     } else {
-      const exists = this.state.users().some((u) => u.id === raw.id);
-      if (exists) {
-        this.toast.show('error', `Ya existe un usuario con el ID ${raw.id}`);
-        return;
-      }
       this.state.addUser({
-        id: raw.id,
         name: raw.name,
         email: raw.email,
         role: raw.role,
@@ -118,10 +110,33 @@ export class UsersComponent {
     this.toast.show('info', `Estado de ${user.name} cambiado a: ${newStatus}`);
   }
 
-  deleteUser(id: string) {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      this.state.deleteUser(id);
-      this.toast.show('success', 'Usuario eliminado con éxito.');
+  deleteUser(user: User) {
+    const activeLoans = this.state.loans().filter(
+      l => l.userId === user.id && !['Devuelto', 'Rechazado', 'Cancelado'].includes(l.status)
+    );
+    const activeReservations = this.state.reservations().filter(
+      r => r.userId === user.id && ['En cola', 'Listo para retirar'].includes(r.status)
+    );
+
+    const reasons: string[] = [];
+    if (activeLoans.length > 0) {
+      reasons.push(`${activeLoans.length} préstamo(s) activo(s)`);
     }
+    if (activeReservations.length > 0) {
+      reasons.push(`${activeReservations.length} reserva(s) activa(s)`);
+    }
+
+    this.userToDelete.set(user);
+    this.deleteBlockReasons.set(reasons);
+    this.showDeleteConfirmModal.set(true);
+  }
+
+  confirmDeleteUser() {
+    const user = this.userToDelete();
+    if (!user) return;
+    this.state.deleteUser(user.id);
+    this.toast.show('success', 'Usuario eliminado con éxito.');
+    this.showDeleteConfirmModal.set(false);
+    this.userToDelete.set(null);
   }
 }

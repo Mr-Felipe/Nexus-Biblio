@@ -14,11 +14,11 @@ import { SidebarComponent } from './components/layout/sidebar/sidebar.component'
 import { ToastComponent } from './components/layout/toast/toast.component';
 
 // Admin components
-import { DashboardComponent } from './components/admin/dashboard/dashboard.component';
 import { UsersComponent } from './components/admin/users/users.component';
 import { BooksComponent } from './components/admin/books/books.component';
 import { InventoryComponent } from './components/admin/inventory/inventory.component';
 import { LoansComponent } from './components/admin/loans/loans.component';
+import { ReturnsComponent } from './components/admin/returns/returns.component';
 import { ReservationsComponent } from './components/admin/reservations/reservations.component';
 import { SanctionsComponent } from './components/admin/sanctions/sanctions.component';
 import { ReportsComponent } from './components/admin/reports/reports.component';
@@ -48,11 +48,11 @@ import { FooterComponent } from './components/footer/footer.component';
     SidebarComponent,
     ToastComponent,
     // Admin
-    DashboardComponent,
     UsersComponent,
     BooksComponent,
     InventoryComponent,
     LoansComponent,
+    ReturnsComponent,
     ReservationsComponent,
     SanctionsComponent,
     ReportsComponent,
@@ -103,15 +103,14 @@ export class App implements OnInit {
     }
   }
 
-  handleNewRegister(data: { id: string; name: string; email: string; password: string; role: 'DOC' | 'EST'; phone: string; address: string }) {
-    const exists = this.state.users().some((u) => u.id === data.id);
+  handleNewRegister(data: { name: string; email: string; password: string; role: 'DOC' | 'EST'; phone: string; address: string }) {
+    const exists = this.state.users().some((u) => u.email === data.email);
     if (exists) {
-      this.toast.show('error', `Ya existe un usuario con el ID ${data.id}`);
+      this.toast.show('error', `Ya existe un usuario con el correo ${data.email}`);
       return;
     }
 
     this.state.addUser({
-      id: data.id,
       name: data.name,
       email: data.email,
       role: data.role,

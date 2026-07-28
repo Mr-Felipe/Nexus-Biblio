@@ -44,10 +44,13 @@
     <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Historial de Lecturas y Devoluciones</h3>
     <div class="divide-y-2 divide-[#232233]/12">
       @for (loan of myLoansHistory(); track loan.id) {
-        <div class="py-4 flex justify-between items-center text-xs">
+          <div class="py-4 flex justify-between items-start text-xs">
           <div>
             <p class="font-serif font-bold text-[#232233] uppercase text-xs">{{ loan.bookTitle }}</p>
             <p class="text-[10px] text-[#54546A]/70 mt-1 font-mono">Retirado el: {{ loan.loanDate }} — Devuelto el: {{ loan.returnDate }}</p>
+            @if (loan.observaciones) {
+              <p class="text-[9px] text-[#54546A]/50 mt-1 font-serif italic">Observaciones: {{ loan.observaciones }}</p>
+            }
           </div>
           <span class="border border-[#232233] text-[#232233] bg-transparent px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider">Devuelto con Éxito</span>
         </div>

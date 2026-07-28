@@ -42,6 +42,10 @@ export class ReservationsComponent {
       this.state.reservations.update((rs) =>
         rs.map((r) => (r.id === res.id ? { ...r, status: 'Retirada' as const } : r))
       );
+      const updatedRes = this.state.reservations().find((r) => r.id === res.id);
+      if (updatedRes) {
+        this.state.syncToSupabase('reservas', updatedRes);
+      }
       this.toast.show('success', `¡Préstamo formalizado! El libro ha sido entregado.`);
       this.state.recalculateQueuePositions(res.bookIsbn);
     }

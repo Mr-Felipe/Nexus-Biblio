@@ -119,10 +119,11 @@ export class LibraryState {
   currentUser = signal<User | null>(null);
   activeView = signal<string>('login');
 
-  notifications = signal<{ id: string; title: string; desc: string; date: string; read: boolean }[]>([]);
+  notifications = signal<{ id: string; title: string; desc: string; date: string; read: boolean; view: string; viewLabel: string }[]>([]);
   pendingReturns = signal<Loan[]>([]);
   pendingSearch = signal<string>('');
   private realtimeChannel: any = null;
+  private lastNotifiedStock = new Map<string, number>();
 
   constructor() {
     this.loadInitialData();
@@ -156,9 +157,9 @@ export class LibraryState {
         auditRes,
       ] = await Promise.all([
         supabase.from('usuarios').select('id, nombre_completo, correo_electronico, contrasena, rol, activo'),
-        supabase.from('libros').select('id, titulo, autor, editorial, anio_publicacion, isbn, estado_general'),
+        supabase.from('libros').select('id, titulo, autor, editorial, anio_publicacion, isbn, estado_general, stock_minimo, portada_url'),
         supabase.from('ejemplares').select('id, libro_id, codigo_ejemplar, estado'),
-        supabase.from('prestamos').select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado'),
+        supabase.from('prestamos').select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado, observaciones, evaluado_por'),
         supabase.from('reservas').select('id, usuario_id, libro_id, fecha_reserva, posicion_cola, estado'),
         supabase.from('sanciones').select('id, usuario_id, tipo, motivo, valor_economico, estado, fecha_creacion'),
         supabase.from('bitacora_auditoria').select('id, usuario_id, operacion, tabla_afectada, direccion_ip, fecha_operacion, detalles'),
@@ -202,9 +203,13 @@ export class LibraryState {
         const totalCopies = ejemplares.length;
         const availableCopies = ejemplares.filter((e: any) => e.estado === 'DISPONIBLE').length;
         const customStatuses: Record<number, 'Disponible' | 'Perdido' | 'Dañado'> = {};
-        ejemplares.forEach((ej: any, idx: number) => {
-          if (ej.estado === 'PERDIDO') customStatuses[idx + 1] = 'Perdido';
-          else if (ej.estado === 'DAÑADO') customStatuses[idx + 1] = 'Dañado';
+        const ejemplaresData: { id: number; numero: number; codigo: string; estado: string }[] = [];
+        ejemplares.forEach((ej: any) => {
+          const parts = ej.codigo_ejemplar.split('-');
+          const numero = parseInt(parts[parts.length - 1], 10) || 0;
+          ejemplaresData.push({ id: ej.id, numero, codigo: ej.codigo_ejemplar, estado: ej.estado });
+          if (ej.estado === 'PERDIDO') customStatuses[numero] = 'Perdido';
+          else if (ej.estado === 'DAÑADO') customStatuses[numero] = 'Dañado';
         });
         return {
           isbn: libro.isbn,
@@ -213,9 +218,11 @@ export class LibraryState {
           description: `${libro.editorial || ''}, ${libro.anio_publicacion || ''}`.trim(),
           copies: totalCopies,
           availableCopies,
-          coverUrl: `https://picsum.photos/seed/${encodeURIComponent(libro.isbn)}/200/300`,
+          stockMinimo: libro.stock_minimo ?? 0,
+          coverUrl: libro.portada_url || `https://picsum.photos/seed/${encodeURIComponent(libro.isbn)}/200/300`,
           status: availableCopies > 0 ? 'Disponible' as const : 'No disponible' as const,
           customCopyStatuses: Object.keys(customStatuses).length > 0 ? customStatuses : undefined,
+          ejemplares: ejemplaresData,
         };
       });
       this.books.set(mappedBooks);
@@ -240,6 +247,8 @@ export class LibraryState {
           dueDate: dateOnly(p.fecha_limite_devolucion),
           returnDate: p.fecha_real_devolucion ? dateOnly(p.fecha_real_devolucion) : null,
           status: LOAN_STATUS_MAP[p.estado] || 'Activo',
+          observaciones: p.observaciones,
+          evaluadoPor: p.evaluado_por ? String(p.evaluado_por) : null,
         };
       });
       this.loans.set(mappedLoans);
@@ -460,6 +469,8 @@ export class LibraryState {
           titulo: b.title,
           autor: b.author,
           estado_general: 'ACTIVO',
+          stock_minimo: b.stockMinimo ?? 0,
+          portada_url: b.coverUrl || null,
         }, { onConflict: 'isbn' });
         if (error) console.error('Error upserting libro:', error);
       } else if (table === 'prestamos' && data) {
@@ -601,9 +612,15 @@ export class LibraryState {
   }
 
   // CRUD USUARIOS
-  addUser(u: Omit<User, 'status'>) {
+  addUser(u: Omit<User, 'status' | 'id'> & { id?: string }) {
+    const maxId = this.users().reduce((max, user) => {
+      const num = parseInt(user.id, 10);
+      return !isNaN(num) && num > max ? num : max;
+    }, 1000);
+    const newId = u.id || String(maxId + 1);
     const newUser: User = {
       ...u,
+      id: newId,
       status: 'Activo',
     };
     this.users.update((us) => [...us, newUser]);
@@ -643,6 +660,7 @@ export class LibraryState {
     const newBook: Book = {
       ...b,
       availableCopies: b.copies,
+      stockMinimo: b.stockMinimo ?? 0,
       status: b.copies > 0 ? 'Disponible' : 'No disponible',
     };
     this.books.update((bs) => [...bs, newBook]);
@@ -654,6 +672,15 @@ export class LibraryState {
   }
 
   updateBook(isbn: string, updated: Partial<Book>) {
+    if (updated.isbn && updated.isbn !== isbn) {
+      this.loans.update((ls) =>
+        ls.map((l) => l.bookIsbn === isbn ? { ...l, bookIsbn: updated.isbn! } : l)
+      );
+      this.reservations.update((rs) =>
+        rs.map((r) => r.bookIsbn === isbn ? { ...r, bookIsbn: updated.isbn! } : r)
+      );
+    }
+
     this.books.update((bs) =>
       bs.map((b) => {
         if (b.isbn === isbn) {
@@ -668,7 +695,7 @@ export class LibraryState {
         return b;
       })
     );
-    const target = this.books().find((b) => b.isbn === isbn);
+    const target = this.books().find((b) => b.isbn === (updated.isbn || isbn));
     if (target) {
       this.syncToSupabase('libros', target);
     }
@@ -678,28 +705,43 @@ export class LibraryState {
     }
   }
 
-  updateCopyStatus(isbn: string, copyNumber: number, newStatus: 'Disponible' | 'Perdido' | 'Dañado') {
+  async updateCopyStatus(isbn: string, copyNumber: number, newStatus: 'Disponible' | 'Perdido' | 'Dañado') {
     const book = this.books().find((b) => b.isbn === isbn);
     if (!book) return 'Libro no encontrado.';
 
-    const oldStatuses = book.customCopyStatuses || {};
-    const oldStatus = oldStatuses[copyNumber] || 'Disponible';
+    const ejemplar = (book.ejemplares || []).find(e => e.numero === copyNumber);
+    if (!ejemplar) return 'Ejemplar no encontrado.';
 
-    if (oldStatus === newStatus) return null;
+    const DB_STATE_MAP: Record<string, string> = { 'Disponible': 'DISPONIBLE', 'Perdido': 'PERDIDO', 'Dañado': 'DAÑADO' };
+    const dbNewStatus = DB_STATE_MAP[newStatus];
+    if (ejemplar.estado === dbNewStatus) return null;
 
-    const newStatuses = { ...oldStatuses, [copyNumber]: newStatus };
+    const oldEstado = ejemplar.estado;
 
-    let diff = 0;
-    if (oldStatus === 'Disponible' && (newStatus === 'Perdido' || newStatus === 'Dañado')) {
-      diff = -1;
-    } else if ((oldStatus === 'Perdido' || oldStatus === 'Dañado') && newStatus === 'Disponible') {
-      diff = 1;
-    }
+    this.books.update((bs) =>
+      bs.map((b) => {
+        if (b.isbn !== isbn) return b;
+        const updatedEjemplares = (b.ejemplares || []).map(e =>
+          e.numero === copyNumber ? { ...e, estado: dbNewStatus } : e
+        );
+        let diff = 0;
+        if (oldEstado === 'DISPONIBLE' && (dbNewStatus === 'PERDIDO' || dbNewStatus === 'DAÑADO')) diff = -1;
+        else if ((oldEstado === 'PERDIDO' || oldEstado === 'DAÑADO') && dbNewStatus === 'DISPONIBLE') diff = 1;
+        const newCustomStatuses = { ...(b.customCopyStatuses || {}) };
+        if (dbNewStatus === 'DISPONIBLE') delete newCustomStatuses[copyNumber];
+        else newCustomStatuses[copyNumber] = newStatus;
+        return {
+          ...b,
+          ejemplares: updatedEjemplares,
+          customCopyStatuses: Object.keys(newCustomStatuses).length > 0 ? newCustomStatuses : undefined,
+          availableCopies: Math.max(0, b.availableCopies + diff),
+          status: (b.availableCopies + diff) > 0 ? 'Disponible' as const : 'No disponible' as const,
+        };
+      })
+    );
 
-    this.updateBook(isbn, {
-      customCopyStatuses: newStatuses,
-      availableCopies: Math.max(0, book.availableCopies + diff)
-    });
+    const ejemplarId = ejemplar.id;
+    await supabase.from('ejemplares').update({ estado: dbNewStatus }).eq('id', ejemplarId);
 
     const current = this.currentUser();
     if (current) {
@@ -707,9 +749,14 @@ export class LibraryState {
         current.id,
         current.name,
         'UPDATE_COPY',
-        `Ejemplar #${copyNumber} de "${book.title}" cambiado de ${oldStatus} a ${newStatus}`
+        `Ejemplar #${copyNumber} de "${book.title}" cambiado de ${oldEstado} a ${dbNewStatus}`
       );
     }
+
+    if (dbNewStatus !== 'DISPONIBLE') {
+      await this.checkStockAndNotify(isbn);
+    }
+
     return null;
   }
 
@@ -760,6 +807,25 @@ export class LibraryState {
 
     this.updateBook(bookIsbn, { availableCopies: book.availableCopies - 1 });
 
+    this.books.update((bs) =>
+      bs.map((b) => {
+        if (b.isbn !== bookIsbn) return b;
+        const firstDisponible = (b.ejemplares || []).find(e => e.estado === 'DISPONIBLE');
+        if (firstDisponible) {
+          const updatedEjemplares = (b.ejemplares || []).map(e =>
+            e.id === firstDisponible.id ? { ...e, estado: 'PRESTADO' as const } : e
+          );
+          return { ...b, ejemplares: updatedEjemplares };
+        }
+        return b;
+      })
+    );
+
+    const firstDisponible = (book.ejemplares || []).find(e => e.estado === 'DISPONIBLE');
+    if (firstDisponible) {
+      await supabase.from('ejemplares').update({ estado: 'PRESTADO' }).eq('id', firstDisponible.id);
+    }
+
     this.loans.update((ls) => [...ls, newLoan]);
     this.syncToSupabase('prestamos', newLoan);
 
@@ -768,10 +834,12 @@ export class LibraryState {
       this.addAudit(current.id, current.name, 'CREATE_LOAN', `Préstamo registrado para ${user.name}: "${book.title}"`);
     }
 
+    await this.checkStockAndNotify(bookIsbn);
+
     return null;
   }
 
-  returnLoan(loanId: string): string | null {
+  async returnLoan(loanId: string): Promise<string | null> {
     const loanIndex = this.loans().findIndex((l) => l.id === loanId);
     if (loanIndex === -1) return 'Préstamo no encontrado.';
 
@@ -779,14 +847,14 @@ export class LibraryState {
     if (loan.status === 'Devuelto') return 'Este préstamo ya fue devuelto.';
     if (loan.status === 'Pendiente devolución') return 'Este préstamo ya está pendiente de evaluación.';
 
-    const today = todayStr();
-
     this.loans.update((ls) =>
       ls.map((l) => (l.id === loanId ? { ...l, status: 'Pendiente devolución' as const } : l))
     );
-    const updatedLoan = this.loans().find((l) => l.id === loanId);
-    if (updatedLoan) {
-      this.syncToSupabase('prestamos', updatedLoan);
+
+    const prestamoId = parseInt(loanId, 10);
+    if (!isNaN(prestamoId)) {
+      const { error } = await supabase.from('prestamos').update({ estado: 'PENDIENTE_DEVOLUCION' }).eq('id', prestamoId);
+      if (error) console.error('Error updating prestamo status:', error);
     }
 
     const current = this.currentUser();
@@ -807,6 +875,8 @@ export class LibraryState {
         'PRESTAMO'
       );
     }
+
+    await this.fetchPendingReturns();
 
     return null;
   }
@@ -851,6 +921,10 @@ export class LibraryState {
       }
 
       await this.refreshData();
+
+      if (ejemplarEstado !== 'DISPONIBLE') {
+        await this.checkStockAndNotify(loan.bookIsbn);
+      }
 
       return null;
     } catch (err: any) {
@@ -1051,12 +1125,17 @@ export class LibraryState {
     };
   }
 
-  markAllNotificationsRead() {
+  async markAllNotificationsRead() {
     this.notifications.update((notes) => notes.map((n) => ({ ...n, read: true })));
     const current = this.currentUser();
     if (current) {
-      supabase.from('notificaciones').update({ leida: true }).eq('usuario_id', parseInt(current.id, 10)).eq('leida', false);
+      await supabase.from('notificaciones').update({ leida: true }).eq('usuario_id', parseInt(current.id, 10)).eq('leida', false);
     }
+  }
+
+  async markNotificationRead(notifId: string) {
+    this.notifications.update((notes) => notes.map((n) => n.id === notifId ? { ...n, read: true } : n));
+    await supabase.from('notificaciones').update({ leida: true }).eq('id', parseInt(notifId, 10));
   }
 
   async createNotification(usuarioId: number, mensaje: string, tipo: string = 'SISTEMA') {
@@ -1069,6 +1148,30 @@ export class LibraryState {
     if (error) console.error('Error creating notification:', error);
   }
 
+  private async checkStockAndNotify(bookIsbn: string) {
+    const book = this.books().find((b) => b.isbn === bookIsbn);
+    if (!book || book.stockMinimo <= 0) return;
+
+    const available = book.availableCopies;
+    if (available > book.stockMinimo) {
+      this.lastNotifiedStock.delete(bookIsbn);
+      return;
+    }
+
+    const lastNotified = this.lastNotifiedStock.get(bookIsbn);
+    if (lastNotified === available) return;
+    this.lastNotifiedStock.set(bookIsbn, available);
+
+    const allBiblioUsers = this.users().filter((u) => u.role === 'BIBL' || u.role === 'ADMIN');
+    const message = available === 0
+      ? `El libro "${book.title}" (ISBN: ${bookIsbn}) no tiene ejemplares disponibles. Stock mínimo: ${book.stockMinimo}.`
+      : `El libro "${book.title}" (ISBN: ${bookIsbn}) está por debajo del stock mínimo. Disponibles: ${available} / Mínimo: ${book.stockMinimo}.`;
+
+    for (const user of allBiblioUsers) {
+      await this.createNotification(parseInt(user.id, 10), message, 'SISTEMA');
+    }
+  }
+
   async fetchNotifications() {
     const current = this.currentUser();
     if (!current) return;
@@ -1079,20 +1182,37 @@ export class LibraryState {
       .order('fecha_creacion', { ascending: false })
       .limit(50);
     if (error) { console.error(error); return; }
-    const mapped = (data || []).map((n: any) => ({
-      id: String(n.id),
-      title: n.tipo || 'Sistema',
-      desc: n.mensaje,
-      date: n.fecha_creacion ? n.fecha_creacion.substring(0, 10) : '',
-      read: n.leida,
-    }));
+    const isLow = current.role === 'DOC' || current.role === 'EST';
+    const mapped = (data || []).map((n: any) => {
+      let view = '';
+      let viewLabel = '';
+      if (n.tipo === 'PRESTAMO') {
+        view = isLow ? 'my-loans' : 'returns';
+        viewLabel = isLow ? 'Ir a Mis Préstamos' : 'Ir a Devoluciones';
+      } else if (n.tipo === 'RESERVA') {
+        view = isLow ? 'my-reservations' : 'reservations';
+        viewLabel = 'Ir a Reservas';
+      } else if (n.tipo === 'SANCION') {
+        view = isLow ? 'my-sanctions' : 'sanctions';
+        viewLabel = 'Ir a Sanciones';
+      }
+      return {
+        id: String(n.id),
+        title: n.tipo || 'Sistema',
+        desc: n.mensaje,
+        date: n.fecha_creacion ? n.fecha_creacion.substring(0, 10) : '',
+        read: n.leida,
+        view,
+        viewLabel,
+      };
+    });
     this.notifications.set(mapped);
   }
 
   async fetchPendingReturns() {
     const { data, error } = await supabase
       .from('prestamos')
-      .select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado, fecha_checkin, motivo_rechazo')
+      .select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado, observaciones, evaluado_por')
       .eq('estado', 'PENDIENTE_DEVOLUCION');
     if (error) { console.error(error); return; }
 
@@ -1122,8 +1242,8 @@ export class LibraryState {
         dueDate: p.fecha_limite_devolucion ? p.fecha_limite_devolucion.substring(0, 10) : '',
         returnDate: p.fecha_real_devolucion ? p.fecha_real_devolucion.substring(0, 10) : null,
         status: 'Pendiente devolución' as const,
-        checkoutDate: p.fecha_checkin,
-        rejectionReason: p.motivo_rechazo,
+        observaciones: p.observaciones,
+        evaluadoPor: p.evaluado_por ? String(p.evaluado_por) : null,
       };
     });
     this.pendingReturns.set(pending);
@@ -1157,17 +1277,17 @@ export class LibraryState {
   }
 
   private async handleRealtimePrestamo(payload: any) {
-    const { eventType, new: newRow, old: oldRow } = payload;
-    if (eventType === 'INSERT' || eventType === 'UPDATE') {
+    const { eventType } = payload;
+    if (eventType === 'INSERT' || eventType === 'UPDATE' || eventType === 'DELETE') {
       await this.refreshLoans();
       await this.fetchPendingReturns();
-    } else if (eventType === 'DELETE') {
-      await this.refreshLoans();
+      await this.refreshEjemplares();
     }
   }
 
   private async handleRealtimeReserva(payload: any) {
     await this.refreshReservations();
+    await this.refreshEjemplares();
   }
 
   private async handleRealtimeNotificacion(payload: any) {
@@ -1201,7 +1321,7 @@ export class LibraryState {
   private async refreshLoans() {
     const { data, error } = await supabase
       .from('prestamos')
-      .select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado, fecha_checkin, motivo_rechazo');
+      .select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado, observaciones, evaluado_por');
     if (error) { console.error(error); return; }
 
     const usuariosRes = await supabase.from('usuarios').select('id, nombre_completo');
@@ -1230,8 +1350,8 @@ export class LibraryState {
         dueDate: p.fecha_limite_devolucion ? p.fecha_limite_devolucion.substring(0, 10) : '',
         returnDate: p.fecha_real_devolucion ? p.fecha_real_devolucion.substring(0, 10) : null,
         status: LOAN_STATUS_MAP[p.estado] || 'Activo',
-        checkoutDate: p.fecha_checkin,
-        rejectionReason: p.motivo_rechazo,
+        observaciones: p.observaciones,
+        evaluadoPor: p.evaluado_por ? String(p.evaluado_por) : null,
       };
     });
     this.loans.set(mapped);
@@ -1271,7 +1391,7 @@ export class LibraryState {
   private async refreshEjemplares() {
     const { data: ejemplaresRes, error: ejErr } = await supabase
       .from('ejemplares')
-      .select('id, libro_id, estado');
+      .select('id, libro_id, estado, codigo_ejemplar');
     if (ejErr) { console.error(ejErr); return; }
 
     const { data: librosRes } = await supabase.from('libros').select('id, isbn');
@@ -1284,7 +1404,13 @@ export class LibraryState {
         if (!bookDb) return book;
         const ejemplares = (ejemplaresRes || []).filter((e: any) => e.libro_id === bookDb.id);
         const availableCopies = ejemplares.filter((e: any) => e.estado === 'DISPONIBLE').length;
-        return { ...book, copies: ejemplares.length, availableCopies, status: availableCopies > 0 ? 'Disponible' as const : 'No disponible' as const };
+        const updatedEjemplares = ejemplares.map((e: any) => ({
+          id: e.id,
+          numero: parseInt(String(e.codigo_ejemplar).split('-').pop() || '0', 10),
+          codigo: e.codigo_ejemplar,
+          estado: e.estado,
+        }));
+        return { ...book, ejemplares: updatedEjemplares, copies: ejemplares.length, availableCopies, status: availableCopies > 0 ? 'Disponible' as const : 'No disponible' as const };
       })
     );
   }

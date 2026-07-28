@@ -18,9 +18,26 @@ export class HeaderComponent {
   @Output() openSupabaseModal = new EventEmitter<void>();
   showNotifications = signal(false);
   showProfile = signal(false);
+  expandedNotification = signal<string | null>(null);
 
   today = (() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   })();
+
+  toggleExpand(notifId: string) {
+    const current = this.expandedNotification();
+    if (current === notifId) {
+      this.expandedNotification.set(null);
+    } else {
+      this.expandedNotification.set(notifId);
+      this.state.markNotificationRead(notifId);
+    }
+  }
+
+  navigateToView(view: string) {
+    this.showNotifications.set(false);
+    this.expandedNotification.set(null);
+    this.navigate.emit(view);
+  }
 }

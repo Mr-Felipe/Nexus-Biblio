@@ -25,10 +25,10 @@
         @if (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL') {
           <p class="text-[9px] uppercase tracking-[0.25em] text-[#54546A]/70 font-bold px-4 pt-5 pb-1 border-b border-[#232233]/8 mb-2">Administración</p>
 
-          <button (click)="navigate.emit('dashboard')"
-                  [ngClass]="state.activeView() === 'dashboard' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+          <button (click)="navigate.emit('reports')"
+                  [ngClass]="state.activeView() === 'reports' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
                   class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
-            <mat-icon class="text-lg">space_dashboard</mat-icon> Panel de Control
+            <mat-icon class="text-lg">analytics</mat-icon> Estadísticas
           </button>
 
           @if (state.currentUser()?.role === 'ADMIN') {
@@ -57,6 +57,12 @@
             <mat-icon class="text-lg">swap_horiz</mat-icon> Préstamos
           </button>
 
+          <button (click)="navigate.emit('returns')"
+                  [ngClass]="state.activeView() === 'returns' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
+            <mat-icon class="text-lg">assignment_late</mat-icon> Devoluciones
+          </button>
+
           <button (click)="navigate.emit('reservations')"
                   [ngClass]="state.activeView() === 'reservations' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
                   class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
@@ -70,13 +76,7 @@
           </button>
 
           @if (state.currentUser()?.role === 'ADMIN') {
-            <p class="text-[9px] uppercase tracking-[0.25em] text-[#54546A]/70 font-bold px-4 pt-5 pb-1 border-b border-[#232233]/8 mb-2">Reportes & Auditoría</p>
-
-            <button (click)="navigate.emit('reports')"
-                    [ngClass]="state.activeView() === 'reports' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
-                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
-              <mat-icon class="text-lg">analytics</mat-icon> Estadísticas
-            </button>
+            <p class="text-[9px] uppercase tracking-[0.25em] text-[#54546A]/70 font-bold px-4 pt-5 pb-1 border-b border-[#232233]/8 mb-2">Auditoría</p>
 
             <button (click)="navigate.emit('audit')"
                     [ngClass]="state.activeView() === 'audit' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"

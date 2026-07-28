@@ -63,8 +63,8 @@ export class MyLoansComponent {
     }
   }
 
-  returnBook(loanId: string) {
-    const error = this.state.returnLoan(loanId);
+  async returnBook(loanId: string) {
+    const error = await this.state.returnLoan(loanId);
     if (error) {
       this.toast.show('error', error);
     } else {

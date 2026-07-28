@@ -51,11 +51,6 @@
           <app-home (navigate)="navigateTo($event)"></app-home>
         }
 
-        <!-- DASHBOARD (ADMIN & BIBL) -->
-        @if (state.activeView() === 'dashboard' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
-          <app-dashboard></app-dashboard>
-        }
-
         <!-- USERS (ADMIN ONLY) -->
         @if (state.activeView() === 'users' && state.currentUser()?.role === 'ADMIN') {
           <app-users></app-users>
@@ -74,6 +69,11 @@
         <!-- LOANS (ADMIN & BIBL) -->
         @if (state.activeView() === 'loans' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
           <app-loans></app-loans>
+        }
+
+        <!-- RETURNS (ADMIN & BIBL) -->
+        @if (state.activeView() === 'returns' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+          <app-returns></app-returns>
         }
 
         <!-- RESERVATIONS (ADMIN & BIBL) -->
@@ -107,7 +107,7 @@
         }
 
         <!-- REPORTS (ADMIN ONLY) -->
-        @if (state.activeView() === 'reports' && state.currentUser()?.role === 'ADMIN') {
+        @if (state.activeView() === 'reports' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
           <app-reports></app-reports>
         }
 

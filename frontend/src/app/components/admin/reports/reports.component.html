@@ -1,6 +1,6 @@
 <div class="space-y-6">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Estadísticas e Informes</h1>
+    <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Estadísticas</h1>
     <div class="flex gap-2">
       <button (click)="exportReport('inventario')" class="border-2 border-[#232233] text-[#232233] hover:bg-[#232233] hover:text-white px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer">
         <mat-icon class="text-sm">download</mat-icon> CSV
@@ -30,15 +30,93 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- KPIs -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div class="p-5 bg-transparent border-2 border-[#232233] flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-[#54546A]/80 uppercase tracking-wider font-bold">Libros Totales</p>
+        <h3 class="text-3xl font-serif text-[#232233] font-bold mt-1.5">{{ stats().totalBooks }}</h3>
+      </div>
+      <div class="text-[#232233]"><mat-icon class="text-3xl">collections_bookmark</mat-icon></div>
+    </div>
+
+    <div class="p-5 bg-transparent border-2 border-emerald-700 flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-emerald-800 uppercase tracking-wider font-bold">Ejemplares OK</p>
+        <h3 class="text-3xl font-serif text-emerald-700 font-bold mt-1.5">{{ ejemplarStats().DISPONIBLE }}</h3>
+      </div>
+      <div class="text-emerald-700"><mat-icon class="text-3xl">check_circle</mat-icon></div>
+    </div>
+
+    <div class="p-5 bg-transparent border-2 border-amber-600 flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-amber-700 uppercase tracking-wider font-bold">Dañados</p>
+        <h3 class="text-3xl font-serif text-amber-700 font-bold mt-1.5">{{ ejemplarStats()['DAÑADO'] }}</h3>
+      </div>
+      <div class="text-amber-600"><mat-icon class="text-3xl">warning</mat-icon></div>
+    </div>
+
+    <div class="p-5 bg-transparent border-2 border-red-600 flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-red-700 uppercase tracking-wider font-bold">Perdidos</p>
+        <h3 class="text-3xl font-serif text-red-700 font-bold mt-1.5">{{ ejemplarStats()['PERDIDO'] }}</h3>
+      </div>
+      <div class="text-red-600"><mat-icon class="text-3xl">block</mat-icon></div>
+    </div>
+
+    <div class="p-5 bg-transparent border-2 border-[#232233] flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-[#54546A]/80 uppercase tracking-wider font-bold">Prestados</p>
+        <h3 class="text-3xl font-serif text-[#232233] font-bold mt-1.5">{{ ejemplarStats().PRESTADO }}</h3>
+      </div>
+      <div class="text-[#232233]"><mat-icon class="text-3xl">swap_horiz</mat-icon></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="p-5 bg-transparent border-2 border-[#232233] flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-[#54546A]/80 uppercase tracking-wider font-bold">Préstamos Activos</p>
+        <h3 class="text-3xl font-serif text-[#232233] font-bold mt-1.5">{{ stats().activeLoans }}</h3>
+      </div>
+      <div class="text-[#232233]"><mat-icon class="text-3xl">swap_horiz</mat-icon></div>
+    </div>
+
+    <div class="p-5 bg-transparent border-2 border-amber-600 flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-amber-700 uppercase tracking-wider font-bold">Pendientes Devolución</p>
+        <h3 class="text-3xl font-serif text-amber-700 font-bold mt-1.5">{{ stats().pendingReturns }}</h3>
+      </div>
+      <div class="text-amber-600"><mat-icon class="text-3xl">assignment_late</mat-icon></div>
+    </div>
+
+    <div class="p-5 bg-transparent border-2 border-[#232233] flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-[#54546A]/80 uppercase tracking-wider font-bold">Reservas Activas</p>
+        <h3 class="text-3xl font-serif text-[#232233] font-bold mt-1.5">{{ stats().activeReservations }}</h3>
+      </div>
+      <div class="text-[#232233]"><mat-icon class="text-3xl">bookmark_border</mat-icon></div>
+    </div>
+
+    <div class="p-5 bg-transparent border-2 border-red-600 flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-red-700 uppercase tracking-wider font-bold">Multas Pendientes</p>
+        <h3 class="text-3xl font-serif text-red-700 font-bold mt-1.5">${{ stats().totalFines | number }}</h3>
+      </div>
+      <div class="text-red-600"><mat-icon class="text-3xl">gavel</mat-icon></div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Loan Status Distribution -->
-    <div class="border-2 border-[#232233] p-6 bg-transparent">
-      <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Distribución de Préstamos</h3>
+    <div class="p-6 bg-transparent border-2 border-[#232233]">
+      <h3 class="text-[10px] font-bold text-[#232233] uppercase tracking-[0.15em] mb-4 border-b border-[#232233]/12 pb-1">Distribución de Préstamos</h3>
       @if (filteredLoans().length > 0) {
-        <div class="flex h-6 border-2 border-[#232233] overflow-hidden mb-4">
+        <div class="flex h-8 border-2 border-[#232233] overflow-hidden mb-4">
           @for (seg of loanStatusData(); track seg.label) {
             @if (seg.value > 0) {
-              <div [class]="seg.color + ' flex items-center justify-center text-[9px] text-white font-bold border-r border-[#232233] last:border-r-0'"
+              <div [class]="seg.color + ' flex items-center justify-center text-[10px] text-white font-bold border-r border-[#232233] last:border-r-0'"
                    [style.width.%]="seg.percent" [title]="seg.label + ': ' + seg.value">
                 {{ seg.percent > 15 ? seg.value : '' }}
               </div>
@@ -54,18 +132,71 @@
           }
         </div>
       } @else {
-        <p class="text-xs text-[#54546A]/70 text-center font-serif italic py-8">No hay préstamos en el rango seleccionado.</p>
+        <p class="text-xs text-[#54546A]/70 text-center font-serif italic py-8">No hay préstamos en el rango.</p>
+      }
+    </div>
+
+    <!-- Ejemplar Status Distribution -->
+    <div class="p-6 bg-transparent border-2 border-[#232233]">
+      <h3 class="text-[10px] font-bold text-[#232233] uppercase tracking-[0.15em] mb-4 border-b border-[#232233]/12 pb-1">Estado de Ejemplares</h3>
+      @if (ejemplarStats().total > 0) {
+        <div class="flex h-8 border-2 border-[#232233] overflow-hidden mb-4">
+          @if (ejemplarStats().DISPONIBLE > 0) {
+            <div class="bg-emerald-700 flex items-center justify-center text-[10px] text-white font-bold border-r border-[#232233]"
+                 [style.width.%]="(ejemplarStats().DISPONIBLE / ejemplarStats().total) * 100"
+                 title="Disponible: {{ ejemplarStats().DISPONIBLE }}">
+              {{ (ejemplarStats().DISPONIBLE / ejemplarStats().total) * 100 > 15 ? ejemplarStats().DISPONIBLE : '' }}
+            </div>
+          }
+          @if (ejemplarStats().PRESTADO > 0) {
+            <div class="bg-[#232233] flex items-center justify-center text-[10px] text-white font-bold border-r border-[#232233]"
+                 [style.width.%]="(ejemplarStats().PRESTADO / ejemplarStats().total) * 100"
+                 title="Prestado: {{ ejemplarStats().PRESTADO }}">
+              {{ (ejemplarStats().PRESTADO / ejemplarStats().total) * 100 > 15 ? ejemplarStats().PRESTADO : '' }}
+            </div>
+          }
+          @if (ejemplarStats()['DAÑADO'] > 0) {
+            <div class="bg-amber-600 flex items-center justify-center text-[10px] text-white font-bold border-r border-[#232233]"
+                 [style.width.%]="(ejemplarStats()['DAÑADO'] / ejemplarStats().total) * 100"
+                 title="Dañado: {{ ejemplarStats()['DAÑADO'] }}">
+              {{ (ejemplarStats()['DAÑADO'] / ejemplarStats().total) * 100 > 15 ? ejemplarStats()['DAÑADO'] : '' }}
+            </div>
+          }
+          @if (ejemplarStats()['PERDIDO'] > 0) {
+            <div class="bg-red-600 flex items-center justify-center text-[10px] text-white font-bold last:border-r-0"
+                 [style.width.%]="(ejemplarStats()['PERDIDO'] / ejemplarStats().total) * 100"
+                 title="Perdido: {{ ejemplarStats()['PERDIDO'] }}">
+              {{ (ejemplarStats()['PERDIDO'] / ejemplarStats().total) * 100 > 15 ? ejemplarStats()['PERDIDO'] : '' }}
+            </div>
+          }
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <span class="flex items-center gap-1.5 text-[10px] font-serif">
+            <span class="w-2.5 h-2.5 bg-emerald-700"></span> Disponible ({{ ejemplarStats().DISPONIBLE }})
+          </span>
+          <span class="flex items-center gap-1.5 text-[10px] font-serif">
+            <span class="w-2.5 h-2.5 bg-[#232233]"></span> Prestado ({{ ejemplarStats().PRESTADO }})
+          </span>
+          <span class="flex items-center gap-1.5 text-[10px] font-serif">
+            <span class="w-2.5 h-2.5 bg-amber-600"></span> Dañado ({{ ejemplarStats()['DAÑADO'] }})
+          </span>
+          <span class="flex items-center gap-1.5 text-[10px] font-serif">
+            <span class="w-2.5 h-2.5 bg-red-600"></span> Perdido ({{ ejemplarStats()['PERDIDO'] }})
+          </span>
+        </div>
+      } @else {
+        <p class="text-xs text-[#54546A]/70 text-center font-serif italic py-8">No hay ejemplares registrados.</p>
       }
     </div>
 
     <!-- Sanctions Distribution -->
-    <div class="border-2 border-[#232233] p-6 bg-transparent">
-      <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Estado de Sanciones</h3>
+    <div class="p-6 bg-transparent border-2 border-[#232233]">
+      <h3 class="text-[10px] font-bold text-[#232233] uppercase tracking-[0.15em] mb-4 border-b border-[#232233]/12 pb-1">Estado de Sanciones</h3>
       @if (state.sanctions().length > 0) {
-        <div class="flex h-6 border-2 border-[#232233] overflow-hidden mb-4">
+        <div class="flex h-8 border-2 border-[#232233] overflow-hidden mb-4">
           @for (seg of sanctionStatusData(); track seg.label) {
             @if (seg.value > 0) {
-              <div [class]="seg.color + ' flex items-center justify-center text-[9px] text-white font-bold border-r border-[#232233] last:border-r-0'"
+              <div [class]="seg.color + ' flex items-center justify-center text-[10px] text-white font-bold border-r border-[#232233] last:border-r-0'"
                    [style.width.%]="(seg.value / (state.sanctions().length || 1)) * 100">
                 {{ seg.value }}
               </div>
@@ -84,32 +215,125 @@
         <p class="text-xs text-[#54546A]/70 text-center font-serif italic py-8">No hay sanciones registradas.</p>
       }
     </div>
+  </div>
 
-    <!-- General Stats Summary -->
-    <div class="border-2 border-[#232233] p-6 flex flex-col justify-between bg-transparent">
-      <div>
-        <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Resumen General</h3>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-            <p class="text-xl font-mono font-bold text-[#232233]">{{ state.users().length }}</p>
-            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Usuarios</p>
-          </div>
-          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-            <p class="text-xl font-mono font-bold text-[#232233]">{{ state.books().length }}</p>
-            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">ISBNs</p>
-          </div>
-          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-            <p class="text-xl font-mono font-bold text-[#232233]">{{ filteredLoans().length }}</p>
-            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Préstamos (Rango)</p>
-          </div>
-          <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-            <p class="text-xl font-mono font-bold text-[#232233]">{{ state.sanctions().length }}</p>
-            <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Sanciones</p>
-          </div>
-        </div>
+  <!-- General Summary -->
+  <div class="p-6 border-2 border-[#232233] bg-transparent">
+    <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Resumen General</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+        <p class="text-xl font-mono font-bold text-[#232233]">{{ state.users().length }}</p>
+        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Usuarios</p>
       </div>
-      <div class="border border-[#232233] p-3 text-[11px] text-[#232233] mt-4 bg-transparent font-serif italic">
-        Para un informe detallado de transacciones, visite la <strong>Bitácora de Auditoría</strong>.
+      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+        <p class="text-xl font-mono font-bold text-[#232233]">{{ state.books().length }}</p>
+        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">ISBNs</p>
+      </div>
+      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+        <p class="text-xl font-mono font-bold text-[#232233]">{{ filteredLoans().length }}</p>
+        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Préstamos (Rango)</p>
+      </div>
+      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
+        <p class="text-xl font-mono font-bold text-[#232233]">{{ state.sanctions().length }}</p>
+        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Sanciones</p>
+      </div>
+    </div>
+    <div class="border border-[#232233] p-3 text-[11px] text-[#232233] mt-4 bg-transparent font-serif italic">
+      Para un informe detallado de transacciones, visite la <strong>Bitácora de Auditoría</strong>.
+    </div>
+  </div>
+
+  <!-- Detailed Tables -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 font-sans">
+
+    <!-- Active Loans -->
+    <div class="bg-transparent border-2 border-[#232233] p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#232233] mb-4 border-b border-[#232233]/12 pb-1.5">Préstamos Activos</h3>
+      <div class="divide-y divide-[#232233]/15">
+        @for (loan of activeLoansList(); track loan.id) {
+          <div class="py-3 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ loan.bookTitle }}</p>
+              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ loan.userName }}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-[#232233] text-[#232233]">Activo</span>
+              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Vence: {{ loan.dueDate }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay préstamos activos.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Pending Returns -->
+    <div class="bg-transparent border-2 border-amber-500 p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-amber-700 mb-4 border-b border-amber-500/30 pb-1.5 flex items-center gap-1.5">
+        <mat-icon class="text-sm">assignment_late</mat-icon> Devoluciones Pendientes
+      </h3>
+      <div class="divide-y divide-amber-500/20">
+        @for (loan of pendingReturnsList(); track loan.id) {
+          <div class="py-3 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ loan.bookTitle }}</p>
+              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ loan.userName }}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-amber-500 text-white">Pendiente</span>
+              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Vence: {{ loan.dueDate }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay devoluciones pendientes.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Active Reservations -->
+    <div class="bg-transparent border-2 border-[#232233] p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#232233] mb-4 border-b border-[#232233]/12 pb-1.5">Reservas Activas</h3>
+      <div class="divide-y divide-[#232233]/15">
+        @for (res of activeReservationsList(); track res.id) {
+          <div class="py-3 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ res.bookTitle }}</p>
+              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ res.userName }}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-[#232233] text-[#232233]">{{ res.status }}</span>
+              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Posición: #{{ res.queuePosition }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay reservas activas.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Sanctioned Users -->
+    <div class="bg-transparent border-2 border-red-500 p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-red-700 mb-4 border-b border-red-500/30 pb-1.5 flex items-center gap-1.5">
+        <mat-icon class="text-sm">gavel</mat-icon> Usuarios Sancionados
+      </h3>
+      <div class="divide-y divide-red-500/20">
+        @for (sanc of sanctionedUsers(); track sanc.userName) {
+          <div class="py-3 text-xs">
+            <div class="flex items-center justify-between mb-1">
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ sanc.userName }}</p>
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border"
+                    [ngClass]="sanc.type === 'Disciplinaria' ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-red-400 bg-red-50 text-red-700'">
+                {{ sanc.type }}
+              </span>
+            </div>
+            <p class="text-[10px] text-[#54546A] font-serif italic">{{ sanc.reason }}</p>
+            @if (sanc.fine > 0) {
+              <p class="text-[10px] text-red-600 font-bold mt-0.5">Multa: ${{ sanc.fine | number }}</p>
+            }
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/80 py-4 text-center font-serif italic">No hay usuarios sancionados.</p>
+        }
       </div>
     </div>
   </div>

@@ -12,7 +12,7 @@ import { LibraryState } from '../../../library-state';
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
-  @Output() registerSuccess = new EventEmitter<{ id: string; name: string; email: string; password: string; role: 'DOC' | 'EST'; phone: string; address: string }>();
+  @Output() registerSuccess = new EventEmitter<{ name: string; email: string; password: string; role: 'DOC' | 'EST'; phone: string; address: string }>();
   @Output() openLogin = new EventEmitter<void>();
   @Output() goBack = new EventEmitter<void>();
 
@@ -29,21 +29,10 @@ export class RegisterComponent {
     password: new FormControl('', { validators: [Validators.required, Validators.minLength(4)], nonNullable: true }),
   });
 
-  private generateId(): string {
-    const users = this.state.users();
-    const maxId = users.reduce((max: number, u: { id: string }) => {
-      const num = parseInt(u.id, 10);
-      return !isNaN(num) && num > max ? num : max;
-    }, 0);
-    return String(maxId + 1);
-  }
-
   onRegisterSubmit() {
     if (this.registerForm.invalid) return;
     const raw = this.registerForm.getRawValue();
-    const newId = this.generateId();
     this.registerSuccess.emit({
-      id: newId,
       name: raw.name,
       email: raw.email,
       password: raw.password,

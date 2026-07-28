@@ -16,14 +16,18 @@ export interface Book {
   description: string;
   copies: number;
   availableCopies: number;
+  stockMinimo: number;
   coverUrl: string;
   status: 'Disponible' | 'No disponible';
   customCopyStatuses?: Record<number, 'Disponible' | 'Perdido' | 'Dañado'>;
+  ejemplares?: { id: number; numero: number; codigo: string; estado: string }[];
 }
 
 export interface BookCopy {
   id: string;
+  ejemplarId: number;
   number: number;
+  codigo: string;
   status: 'Disponible' | 'Prestado' | 'En reserva' | 'Perdido' | 'Dañado';
   loanDetails?: {
     loanId: string;
@@ -48,8 +52,8 @@ export interface Loan {
   dueDate: string;
   returnDate: string | null;
   status: 'Activo' | 'Pendiente devolución' | 'Devuelto' | 'Vencido' | 'Rechazado' | 'Cancelado';
-  checkoutDate?: string | null;
-  rejectionReason?: string | null;
+  observaciones?: string | null;
+  evaluadoPor?: string | null;
 }
 
 export interface Reservation {

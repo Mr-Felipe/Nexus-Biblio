@@ -20,11 +20,15 @@ export class BooksComponent implements OnInit {
   bookSearchQuery = signal('');
   showAddBookModal = signal(false);
   editingBook = signal<Book | null>(null);
+  showDeleteModal = signal(false);
+  deleteTarget = signal<Book | null>(null);
+  deleteBlocked = signal(false);
+  deleteBlockedReason = signal('');
 
   ngOnInit() {
-    const pending = this.state.pendingSearch();
-    if (pending) {
-      this.bookSearchQuery.set(pending);
+    const pendingSearch = this.state.pendingSearch();
+    if (pendingSearch) {
+      this.bookSearchQuery.set(pendingSearch);
       this.state.pendingSearch.set('');
     }
   }
@@ -42,6 +46,7 @@ export class BooksComponent implements OnInit {
     author: new FormControl('', { validators: [Validators.required], nonNullable: true }),
     description: new FormControl('', { nonNullable: true }),
     copies: new FormControl<number>(1, { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
+    stockMinimo: new FormControl<number>(0, { validators: [Validators.required, Validators.min(0)], nonNullable: true }),
     coverUrl: new FormControl('', { nonNullable: true }),
   });
 
@@ -53,6 +58,7 @@ export class BooksComponent implements OnInit {
       author: '',
       description: '',
       copies: 1,
+      stockMinimo: 0,
       coverUrl: '',
     });
     this.bookForm.get('isbn')?.enable();
@@ -67,9 +73,9 @@ export class BooksComponent implements OnInit {
       author: book.author,
       description: book.description,
       copies: book.copies,
+      stockMinimo: book.stockMinimo ?? 0,
       coverUrl: book.coverUrl,
     });
-    this.bookForm.get('isbn')?.disable();
     this.showAddBookModal.set(true);
   }
 
@@ -85,11 +91,20 @@ export class BooksComponent implements OnInit {
     const finalCover = raw.coverUrl ? raw.coverUrl : `https://picsum.photos/seed/${encodeURIComponent(raw.title)}/200/300`;
 
     if (editMode) {
+      if (raw.isbn !== editMode.isbn) {
+        const isbnExists = this.state.books().some((b) => b.isbn === raw.isbn);
+        if (isbnExists) {
+          this.toast.show('error', `Ya existe otro libro con el ISBN ${raw.isbn}`);
+          return;
+        }
+      }
       this.state.updateBook(editMode.isbn, {
+        isbn: raw.isbn,
         title: raw.title,
         author: raw.author,
         description: raw.description,
         copies: raw.copies,
+        stockMinimo: raw.stockMinimo,
         coverUrl: finalCover,
       });
       this.toast.show('success', 'Libro actualizado correctamente.');
@@ -105,6 +120,7 @@ export class BooksComponent implements OnInit {
         author: raw.author,
         description: raw.description,
         copies: raw.copies,
+        stockMinimo: raw.stockMinimo,
         coverUrl: finalCover,
       });
       this.toast.show('success', 'Libro registrado exitosamente en el catálogo.');
@@ -113,9 +129,41 @@ export class BooksComponent implements OnInit {
   }
 
   deleteBook(isbn: string) {
-    if (confirm('¿Estás seguro de que deseas eliminar este libro del catálogo?')) {
-      this.state.deleteBook(isbn);
-      this.toast.show('success', 'Libro removido de la biblioteca.');
+    const book = this.state.books().find((b) => b.isbn === isbn);
+    if (!book) return;
+
+    const activeLoans = this.state.loans().filter(
+      (l) => l.bookIsbn === isbn && (l.status === 'Activo' || l.status === 'Pendiente devolución')
+    ).length;
+    const activeReservations = this.state.reservations().filter(
+      (r) => r.bookIsbn === isbn && (r.status === 'En cola' || r.status === 'Listo para retirar')
+    ).length;
+
+    if (activeLoans > 0 || activeReservations > 0) {
+      const parts: string[] = [];
+      if (activeLoans > 0) parts.push(`${activeLoans} préstamo(s) activo(s)`);
+      if (activeReservations > 0) parts.push(`${activeReservations} reserva(s) en cola`);
+      this.deleteBlockedReason.set(parts.join(' y '));
+      this.deleteBlocked.set(true);
+    } else {
+      this.deleteBlocked.set(false);
     }
+
+    this.deleteTarget.set(book);
+    this.showDeleteModal.set(true);
+  }
+
+  confirmDelete() {
+    const book = this.deleteTarget();
+    if (!book) return;
+    this.state.deleteBook(book.isbn);
+    this.showDeleteModal.set(false);
+    this.deleteTarget.set(null);
+    this.toast.show('success', `Libro "${book.title}" removido de la biblioteca.`);
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.deleteTarget.set(null);
   }
 }

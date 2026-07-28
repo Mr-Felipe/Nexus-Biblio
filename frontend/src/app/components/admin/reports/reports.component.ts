@@ -19,6 +19,19 @@ export class ReportsComponent {
   dateFrom = signal('');
   dateTo = signal('');
 
+  stats = computed(() => this.state.getDashboardStats());
+
+  ejemplarStats = computed(() => {
+    const all = this.state.books().flatMap(b => b.ejemplares || []);
+    return {
+      total: all.length,
+      DISPONIBLE: all.filter(e => e.estado === 'DISPONIBLE').length,
+      PRESTADO: all.filter(e => e.estado === 'PRESTADO').length,
+      DAÑADO: all.filter(e => e.estado === 'DAÑADO').length,
+      PERDIDO: all.filter(e => e.estado === 'PERDIDO').length,
+    };
+  });
+
   filteredLoans = computed(() => {
     let loans = this.state.loans();
     const from = this.dateFrom();
@@ -54,13 +67,51 @@ export class ReportsComponent {
     ];
   });
 
+  recentLoans = computed(() => this.state.loans().slice(0, 5));
+
+  recentSanctionsActive = computed(() =>
+    this.state.sanctions().filter(s => s.status === 'Activa').slice(0, 5)
+  );
+
+  activeLoansList = computed(() =>
+    this.state.loans().filter(l => l.status === 'Activo')
+  );
+
+  pendingReturnsList = computed(() =>
+    this.state.loans().filter(l => l.status === 'Pendiente devolución')
+  );
+
+  activeReservationsList = computed(() =>
+    this.state.reservations().filter(r => r.status === 'En cola' || r.status === 'Listo para retirar')
+  );
+
+  sanctionedUsers = computed(() =>
+    this.state.sanctions()
+      .filter(s => s.status === 'Activa')
+      .map(s => ({
+        userName: s.userName,
+        type: s.type,
+        reason: s.reason,
+        fine: s.fine,
+      }))
+  );
+
+  navigateTo(view: string) {
+    this.state.activeView.set(view);
+  }
+
   exportReport(type: string) {
     const stats = this.state.getDashboardStats();
+    const ej = this.ejemplarStats();
     const timestamp = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     const headers = 'Métrica,Valor,Fecha de Generación\n';
     const rows = [
       `"Total Copias en Catálogo",${stats.totalBooks},"${timestamp}"`,
       `"Copias Disponibles",${stats.availableBooks},"${timestamp}"`,
+      `"Ejemplares Disponibles",${ej.DISPONIBLE},"${timestamp}"`,
+      `"Ejemplares Prestados",${ej.PRESTADO},"${timestamp}"`,
+      `"Ejemplares Dañados",${ej['DAÑADO']},"${timestamp}"`,
+      `"Ejemplares Perdidos",${ej['PERDIDO']},"${timestamp}"`,
       `"Préstamos Activos",${stats.activeLoans},"${timestamp}"`,
       `"Préstamos Pendientes Devolución",${stats.pendingReturns},"${timestamp}"`,
       `"Total Préstamos Históricos",${stats.totalLoans},"${timestamp}"`,
