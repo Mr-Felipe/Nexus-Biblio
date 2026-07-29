@@ -596,7 +596,7 @@ export class LibraryState {
   }
 
   // CRUD LIBROS
-  addBook(b: Omit<Book, 'availableCopies' | 'status'>) {
+  async addBook(b: Omit<Book, 'availableCopies' | 'status'>) {
     const newBook: Book = {
       ...b,
       availableCopies: b.copies,
@@ -604,7 +604,25 @@ export class LibraryState {
       status: b.copies > 0 ? 'Disponible' : 'No disponible',
     };
     this.books.update((bs) => [...bs, newBook]);
-    this.syncToSupabase('libros', newBook);
+    await this.syncToSupabase('libros', newBook);
+
+    if (b.copies > 0) {
+      const { data: libro } = await supabase.from('libros').select('id').eq('isbn', b.isbn).single();
+      if (libro) {
+        const ejemplaresToInsert = Array.from({ length: b.copies }, (_, i) => ({
+          libro_id: libro.id,
+          codigo_ejemplar: `${b.isbn}-${String(i + 1).padStart(3, '0')}`,
+          estado: 'DISPONIBLE',
+        }));
+        const { data: inserted } = await supabase.from('ejemplares').insert(ejemplaresToInsert).select('id, codigo_ejemplar, estado');
+        if (inserted) {
+          const ejemplaresData = inserted.map((e: any, i: number) => ({ id: e.id, numero: i + 1, codigo: e.codigo_ejemplar, estado: e.estado }));
+          this.books.update((bs) =>
+            bs.map((bk) => bk.isbn === b.isbn ? { ...bk, ejemplares: ejemplaresData } : bk)
+          );
+        }
+      }
+    }
   }
 
   updateBook(isbn: string, updated: Partial<Book>) {

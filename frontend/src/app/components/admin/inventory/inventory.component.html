@@ -10,7 +10,7 @@
   </div>
 
   <!-- Summary KPI Cards -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-sans">
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4 font-sans">
     <div class="border-2 border-[#232233] p-4 bg-transparent flex flex-col justify-between">
       <span class="text-[9px] font-bold uppercase tracking-wider text-[#54546A]/70">Títulos Registrados</span>
       <span class="font-serif text-2xl font-bold text-[#232233] mt-2">{{ state.books().length }}</span>
@@ -26,6 +26,10 @@
     <div class="border-2 border-[#232233] p-4 bg-transparent flex flex-col justify-between">
       <span class="text-[9px] font-bold uppercase tracking-wider text-[#54546A]/70">En Préstamo (Activos)</span>
       <span class="font-serif text-2xl font-bold text-[#232233] mt-2">{{ totalLoanedCopiesCount() }}</span>
+    </div>
+    <div class="border-2 border-red-500 p-4 bg-transparent flex flex-col justify-between">
+      <span class="text-[9px] font-bold uppercase tracking-wider text-red-700">No Disponibles</span>
+      <span class="font-serif text-2xl font-bold text-red-600 mt-2">{{ totalUnavailableCopiesCount() }}</span>
     </div>
   </div>
 

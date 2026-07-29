@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { LibraryState } from '../../../library-state';
+import { LibraryState, normalizeText } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
 
 @Component({
@@ -19,7 +19,25 @@ export class ReportsComponent {
   dateFrom = signal('');
   dateTo = signal('');
 
-  stats = computed(() => this.state.getDashboardStats());
+  stats = computed(() => {
+    const books = this.state.books();
+    const loans = this.state.loans();
+    const reservations = this.state.reservations();
+    const sanctions = this.state.sanctions();
+    const users = this.state.users();
+
+    const totalBooks = books.reduce((sum, b) => sum + b.copies, 0);
+    const availableBooks = books.reduce((sum, b) => sum + b.availableCopies, 0);
+    const activeLoans = loans.filter((l) => l.status === 'Activo' || l.status === 'Pendiente devolución' || l.status === 'Vencido').length;
+    const pendingReturns = loans.filter((l) => l.status === 'Pendiente devolución').length;
+    const totalLoans = loans.length;
+    const activeReservations = reservations.filter((r) => r.status === 'En cola' || r.status === 'Listo para retirar').length;
+    const activeSanctions = sanctions.filter((s) => s.status === 'Activa').length;
+    const totalFines = sanctions.filter((s) => s.status === 'Activa').reduce((sum, s) => sum + s.fine, 0);
+    const activeUsers = users.filter((u) => u.status === 'Activo').length;
+
+    return { totalBooks, availableBooks, activeLoans, pendingReturns, totalLoans, activeReservations, activeSanctions, totalFines, activeUsers };
+  });
 
   ejemplarStats = computed(() => {
     const all = this.state.books().flatMap(b => b.ejemplares || []);
@@ -99,6 +117,62 @@ export class ReportsComponent {
   navigateTo(view: string) {
     this.state.activeView.set(view);
   }
+
+  historyTab = signal<'loans' | 'sanctions' | 'ejemplares'>('loans');
+  historySearchQuery = signal('');
+
+  setHistoryTab(tab: 'loans' | 'sanctions' | 'ejemplares') {
+    this.historyTab.set(tab);
+    this.historySearchQuery.set('');
+  }
+
+  historyLoans = computed(() => {
+    const q = normalizeText(this.historySearchQuery().trim());
+    return this.state.loans().filter(l => {
+      const isHistory = l.status === 'Devuelto' || l.status === 'Vencido' || l.status === 'Cancelado';
+      const matchQ = normalizeText(l.userName).includes(q) || normalizeText(l.bookTitle).includes(q) || normalizeText(l.id).includes(q);
+      return isHistory && matchQ;
+    }).sort((a, b) => {
+      const dateA = a.returnDate || a.dueDate;
+      const dateB = b.returnDate || b.dueDate;
+      return dateB.localeCompare(dateA);
+    });
+  });
+
+  historySanctions = computed(() => {
+    const q = normalizeText(this.historySearchQuery().trim());
+    return this.state.sanctions().filter(s => {
+      const isHistory = s.status === 'Pagada';
+      const matchQ = normalizeText(s.userName).includes(q) || normalizeText(s.reason).includes(q) || normalizeText(s.id).includes(q);
+      return isHistory && matchQ;
+    }).sort((a, b) => b.date.localeCompare(a.date));
+  });
+
+  unavailableEjemplares = computed(() => {
+    const q = normalizeText(this.historySearchQuery().trim());
+    const result: { bookTitle: string; bookIsbn: string; ejemplarNumero: number; codigo: string; estado: string }[] = [];
+    for (const book of this.state.books()) {
+      for (const ej of book.ejemplares || []) {
+        if (ej.estado === 'PERDIDO' || ej.estado === 'DAÑADO') {
+          const matchQ = normalizeText(book.title).includes(q) || normalizeText(book.isbn).includes(q) || normalizeText(ej.codigo).includes(q);
+          if (matchQ) {
+            result.push({ bookTitle: book.title, bookIsbn: book.isbn, ejemplarNumero: ej.numero, codigo: ej.codigo, estado: ej.estado });
+          }
+        }
+      }
+    }
+    return result.sort((a, b) => a.bookTitle.localeCompare(b.bookTitle));
+  });
+
+  totalUnavailable = computed(() => {
+    let count = 0;
+    for (const book of this.state.books()) {
+      for (const ej of book.ejemplares || []) {
+        if (ej.estado === 'PERDIDO' || ej.estado === 'DAÑADO') count++;
+      }
+    }
+    return count;
+  });
 
   exportReport(type: string) {
     const stats = this.state.getDashboardStats();

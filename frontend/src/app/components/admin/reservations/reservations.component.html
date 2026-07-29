@@ -31,7 +31,6 @@
             <th class="p-4 font-bold">Fecha Solicitud</th>
             <th class="p-4 font-bold">Lugar Cola</th>
             <th class="p-4 font-bold">Estado</th>
-            <th class="p-4 font-bold text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y-2 divide-[#232233]/12 font-sans">
@@ -56,22 +55,10 @@
                   {{ res.status }}
                 </span>
               </td>
-              <td class="p-4 text-right flex items-center justify-end gap-2">
-                @if (res.status === 'Listo para retirar') {
-                  <button (click)="deliverReservedBook(res)" class="border border-[#232233] text-[#232233] hover:bg-[#232233] hover:text-white px-2.5 py-1 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-all">
-                    <mat-icon class="text-xs">check_circle</mat-icon> Entregar
-                  </button>
-                }
-                @if (res.status === 'En cola' || res.status === 'Listo para retirar') {
-                  <button (click)="cancelReservation(res.id)" class="text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-400 px-2.5 py-1 font-bold text-[9px] uppercase tracking-wider cursor-pointer transition-all">Cancelar</button>
-                } @else {
-                  <span class="text-[#54546A]/70 font-serif italic text-[10px]">Archivado</span>
-                }
-              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="p-8 text-center text-[#A0A0B2] font-serif italic">No hay reservas vigentes registradas.</td>
+              <td colspan="6" class="p-8 text-center text-[#A0A0B2] font-serif italic">No hay reservas vigentes registradas.</td>
             </tr>
           }
         </tbody>

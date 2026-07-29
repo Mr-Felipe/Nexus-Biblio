@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { LibraryState, normalizeText } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
@@ -9,7 +8,7 @@ import { ToastService } from '../../../services/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-sanctions',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './sanctions.component.html',
   styleUrl: './sanctions.component.css',
 })
@@ -19,7 +18,6 @@ export class SanctionsComponent {
 
   sanctionSearchQuery = signal('');
   sanctionStatusFilter = signal('ALL');
-  showAddSanctionModal = signal(false);
 
   filteredSanctions = computed(() => {
     const q = normalizeText(this.sanctionSearchQuery().trim());
@@ -36,38 +34,6 @@ export class SanctionsComponent {
       return numB - numA;
     });
   });
-
-  sanctionForm = new FormGroup({
-    userId: new FormControl('', { validators: [Validators.required], nonNullable: true }),
-    type: new FormControl<'Disciplinaria' | 'Económica' | 'Daño' | 'Pérdida'>('Disciplinaria', { validators: [Validators.required], nonNullable: true }),
-    fine: new FormControl<number>(0, { validators: [Validators.min(0)], nonNullable: true }),
-    reason: new FormControl('', { validators: [Validators.required], nonNullable: true }),
-  });
-
-  openAddSanctionModal() {
-    this.sanctionForm.reset({
-      userId: '',
-      type: 'Disciplinaria',
-      fine: 0,
-      reason: '',
-    });
-    this.showAddSanctionModal.set(true);
-  }
-
-  saveSanction() {
-    if (this.sanctionForm.invalid) {
-      this.toast.show('error', 'Por favor rellene todos los campos.');
-      return;
-    }
-    const { userId, type, fine, reason } = this.sanctionForm.getRawValue();
-    const error = this.state.createSanction(userId, type, fine, reason);
-    if (error) {
-      this.toast.show('error', error);
-    } else {
-      this.toast.show('success', 'Sanción registrada correctamente.');
-      this.showAddSanctionModal.set(false);
-    }
-  }
 
   paySanction(id: string) {
     const error = this.state.paySanction(id);

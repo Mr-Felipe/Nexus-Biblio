@@ -67,6 +67,16 @@ export class InventoryComponent implements OnInit {
     ).length;
   });
 
+  totalUnavailableCopiesCount = computed(() => {
+    let count = 0;
+    for (const book of this.state.books()) {
+      for (const ej of book.ejemplares || []) {
+        if (ej.estado === 'PERDIDO' || ej.estado === 'DAÑADO') count++;
+      }
+    }
+    return count;
+  });
+
   getLoanedCopiesCount(isbn: string): number {
     return this.state.loans().filter(
       (l) => l.bookIsbn === isbn && (l.status === 'Activo' || l.status === 'Pendiente devolución')
