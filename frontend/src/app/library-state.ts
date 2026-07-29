@@ -126,6 +126,7 @@ export class LibraryState {
   pendingSearch = signal<string>('');
   private realtimeChannel: any = null;
   private lastNotifiedStock = new Map<string, number>();
+  private expirationInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.loadInitialData();
@@ -296,10 +297,12 @@ export class LibraryState {
       this.supabaseConnected.set(true);
       this.supabaseError.set(null);
 
+      this.updateVencidos();
       await this.cancelarReservasVencidas();
       await this.fetchNotifications();
       await this.fetchPendingReturns();
       this.initRealtime();
+      this.startExpirationChecker();
     } catch (err: unknown) {
       console.error("Supabase init failed:", err);
       this.supabaseConnected.set(false);
@@ -518,21 +521,71 @@ export class LibraryState {
     }
   }
 
-  updateVencidos() {
+  async updateVencidos() {
     const today = new Date(todayStr());
+    const loans = this.loans();
+
+    for (const loan of loans) {
+      if (loan.status !== 'Activo') continue;
+      const dueDate = new Date(loan.dueDate);
+      if (dueDate >= today) continue;
+
+      const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      const { error } = await supabase
+        .from('prestamos')
+        .update({ estado: 'VENCIDO' })
+        .eq('id', loan.id);
+      if (error) { console.error('Error updating loan to VENCIDO:', error); continue; }
+
+      if (daysOverdue >= 3) {
+        const { data: existing } = await supabase
+          .from('sanciones')
+          .select('id')
+          .eq('usuario_id', parseInt(loan.userId, 10))
+          .eq('motivo', `Mora de ${daysOverdue} día(s) en préstamo #${loan.id}`)
+          .limit(1);
+
+        if (existing && existing.length > 0) continue;
+
+        const isEconomic = daysOverdue >= 10;
+        const fine = isEconomic ? daysOverdue * 500 : 0;
+        const tipo = isEconomic ? 'ECONOMICA' : 'DISCIPLINARIA';
+        const motivo = `Mora de ${daysOverdue} día(s) en préstamo #${loan.id}`;
+
+        const { error: sanErr } = await supabase
+          .from('sanciones')
+          .insert({
+            usuario_id: parseInt(loan.userId, 10),
+            tipo,
+            motivo,
+            valor_economico: fine,
+            estado: 'ACTIVA',
+            fecha_creacion: new Date().toISOString(),
+          });
+        if (sanErr) console.error('Error creating sanction:', sanErr);
+      }
+    }
 
     let updated = false;
-    const currentLoans = this.loans().map((loan) => {
+    const currentLoans = loans.map((loan) => {
       if (loan.status === 'Activo' && new Date(loan.dueDate) < today) {
         updated = true;
         return { ...loan, status: 'Vencido' as const };
       }
       return loan;
     });
+    if (updated) this.loans.set(currentLoans);
+  }
 
-    if (updated) {
-      this.loans.set(currentLoans);
-    }
+  private startExpirationChecker() {
+    if (this.expirationInterval) clearInterval(this.expirationInterval);
+    this.expirationInterval = setInterval(async () => {
+      if (!this.supabaseConnected()) return;
+      this.updateVencidos();
+      await this.cancelarReservasVencidas();
+      await this.fetchSanctions();
+    }, 5 * 60 * 1000);
   }
 
   login(email: string, pass: string): boolean {
@@ -1271,9 +1324,35 @@ export class LibraryState {
     this.pendingReturns.set(pending);
   }
 
+  async fetchSanctions() {
+    const { data, error } = await supabase.from('sanciones').select('id, usuario_id, tipo, motivo, valor_economico, estado, fecha_creacion');
+    if (error) { console.error('Error fetching sanciones:', error); return; }
+    const sanctions: Sanction[] = (data || []).map((s: any) => {
+      const identificacion = this.findIdentificacion(s.usuario_id);
+      const users = this.users();
+      const userName = users.find((u) => u.id === identificacion)?.name || 'Desconocido';
+      return {
+        id: String(s.id),
+        userId: identificacion,
+        userName,
+        type: SANC_TYPE_MAP[s.tipo] || 'Disciplinaria',
+        fine: s.valor_economico || 0,
+        reason: s.motivo || '',
+        date: dateOnly(s.fecha_creacion),
+        status: SANC_STATUS_MAP[s.estado] || 'Activa',
+      };
+    });
+    this.sanctions.set(sanctions);
+  }
+
   async cancelarReservasVencidas() {
     const { error } = await supabase.rpc('cancelar_reservas_vencidas');
-    if (error) console.error('Error canceling expired reservations:', error);
+    if (error) {
+      console.error('Error canceling expired reservations:', error);
+      return;
+    }
+    await this.refreshReservations();
+    await this.fetchSanctions();
   }
 
   async initRealtime() {
@@ -1310,6 +1389,7 @@ export class LibraryState {
   private async handleRealtimeReserva(payload: any) {
     await this.refreshReservations();
     await this.refreshEjemplares();
+    await this.fetchSanctions();
   }
 
   private async handleRealtimeNotificacion(payload: any) {

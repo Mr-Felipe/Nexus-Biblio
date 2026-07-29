@@ -16,6 +16,7 @@
       <option value="Listo para retirar">Listos para Entrega</option>
       <option value="Retirada">Retirados (Entregados)</option>
       <option value="Cancelada">Cancelados</option>
+      <option value="Expirada">Expirados</option>
     </select>
   </div>
 
@@ -46,7 +47,7 @@
               <td class="p-4 font-mono font-bold text-[#232233]">{{ res.queuePosition }}</td>
               <td class="p-4">
                 <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                      [style.background]="res.status === 'En cola' ? '#4f46e5' : res.status === 'Listo para retirar' ? '#232233' : res.status === 'Retirada' ? '#2563eb' : '#dc2626'"
+                      [style.background]="res.status === 'En cola' ? '#4f46e5' : res.status === 'Listo para retirar' ? '#232233' : res.status === 'Retirada' ? '#2563eb' : res.status === 'Expirada' ? '#f97316' : '#dc2626'"
                       [style.color]="'white'">
                   {{ res.status }}
                 </span>
