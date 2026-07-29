@@ -77,14 +77,3 @@ export interface Sanction {
   date: string;
   status: 'Activa' | 'Pagada';
 }
-
-export interface AuditLog {
-  id: string;
-  date: string;
-  time: string;
-  userId: string;
-  userName: string;
-  operation: string;
-  ip: string;
-  detail: string;
-}

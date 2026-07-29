@@ -56,11 +56,6 @@
           <app-users></app-users>
         }
 
-        <!-- BOOKS (ADMIN & BIBL) -->
-        @if (state.activeView() === 'books' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
-          <app-books></app-books>
-        }
-
         <!-- INVENTORY (ADMIN & BIBL) -->
         @if (state.activeView() === 'inventory' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
           <app-inventory></app-inventory>
@@ -109,11 +104,6 @@
         <!-- REPORTS (ADMIN ONLY) -->
         @if (state.activeView() === 'reports' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
           <app-reports></app-reports>
-        }
-
-        <!-- AUDIT (ADMIN ONLY) -->
-        @if (state.activeView() === 'audit' && state.currentUser()?.role === 'ADMIN') {
-          <app-audit></app-audit>
         }
 
         <!-- FOOTER -->
@@ -175,7 +165,7 @@
               </p>
               <p class="mt-1">{{ state.supabaseError() }}</p>
               <p class="mt-3 font-semibold text-red-700 bg-red-100/50 p-2 border border-red-200">
-                Nota: Verifica que las tablas (usuarios, libros, ejemplares, prestamos, reservas, sanciones, bitacora_auditoria) existan en tu base de datos de Supabase.
+                Nota: Verifica que las tablas (usuarios, libros, ejemplares, prestamos, reservas, sanciones) existan en tu base de datos de Supabase.
               </p>
             </div>
           }
@@ -185,11 +175,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono">
               <div>
                 <span class="text-[#54546A]/80 block text-[9px] uppercase font-bold tracking-wider">Proyecto:</span>
-                <span class="text-[#232233] font-semibold">Nexus Corp DB (yedsibiotgjcwkhorifr)</span>
+                <span class="text-[#232233] font-semibold">Nexus Biblio (ydhvtuaomppbhcmcpedr)</span>
               </div>
               <div>
                 <span class="text-[#54546A]/80 block text-[9px] uppercase font-bold tracking-wider">API URL:</span>
-                <span class="text-[#232233] font-semibold truncate block">https://yedsibiotgjcwkhorifr.supabase.co</span>
+                <span class="text-[#232233] font-semibold truncate block">https://ydhvtuaomppbhcmcpedr.supabase.co</span>
               </div>
             </div>
           </div>

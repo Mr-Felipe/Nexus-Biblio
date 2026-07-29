@@ -29,8 +29,8 @@ export class ReservationsComponent {
     });
   });
 
-  cancelReservation(resId: string) {
-    this.state.cancelReservation(resId);
+  async cancelReservation(resId: string) {
+    await this.state.cancelReservation(resId);
     this.toast.show('success', 'Reserva cancelada correctamente.');
   }
 

@@ -39,12 +39,6 @@
             </button>
           }
 
-          <button (click)="navigate.emit('books')"
-                  [ngClass]="state.activeView() === 'books' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
-                  class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
-            <mat-icon class="text-lg">book</mat-icon> Gestión Catálogo
-          </button>
-
           <button (click)="navigate.emit('inventory')"
                   [ngClass]="state.activeView() === 'inventory' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
                   class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
@@ -74,16 +68,6 @@
                   class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
             <mat-icon class="text-lg">gavel</mat-icon> Sanciones
           </button>
-
-          @if (state.currentUser()?.role === 'ADMIN') {
-            <p class="text-[9px] uppercase tracking-[0.25em] text-[#54546A]/70 font-bold px-4 pt-5 pb-1 border-b border-[#232233]/8 mb-2">Auditoría</p>
-
-            <button (click)="navigate.emit('audit')"
-                    [ngClass]="state.activeView() === 'audit' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:opacity-60'"
-                    class="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-left transition-all uppercase tracking-widest font-semibold">
-              <mat-icon class="text-lg">security</mat-icon> Registro de Auditoría
-            </button>
-          }
         }
 
         <!-- Teacher / Student Navigation -->

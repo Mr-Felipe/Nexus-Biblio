@@ -1,8 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { supabase } from './supabase';
-import { User, Book, BookCopy, Loan, Reservation, Sanction, AuditLog } from './models';
+import { User, Book, BookCopy, Loan, Reservation, Sanction } from './models';
 
-export type { User, Book, BookCopy, Loan, Reservation, Sanction, AuditLog };
+export type { User, Book, BookCopy, Loan, Reservation, Sanction };
 
 // --- Mapping helpers for Supabase real tables ---
 
@@ -110,8 +110,6 @@ export class LibraryState {
   loans = signal<Loan[]>([]);
   reservations = signal<Reservation[]>([]);
   sanctions = signal<Sanction[]>([]);
-  auditLogs = signal<AuditLog[]>([]);
-
   supabaseConnected = signal<boolean>(false);
   supabaseConnecting = signal<boolean>(false);
   supabaseError = signal<string | null>(null);
@@ -136,7 +134,6 @@ export class LibraryState {
     this.loans.set([]);
     this.reservations.set([]);
     this.sanctions.set([]);
-    this.auditLogs.set([]);
     this.currentUser.set(null);
     this.activeView.set('login');
     this.notifications.set([]);
@@ -154,7 +151,6 @@ export class LibraryState {
         prestamosRes,
         reservasRes,
         sancionesRes,
-        auditRes,
       ] = await Promise.all([
         supabase.from('usuarios').select('id, nombre_completo, correo_electronico, contrasena, rol, activo'),
         supabase.from('libros').select('id, titulo, autor, editorial, anio_publicacion, isbn, estado_general, stock_minimo, portada_url'),
@@ -162,7 +158,6 @@ export class LibraryState {
         supabase.from('prestamos').select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado, observaciones, evaluado_por'),
         supabase.from('reservas').select('id, usuario_id, libro_id, fecha_reserva, posicion_cola, estado'),
         supabase.from('sanciones').select('id, usuario_id, tipo, motivo, valor_economico, estado, fecha_creacion'),
-        supabase.from('bitacora_auditoria').select('id, usuario_id, operacion, tabla_afectada, direccion_ip, fecha_operacion, detalles'),
       ]);
 
       if (usuariosRes.error) throw usuariosRes.error;
@@ -171,7 +166,6 @@ export class LibraryState {
       if (prestamosRes.error) throw prestamosRes.error;
       if (reservasRes.error) throw reservasRes.error;
       if (sancionesRes.error) throw sancionesRes.error;
-      if (auditRes.error) throw auditRes.error;
 
       const dbUsuarios = usuariosRes.data;
       const dbLibros = librosRes.data;
@@ -179,7 +173,6 @@ export class LibraryState {
       const dbPrestamos = prestamosRes.data;
       const dbReservas = reservasRes.data;
       const dbSanciones = sancionesRes.data;
-      const dbAudit = auditRes.data;
 
       const mappedUsers: User[] = (dbUsuarios || []).map((u: any) => ({
         id: String(u.id),
@@ -290,23 +283,6 @@ export class LibraryState {
         };
       });
       this.sanctions.set(mappedSanctions);
-
-      const mappedAudit: AuditLog[] = (dbAudit || []).map((a: any) => {
-        const identificacion = this.findIdentificacion(a.usuario_id);
-        const userName = mappedUsers.find((u) => u.id === identificacion)?.name || 'Sistema';
-        const detail = typeof a.detalles === 'object' ? JSON.stringify(a.detalles) : (a.detalles || '');
-        return {
-          id: String(a.id),
-          date: dateOnly(a.fecha_operacion),
-          time: timeOnly(a.fecha_operacion),
-          userId: identificacion,
-          userName,
-          operation: a.operacion || '',
-          ip: a.direccion_ip || '',
-          detail,
-        };
-      });
-      this.auditLogs.set(mappedAudit);
 
       this.supabaseConnected.set(true);
       this.supabaseError.set(null);
@@ -519,19 +495,6 @@ export class LibraryState {
           estado: SANC_STATUS_MAP_REVERSE[s.status] || 'ACTIVA',
         });
         if (error) console.error('Error upserting sancion:', error);
-      } else if (table === 'bitacora_auditoria' && data) {
-        const a = data as AuditLog;
-        const usuarioId = this.findUsuarioId(a.userId);
-        const { error } = await supabase.from('bitacora_auditoria').upsert({
-          id: parseInt(a.id) || undefined,
-          usuario_id: usuarioId,
-          operacion: a.operation,
-          tabla_afectada: 'general',
-          direccion_ip: a.ip,
-          fecha_operacion: `${a.date}T${a.time}`,
-          detalles: { detalle: a.detail },
-        });
-        if (error) console.error('Error upserting bitacora:', error);
       }
     } catch (err) {
       console.error(`Supabase sync error on ${table}:`, err);
@@ -552,7 +515,6 @@ export class LibraryState {
 
     if (updated) {
       this.loans.set(currentLoans);
-      this.addSystemAudit('UPDATE_LOAN', 'Detección automática de préstamos vencidos.');
     }
   }
 
@@ -575,40 +537,13 @@ export class LibraryState {
 
     this.currentUser.set(user);
     this.activeView.set('home');
-    this.addAudit(user.id, user.name, 'LOGIN', 'Inicio de sesión exitoso en la plataforma.');
     this.fetchNotifications();
     return true;
   }
 
   logout() {
-    const user = this.currentUser();
-    if (user) {
-      this.addAudit(user.id, user.name, 'LOGOUT', 'Cierre de sesión de la plataforma.');
-    }
     this.currentUser.set(null);
     this.activeView.set('login');
-  }
-
-  addAudit(userId: string, userName: string, operation: string, detail: string) {
-    const now = new Date();
-    const date = todayStr();
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    const newLog: AuditLog = {
-      id: 'A' + (this.auditLogs().length + 1).toString().padStart(3, '0'),
-      date,
-      time,
-      userId,
-      userName,
-      operation,
-      ip: '192.168.1.' + Math.floor(Math.random() * 254 + 1),
-      detail,
-    };
-    this.auditLogs.update((logs) => [newLog, ...logs]);
-    this.syncToSupabase('bitacora_auditoria', newLog);
-  }
-
-  addSystemAudit(operation: string, detail: string) {
-    this.addAudit('SYSTEM', 'Sistema Autónomo', operation, detail);
   }
 
   // CRUD USUARIOS
@@ -625,10 +560,6 @@ export class LibraryState {
     };
     this.users.update((us) => [...us, newUser]);
     this.syncToSupabase('usuarios', newUser);
-    const current = this.currentUser();
-    if (current) {
-      this.addAudit(current.id, current.name, 'INSERT_USER', `Usuario creado: ${newUser.name} (${newUser.role})`);
-    }
   }
 
   updateUser(id: string, updated: Partial<User>) {
@@ -639,20 +570,12 @@ export class LibraryState {
     if (target) {
       this.syncToSupabase('usuarios', target);
     }
-    const current = this.currentUser();
-    if (current && target) {
-      this.addAudit(current.id, current.name, 'UPDATE_USER', `Usuario actualizado: ${target.name}`);
-    }
   }
 
   deleteUser(id: string) {
     const target = this.users().find((u) => u.id === id);
     this.users.update((us) => us.filter((u) => u.id !== id));
     this.syncToSupabase('usuarios', null, 'id', id, 'delete');
-    const current = this.currentUser();
-    if (current && target) {
-      this.addAudit(current.id, current.name, 'DELETE_USER', `Usuario eliminado: ${target.name}`);
-    }
   }
 
   // CRUD LIBROS
@@ -665,10 +588,6 @@ export class LibraryState {
     };
     this.books.update((bs) => [...bs, newBook]);
     this.syncToSupabase('libros', newBook);
-    const current = this.currentUser();
-    if (current) {
-      this.addAudit(current.id, current.name, 'INSERT_BOOK', `Libro registrado: ${newBook.title} por ${newBook.author}`);
-    }
   }
 
   updateBook(isbn: string, updated: Partial<Book>) {
@@ -698,10 +617,6 @@ export class LibraryState {
     const target = this.books().find((b) => b.isbn === (updated.isbn || isbn));
     if (target) {
       this.syncToSupabase('libros', target);
-    }
-    const current = this.currentUser();
-    if (current && target) {
-      this.addAudit(current.id, current.name, 'UPDATE_BOOK', `Libro actualizado: ${target.title}`);
     }
   }
 
@@ -743,16 +658,6 @@ export class LibraryState {
     const ejemplarId = ejemplar.id;
     await supabase.from('ejemplares').update({ estado: dbNewStatus }).eq('id', ejemplarId);
 
-    const current = this.currentUser();
-    if (current) {
-      this.addAudit(
-        current.id,
-        current.name,
-        'UPDATE_COPY',
-        `Ejemplar #${copyNumber} de "${book.title}" cambiado de ${oldEstado} a ${dbNewStatus}`
-      );
-    }
-
     if (dbNewStatus !== 'DISPONIBLE') {
       await this.checkStockAndNotify(isbn);
     }
@@ -764,10 +669,6 @@ export class LibraryState {
     const target = this.books().find((b) => b.isbn === isbn);
     this.books.update((bs) => bs.filter((b) => b.isbn !== isbn));
     this.syncToSupabase('libros', null, 'isbn', isbn, 'delete');
-    const current = this.currentUser();
-    if (current && target) {
-      this.addAudit(current.id, current.name, 'DELETE_BOOK', `Libro eliminado: ${target.title}`);
-    }
   }
 
   // LOANS MANAGEMENT
@@ -826,13 +727,8 @@ export class LibraryState {
       await supabase.from('ejemplares').update({ estado: 'PRESTADO' }).eq('id', firstDisponible.id);
     }
 
-    this.loans.update((ls) => [...ls, newLoan]);
+      this.loans.update((ls) => [...ls, newLoan]);
     this.syncToSupabase('prestamos', newLoan);
-
-    const current = this.currentUser();
-    if (current) {
-      this.addAudit(current.id, current.name, 'CREATE_LOAN', `Préstamo registrado para ${user.name}: "${book.title}"`);
-    }
 
     await this.checkStockAndNotify(bookIsbn);
 
@@ -856,10 +752,6 @@ export class LibraryState {
       const { error } = await supabase.from('prestamos').update({ estado: 'PENDIENTE_DEVOLUCION' }).eq('id', prestamoId);
       if (error) console.error('Error updating prestamo status:', error);
     }
-
-    const current = this.currentUser();
-    const actionBy = current ? current.name : 'Sistema';
-    this.addAudit(current?.id || 'SYSTEM', actionBy, 'REQUEST_RETURN', `Devolución solicitada por ${loan.userName}: "${loan.bookTitle}"`);
 
     this.createNotification(
       parseInt(loan.userId, 10),
@@ -955,8 +847,6 @@ export class LibraryState {
           'RESERVA'
         );
       }
-
-      this.addSystemAudit('UPDATE_RESERVATION', `Reserva ${nextRes.id} lista para entrega a ${nextRes.userName}.`);
     }
   }
 
@@ -986,6 +876,18 @@ export class LibraryState {
 
     if (status === 'Listo para retirar') {
       this.updateBook(bookIsbn, { availableCopies: book.availableCopies - 1 });
+
+      const bookEjemplares = (book.ejemplares || []).filter(e => e.estado === 'DISPONIBLE');
+      if (bookEjemplares.length > 0) {
+        const ejemplarToReserve = bookEjemplares[0];
+        await supabase.from('ejemplares').update({ estado: 'RESERVADO' }).eq('id', ejemplarToReserve.id);
+        this.books.update((bs) =>
+          bs.map((b) => {
+            if (b.isbn !== bookIsbn) return b;
+            return { ...b, ejemplares: (b.ejemplares || []).map(e => e.id === ejemplarToReserve.id ? { ...e, estado: 'RESERVADO' as const } : e) };
+          })
+        );
+      }
     }
 
     const newRes: Reservation = {
@@ -1002,12 +904,10 @@ export class LibraryState {
     this.reservations.update((rs) => [...rs, newRes]);
     this.syncToSupabase('reservas', newRes);
 
-    this.addAudit(userId, user.name, 'CREATE_RESERVATION', `Reserva realizada para "${book.title}" (Estado: ${status})`);
-
     return null;
   }
 
-  cancelReservation(resId: string): string | null {
+  async cancelReservation(resId: string): Promise<string | null> {
     const res = this.reservations().find((r) => r.id === resId);
     if (!res) return 'Reserva no encontrada.';
 
@@ -1023,10 +923,19 @@ export class LibraryState {
       const book = this.books().find((b) => b.isbn === res.bookIsbn);
       if (book) {
         this.updateBook(res.bookIsbn, { availableCopies: book.availableCopies + 1 });
+
+        const reservedEjemplar = (book.ejemplares || []).find(e => e.estado === 'RESERVADO');
+        if (reservedEjemplar) {
+          await supabase.from('ejemplares').update({ estado: 'DISPONIBLE' }).eq('id', reservedEjemplar.id);
+          this.books.update((bs) =>
+            bs.map((b) => {
+              if (b.isbn !== res.bookIsbn) return b;
+              return { ...b, ejemplares: (b.ejemplares || []).map(e => e.id === reservedEjemplar.id ? { ...e, estado: 'DISPONIBLE' as const } : e) };
+            })
+          );
+        }
       }
     }
-
-    this.addAudit(res.userId, res.userName, 'CANCEL_RESERVATION', `Reserva cancelada para "${res.bookTitle}".`);
 
     this.recalculateQueuePositions(res.bookIsbn);
 
@@ -1066,11 +975,6 @@ export class LibraryState {
     this.sanctions.update((scs) => [...scs, newSanction]);
     this.syncToSupabase('sanciones', newSanction);
 
-    const current = this.currentUser();
-    if (current) {
-      this.addAudit(current.id, current.name, 'CREATE_SANCTION', `Sanción manual registrada para ${user.name}: ${type} (${fine > 0 ? '$' + fine : 'Disciplinaria'})`);
-    }
-
     const notifMsg = `Se le ha registrado una sanción ${type}: ${reason}${fine > 0 ? `. Multa: $${fine}` : ''}.`;
     this.createNotification(parseInt(userId, 10), notifMsg, 'SANCION');
 
@@ -1088,10 +992,6 @@ export class LibraryState {
     if (updatedSanc) {
       this.syncToSupabase('sanciones', updatedSanc);
     }
-
-    const current = this.currentUser();
-    const actionBy = current ? current.name : 'Sistema';
-    this.addAudit(current?.id || 'SYSTEM', actionBy, 'PAY_SANCTION', `Sanción liquidada / levantada para ${sanction.userName}.`);
 
     this.createNotification(parseInt(sanction.userId, 10), `Su sanción ${sanctionId} (${sanction.type}) ha sido levantada. Ya puede realizar operaciones normales.`, 'SANCION');
 

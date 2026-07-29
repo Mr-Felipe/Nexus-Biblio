@@ -23,8 +23,8 @@ export class MyReservationsComponent {
     return this.state.reservations().filter((r) => r.userId === cur.id);
   });
 
-  cancelReservation(resId: string) {
-    this.state.cancelReservation(resId);
+  async cancelReservation(resId: string) {
+    await this.state.cancelReservation(resId);
     this.toast.show('success', 'Reserva cancelada correctamente.');
   }
 

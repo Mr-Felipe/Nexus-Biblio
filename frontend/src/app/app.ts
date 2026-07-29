@@ -15,14 +15,12 @@ import { ToastComponent } from './components/layout/toast/toast.component';
 
 // Admin components
 import { UsersComponent } from './components/admin/users/users.component';
-import { BooksComponent } from './components/admin/books/books.component';
 import { InventoryComponent } from './components/admin/inventory/inventory.component';
 import { LoansComponent } from './components/admin/loans/loans.component';
 import { ReturnsComponent } from './components/admin/returns/returns.component';
 import { ReservationsComponent } from './components/admin/reservations/reservations.component';
 import { SanctionsComponent } from './components/admin/sanctions/sanctions.component';
 import { ReportsComponent } from './components/admin/reports/reports.component';
-import { AuditComponent } from './components/admin/audit/audit.component';
 
 // Client components
 import { HomeComponent } from './components/client/home/home.component';
@@ -49,14 +47,12 @@ import { FooterComponent } from './components/footer/footer.component';
     ToastComponent,
     // Admin
     UsersComponent,
-    BooksComponent,
     InventoryComponent,
     LoansComponent,
     ReturnsComponent,
     ReservationsComponent,
     SanctionsComponent,
     ReportsComponent,
-    AuditComponent,
     // Client
     HomeComponent,
     CatalogueComponent,
