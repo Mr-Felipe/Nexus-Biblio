@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.biblioteca.Entities.Usuario;
-import com.biblioteca.Entities.UsuarioSesion;
 import com.biblioteca.Services.SesionService;
 import com.biblioteca.Services.UsuarioService;
 
 import jakarta.servlet.http.HttpSession;
 
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/sesion")
 public class SesionController {
@@ -54,11 +52,12 @@ public class SesionController {
                 .body(Map.of("mensaje", "La cuenta está desactivada. Contacte al administrador."));
         }
 
-        UsuarioSesion usuarioSesion = new UsuarioSesion();
-        usuarioSesion.setId(usuario.getId());
-        usuarioSesion.setNombre(usuario.getNombreCompleto());
-        usuarioSesion.setCorreo(usuario.getCorreoElectronico());
-        usuarioSesion.setRol(usuario.getRol());
+        Map<String, Object> usuarioSesion = Map.of(
+            "id", usuario.getId(),
+            "nombre", usuario.getNombreCompleto(),
+            "correo", usuario.getCorreoElectronico(),
+            "rol", usuario.getRol()
+        );
 
         sesionService.guardarUsuario(session, usuarioSesion);
 
@@ -116,7 +115,7 @@ public class SesionController {
 
     @GetMapping("/me")
     public ResponseEntity<?> me(HttpSession session) {
-        UsuarioSesion usuario = sesionService.obtenerUsuario(session);
+        Map<String, Object> usuario = sesionService.obtenerUsuario(session);
 
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

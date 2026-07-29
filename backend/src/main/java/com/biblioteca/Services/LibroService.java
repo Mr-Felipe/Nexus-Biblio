@@ -23,14 +23,12 @@ public class LibroService {
     private final LibroRepository libroRepository;
     private final EjemplarRepository ejemplarRepository;
     private final PrestamoRepository prestamoRepository;
-    private final BitacoraAuditoriaService bitacoraService;
 
     public LibroService(LibroRepository libroRepository, EjemplarRepository ejemplarRepository,
-                        PrestamoRepository prestamoRepository, BitacoraAuditoriaService bitacoraService) {
+                        PrestamoRepository prestamoRepository) {
         this.libroRepository = libroRepository;
         this.ejemplarRepository = ejemplarRepository;
         this.prestamoRepository = prestamoRepository;
-        this.bitacoraService = bitacoraService;
     }
 
     public List<LibroDTO> findAll() {
@@ -53,8 +51,6 @@ public class LibroService {
                 .body(Map.of("mensaje", "El ISBN ya está registrado"));
         }
         Libro guardado = libroRepository.save(libro);
-        bitacoraService.registrar(null, "CREAR", "libros", guardado.getId(),
-            "Nuevo libro: \"" + guardado.getTitulo() + "\" (ISBN: " + guardado.getIsbn() + ")", null);
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(guardado));
     }
 
@@ -75,8 +71,6 @@ public class LibroService {
         if (libroActualizado.getEstadoGeneral() != null) existente.setEstadoGeneral(libroActualizado.getEstadoGeneral());
 
         Libro guardado = libroRepository.save(existente);
-        bitacoraService.registrar(null, "ACTUALIZAR", "libros", id,
-            "Libro actualizado: \"" + guardado.getTitulo() + "\"", null);
         return ResponseEntity.ok(toDTO(guardado));
     }
 
@@ -88,8 +82,6 @@ public class LibroService {
         }
         String titulo = libroOpt.get().getTitulo();
         libroRepository.deleteById(id);
-        bitacoraService.registrar(null, "ELIMINAR", "libros", id,
-            "Libro eliminado: \"" + titulo + "\"", null);
         return ResponseEntity.ok(Map.of("mensaje", "Libro eliminado correctamente"));
     }
 

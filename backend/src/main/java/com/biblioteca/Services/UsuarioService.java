@@ -17,13 +17,10 @@ public class UsuarioService {
 
     private final UsuarioRepository repository;
     private final PasswordEncoder passwordEncoder;
-    private final BitacoraAuditoriaService bitacoraService;
 
-    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder,
-                          BitacoraAuditoriaService bitacoraService) {
+    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
-        this.bitacoraService = bitacoraService;
     }
 
     public List<Usuario> findAll() {
@@ -87,8 +84,6 @@ public class UsuarioService {
         }
 
         Usuario nuevoUsuario = repository.save(usuario);
-        bitacoraService.registrar(null, "CREAR", "usuarios", nuevoUsuario.getId(),
-            "Nuevo usuario: " + nuevoUsuario.getNombreCompleto() + " (" + nuevoUsuario.getRol() + ")", null);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
 
@@ -140,8 +135,6 @@ public class UsuarioService {
         }
 
         Usuario guardado = repository.save(usuarioExistente);
-        bitacoraService.registrar(id, "ACTUALIZAR", "usuarios", id,
-            "Usuario actualizado: " + guardado.getNombreCompleto(), null);
         return ResponseEntity.ok(guardado);
     }
 
@@ -154,8 +147,6 @@ public class UsuarioService {
 
         String nombre = usuario.getNombreCompleto();
         repository.delete(usuario);
-        bitacoraService.registrar(null, "ELIMINAR", "usuarios", id,
-            "Usuario eliminado: " + nombre, null);
         return ResponseEntity.ok(Map.of("mensaje", "Usuario eliminado correctamente"));
     }
 }

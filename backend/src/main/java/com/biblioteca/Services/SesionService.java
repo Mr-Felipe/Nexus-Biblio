@@ -1,9 +1,9 @@
 package com.biblioteca.Services;
 
+import java.util.Map;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.biblioteca.Entities.UsuarioSesion;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -24,12 +24,14 @@ public class SesionService {
         return passwordEncoder.matches(rawPassword, hashedPassword);
     }
 
-    public void guardarUsuario(HttpSession session, UsuarioSesion usuario) {
+    @SuppressWarnings("unchecked")
+    public void guardarUsuario(HttpSession session, Map<String, Object> usuario) {
         session.setAttribute("usuario", usuario);
     }
 
-    public UsuarioSesion obtenerUsuario(HttpSession session) {
-        return (UsuarioSesion) session.getAttribute("usuario");
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> obtenerUsuario(HttpSession session) {
+        return (Map<String, Object>) session.getAttribute("usuario");
     }
 
     public boolean haySesion(HttpSession session) {
@@ -43,36 +45,33 @@ public class SesionService {
     // --- Roles ---
 
     public boolean esAdministrador(HttpSession session) {
-        UsuarioSesion usuario = obtenerUsuario(session);
-        return usuario != null && usuario.getRol().equalsIgnoreCase("ADMINISTRADOR");
+        Map<String, Object> usuario = obtenerUsuario(session);
+        return usuario != null && "ADMINISTRADOR".equalsIgnoreCase((String) usuario.get("rol"));
     }
 
     public boolean esBibliotecario(HttpSession session) {
-        UsuarioSesion usuario = obtenerUsuario(session);
-        return usuario != null && usuario.getRol().equalsIgnoreCase("BIBLIOTECARIO");
+        Map<String, Object> usuario = obtenerUsuario(session);
+        return usuario != null && "BIBLIOTECARIO".equalsIgnoreCase((String) usuario.get("rol"));
     }
 
     public boolean esDocente(HttpSession session) {
-        UsuarioSesion usuario = obtenerUsuario(session);
-        return usuario != null && usuario.getRol().equalsIgnoreCase("DOCENTE");
+        Map<String, Object> usuario = obtenerUsuario(session);
+        return usuario != null && "DOCENTE".equalsIgnoreCase((String) usuario.get("rol"));
     }
 
     public boolean esEstudiante(HttpSession session) {
-        UsuarioSesion usuario = obtenerUsuario(session);
-        return usuario != null && usuario.getRol().equalsIgnoreCase("ESTUDIANTE");
+        Map<String, Object> usuario = obtenerUsuario(session);
+        return usuario != null && "ESTUDIANTE".equalsIgnoreCase((String) usuario.get("rol"));
     }
 
-    // ADMINISTRADOR y BIBLIOTECARIO pueden gestionar préstamos, reservas, sanciones
     public boolean esAdminOBibliotecario(HttpSession session) {
         return esAdministrador(session) || esBibliotecario(session);
     }
 
-    // Solo ADMINISTRADOR puede gestionar usuarios y configuración
     public boolean esSoloAdministrador(HttpSession session) {
         return esAdministrador(session);
     }
 
-    // DOCENTE y ESTUDIANTE son usuarios normales
     public boolean esUsuarioNormal(HttpSession session) {
         return esDocente(session) || esEstudiante(session);
     }

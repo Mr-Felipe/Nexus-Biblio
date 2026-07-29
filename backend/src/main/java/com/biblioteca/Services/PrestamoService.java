@@ -31,19 +31,16 @@ public class PrestamoService {
     private final LibroRepository libroRepository;
     private final SancionRepository sancionRepository;
     private final NotificacionService notificacionService;
-    private final BitacoraAuditoriaService bitacoraService;
 
     public PrestamoService(PrestamoRepository prestamoRepository, EjemplarRepository ejemplarRepository,
                            UsuarioRepository usuarioRepository, LibroRepository libroRepository,
-                           SancionRepository sancionRepository, NotificacionService notificacionService,
-                           BitacoraAuditoriaService bitacoraService) {
+                           SancionRepository sancionRepository, NotificacionService notificacionService) {
         this.prestamoRepository = prestamoRepository;
         this.ejemplarRepository = ejemplarRepository;
         this.usuarioRepository = usuarioRepository;
         this.libroRepository = libroRepository;
         this.sancionRepository = sancionRepository;
         this.notificacionService = notificacionService;
-        this.bitacoraService = bitacoraService;
     }
 
     public List<PrestamoDTO> findAll() {
@@ -91,9 +88,6 @@ public class PrestamoService {
         }
 
         prestamoRepository.deleteById(id);
-
-        bitacoraService.registrar(null, "ELIMINAR", "prestamos", id,
-            "Préstamo eliminado: #" + id + " - Libro: " + ejemplar.getLibro().getTitulo(), null);
 
         return ResponseEntity.ok(Map.of("mensaje", "Préstamo eliminado exitosamente"));
     }
@@ -151,10 +145,6 @@ public class PrestamoService {
 
         Prestamo guardado = prestamoRepository.save(prestamo);
 
-        bitacoraService.registrar(usuarioId, "CREAR", "prestamos", guardado.getId(),
-            "Nuevo préstamo: libro \"" + ejemplar.getLibro().getTitulo() + "\" ejemplar " + ejemplar.getCodigoEjemplar(),
-            null);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(guardado));
     }
 
@@ -178,9 +168,6 @@ public class PrestamoService {
 
         prestamo.setEstado("PENDIENTE_DEVOLUCION");
         prestamoRepository.save(prestamo);
-
-        bitacoraService.registrar(prestamo.getUsuario().getId(), "ACTUALIZAR", "prestamos", prestamoId,
-            "Devolución solicitada: préstamo #" + prestamoId, null);
 
         notificacionService.crearNotificacion(
             prestamo.getUsuario().getId(),
@@ -224,10 +211,7 @@ public class PrestamoService {
         ejemplar.setEstado(estadoEjemplar);
         ejemplarRepository.save(ejemplar);
 
-        bitacoraService.registrar(bibliotecarioId, "ACTUALIZAR", "prestamos", prestamoId,
-            "Devolución confirmada: préstamo #" + prestamoId + " - Estado ejemplar: " + estadoEjemplar, null);
-
-        if (valorMulta > 0 && tipoSancion != null && !tipoSancion.isBlank()) {
+        if (tipoSancion != null && !tipoSancion.isBlank()) {
             Sancion sancion = new Sancion();
             sancion.setUsuario(prestamo.getUsuario());
             sancion.setPrestamo(prestamo);
@@ -237,16 +221,21 @@ public class PrestamoService {
             sancion.setEstado("ACTIVA");
             sancionRepository.save(sancion);
 
+            String msgSancion = "Se le ha registrado una sanción " + tipoSancion + " por el préstamo #" + prestamoId + "."
+                + (valorMulta > 0 ? " Multa: $ " + valorMulta + "." : "")
+                + " Motivo: " + (observaciones != null ? observaciones : "Sin observaciones");
             notificacionService.crearNotificacion(
                 prestamo.getUsuario().getId(),
-                "Se le ha registrado una sanción " + tipoSancion + " por $ " + valorMulta + ". Motivo: " + observaciones,
+                msgSancion,
                 "SANCION"
             );
         }
 
+        String msgDevolucion = "Tu devolución del préstamo #" + prestamoId + " ha sido procesada. Estado del ejemplar: " + estadoEjemplar + "."
+            + (tipoSancion != null && !tipoSancion.isBlank() ? " Se aplicó una sanción." : " No se generaron sanciones.");
         notificacionService.crearNotificacion(
             prestamo.getUsuario().getId(),
-            "Tu devolución del préstamo #" + prestamoId + " ha sido procesada. Estado del ejemplar: " + estadoEjemplar,
+            msgDevolucion,
             "PRESTAMO"
         );
 

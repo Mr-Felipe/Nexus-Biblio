@@ -31,19 +31,16 @@ public class ReservaService {
     private final EjemplarRepository ejemplarRepository;
     private final SancionRepository sancionRepository;
     private final NotificacionService notificacionService;
-    private final BitacoraAuditoriaService bitacoraService;
 
     public ReservaService(ReservaRepository reservaRepository, UsuarioRepository usuarioRepository,
                           LibroRepository libroRepository, EjemplarRepository ejemplarRepository,
-                          SancionRepository sancionRepository, NotificacionService notificacionService,
-                          BitacoraAuditoriaService bitacoraService) {
+                          SancionRepository sancionRepository, NotificacionService notificacionService) {
         this.reservaRepository = reservaRepository;
         this.usuarioRepository = usuarioRepository;
         this.libroRepository = libroRepository;
         this.ejemplarRepository = ejemplarRepository;
         this.sancionRepository = sancionRepository;
         this.notificacionService = notificacionService;
-        this.bitacoraService = bitacoraService;
     }
 
     public List<ReservaDTO> findAll() {
@@ -119,9 +116,6 @@ public class ReservaService {
 
         Reserva guardada = reservaRepository.save(reserva);
 
-        bitacoraService.registrar(usuarioId, "CREAR", "reservas", guardada.getId(),
-            "Nueva reserva: libro \"" + libroOpt.get().getTitulo() + "\" - Estado: " + estado, null);
-
         if (estado.equals("ACTIVA")) {
             notificacionService.crearNotificacion(usuarioId,
                 "¡Tu reserva del libro \"" + libroOpt.get().getTitulo() + "\" está lista para retirar!",
@@ -144,9 +138,6 @@ public class ReservaService {
         String estadoAnterior = reserva.getEstado();
         reserva.setEstado("CANCELADA");
         reservaRepository.save(reserva);
-
-        bitacoraService.registrar(reserva.getUsuario().getId(), "ACTUALIZAR", "reservas", reservaId,
-            "Reserva cancelada: libro \"" + reserva.getLibro().getTitulo() + "\" (estado anterior: " + estadoAnterior + ")", null);
 
         notificacionService.crearNotificacion(
             reserva.getUsuario().getId(),

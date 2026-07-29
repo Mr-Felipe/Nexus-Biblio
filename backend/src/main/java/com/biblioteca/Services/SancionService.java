@@ -24,16 +24,13 @@ public class SancionService {
     private final UsuarioRepository usuarioRepository;
     private final PrestamoRepository prestamoRepository;
     private final NotificacionService notificacionService;
-    private final BitacoraAuditoriaService bitacoraService;
 
     public SancionService(SancionRepository sancionRepository, UsuarioRepository usuarioRepository,
-                          PrestamoRepository prestamoRepository, NotificacionService notificacionService,
-                          BitacoraAuditoriaService bitacoraService) {
+                          PrestamoRepository prestamoRepository, NotificacionService notificacionService) {
         this.sancionRepository = sancionRepository;
         this.usuarioRepository = usuarioRepository;
         this.prestamoRepository = prestamoRepository;
         this.notificacionService = notificacionService;
-        this.bitacoraService = bitacoraService;
     }
 
     public List<SancionDTO> findAll() {
@@ -82,9 +79,6 @@ public class SancionService {
 
         Sancion guardada = sancionRepository.save(sancion);
 
-        bitacoraService.registrar(null, "CREAR", "sanciones", guardada.getId(),
-            "Nueva sanción " + tipo + " para usuario #" + usuarioId + ": " + motivo, null);
-
         String msg = "Se le ha registrado una sanción " + tipo + ": " + motivo;
         if (valorEconomico > 0) {
             msg += ". Multa: $ " + valorEconomico;
@@ -106,9 +100,6 @@ public class SancionService {
         sancion.setEstado("CUMPLIDA");
         sancion.setFechaResolucion(java.time.OffsetDateTime.now());
         sancionRepository.save(sancion);
-
-        bitacoraService.registrar(null, "ACTUALIZAR", "sanciones", sancionId,
-            "Sanción pagada: " + sancion.getTipo() + " - Usuario #" + sancion.getUsuario().getId(), null);
 
         notificacionService.crearNotificacion(
             sancion.getUsuario().getId(),
@@ -132,9 +123,6 @@ public class SancionService {
 
         Sancion sancion = sancionOpt.get();
         sancionRepository.deleteById(id);
-
-        bitacoraService.registrar(null, "ELIMINAR", "sanciones", id,
-            "Sanción eliminada: " + sancion.getTipo() + " - Usuario #" + sancion.getUsuario().getId(), null);
 
         return ResponseEntity.ok(Map.of("mensaje", "Sanción eliminada exitosamente"));
     }
