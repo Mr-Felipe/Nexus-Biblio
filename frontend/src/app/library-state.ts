@@ -947,8 +947,21 @@ export class LibraryState {
     this.reservations.update((rs) =>
       rs.map((r) => {
         if (r.bookIsbn === bookIsbn && r.status === 'En cola') {
-          const updated = { ...r, queuePosition: position++ };
+          const newPosition = position++;
+          const wasUpdated = r.queuePosition !== newPosition;
+          const updated = { ...r, queuePosition: newPosition };
           this.syncToSupabase('reservas', updated);
+          if (wasUpdated && newPosition === 1) {
+            const userId = parseInt(r.userId, 10);
+            if (!isNaN(userId)) {
+              const book = this.books().find((b) => b.isbn === bookIsbn);
+              this.createNotification(
+                userId,
+                `¡Tu reserva del libro "${book?.title || ''}" ahora es la primera en la cola! Se te notificará cuando esté disponible para retirar.`,
+                'RESERVA'
+              );
+            }
+          }
           return updated;
         }
         return r;

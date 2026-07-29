@@ -48,9 +48,9 @@
               <td class="p-4">
                 <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
                       [ngClass]="{
-                        'border border-[#232233]/35 text-[#54546A] bg-[#D9C997]/15': res.status === 'En cola',
+                        'bg-indigo-600 text-white': res.status === 'En cola',
                         'bg-[#232233] text-white': res.status === 'Listo para retirar',
-                        'border border-[#232233]/8 text-[#A0A0B2] bg-transparent': res.status === 'Retirada',
+                        'bg-blue-600 text-white': res.status === 'Retirada',
                         'bg-red-600 text-white': res.status === 'Cancelada'
                       }">
                   {{ res.status }}

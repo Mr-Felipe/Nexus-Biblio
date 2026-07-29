@@ -54,14 +54,8 @@
               <td class="p-4 font-mono">{{ loan.loanDate }}</td>
               <td class="p-4 font-mono font-bold text-[#232233]">{{ loan.dueDate }}</td>
               <td class="p-4">
-                <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                      [ngClass]="{
-                        'bg-[#232233] text-white': loan.status === 'Devuelto',
-                        'border border-[#232233] text-[#232233]': loan.status === 'Activo',
-                        'bg-red-600 text-white': loan.status === 'Vencido',
-                        'bg-amber-500 text-white': loan.status === 'Pendiente devolución',
-                        'bg-gray-400 text-white': loan.status === 'Cancelado' || loan.status === 'Rechazado'
-                      }">
+                <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
+                      [style.background]="loan.status === 'Devuelto' ? '#232233' : loan.status === 'Activo' ? '#2563eb' : loan.status === 'Vencido' ? '#dc2626' : loan.status === 'Pendiente devolución' ? '#f59e0b' : '#9ca3af'">
                   {{ loan.status }}
                 </span>
               </td>
