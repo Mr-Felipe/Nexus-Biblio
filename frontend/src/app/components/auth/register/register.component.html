@@ -23,7 +23,7 @@
 
         <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="flex flex-col gap-4">
 
-          <!-- FILA: NOMBRE + CELULAR -->
+          <!-- FILA: NOMBRE + IDENTIFICACIÓN -->
           <div class="grid grid-cols-2 gap-4 register-row">
             <div class="flex flex-col gap-3">
               <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">NOMBRE COMPLETO</label>
@@ -38,6 +38,21 @@
             </div>
 
             <div class="flex flex-col gap-3">
+              <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">IDENTIFICACIÓN</label>
+              <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+                <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">badge</mat-icon>
+                <input
+                  type="text"
+                  formControlName="identificacion"
+                  placeholder="Ej. V-12345678"
+                  class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
+              </div>
+            </div>
+          </div>
+
+          <!-- FILA: CELULAR + DIRECCIÓN -->
+          <div class="grid grid-cols-2 gap-4 register-row">
+            <div class="flex flex-col gap-3">
               <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">NÚMERO DE CELULAR</label>
               <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
                 <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">phone</mat-icon>
@@ -45,6 +60,18 @@
                   type="tel"
                   formControlName="phone"
                   placeholder="Ej. 55 1234 5678"
+                  class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">DIRECCIÓN</label>
+              <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
+                <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">location_on</mat-icon>
+                <input
+                  type="text"
+                  formControlName="address"
+                  placeholder="Calle, número, colonia, ciudad"
                   class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
               </div>
             </div>
@@ -59,19 +86,6 @@
                 type="email"
                 formControlName="email"
                 placeholder="maria@universidad.edu"
-                class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
-            </div>
-          </div>
-
-          <!-- DIRECCIÓN -->
-          <div class="w-full flex flex-col gap-3">
-            <label class="text-[11px] tracking-[3px] font-semibold text-[#54546A]">DIRECCIÓN</label>
-            <div class="flex items-center border-b-2 border-[#DDD4BE] pb-3 transition-all duration-300 hover:border-[#CDBA84] focus-within:border-[#232233]">
-              <mat-icon class="text-[#A0A0B2] w-[25px] h-[25px] text-[18px]">location_on</mat-icon>
-              <input
-                type="text"
-                formControlName="address"
-                placeholder="Calle, número, colonia, ciudad"
                 class="w-full border-none outline-none bg-transparent text-[15px] font-sans text-[#232233] pl-3 placeholder:text-[#A0A0B2] focus:translate-x-[2px] transition-transform duration-300">
             </div>
           </div>

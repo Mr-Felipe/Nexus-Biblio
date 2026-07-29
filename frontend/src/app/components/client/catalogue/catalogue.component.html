@@ -27,7 +27,9 @@
             <span class="text-[9px] font-bold text-[#232233] border border-[#232233] px-2 py-0.5 uppercase tracking-wider bg-transparent">{{ book.isbn }}</span>
             <h3 class="font-serif text-sm font-bold text-[#232233] mt-2 line-clamp-1" [title]="book.title">{{ book.title }}</h3>
             <p class="text-xs text-[#54546A]/80 font-medium font-serif italic">{{ book.author }}</p>
-            <p class="text-[10px] text-[#54546A] mt-2 line-clamp-2 font-sans">{{ book.description }}</p>
+            <p class="text-[10px] text-[#54546A] mt-2 line-clamp-2 font-sans">
+              {{ book.editorial }}{{ book.anioPublicacion ? ', ' + book.anioPublicacion : '' }}
+            </p>
           </div>
 
           <div class="border-t-2 border-[#232233]/12 pt-2.5 mt-2 flex flex-col gap-2">

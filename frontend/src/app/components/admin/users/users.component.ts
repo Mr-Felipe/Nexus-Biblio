@@ -42,6 +42,7 @@ export class UsersComponent {
     password: new FormControl('', { nonNullable: true }),
     phone: new FormControl('', { nonNullable: true }),
     address: new FormControl('', { nonNullable: true }),
+    identificacion: new FormControl('', { nonNullable: true }),
   });
 
   openAddUserModal() {
@@ -53,6 +54,7 @@ export class UsersComponent {
       password: '',
       phone: '',
       address: '',
+      identificacion: '',
     });
     this.showAddUserModal.set(true);
   }
@@ -66,6 +68,7 @@ export class UsersComponent {
       password: user.password || '',
       phone: user.phone || '',
       address: user.address || '',
+      identificacion: user.identificacion || '',
     });
     this.showAddUserModal.set(true);
   }
@@ -87,6 +90,7 @@ export class UsersComponent {
         password: raw.password || undefined,
         phone: raw.phone || undefined,
         address: raw.address || undefined,
+        identificacion: raw.identificacion || undefined,
       });
       this.toast.show('success', 'Usuario actualizado correctamente.');
     } else {
@@ -97,6 +101,7 @@ export class UsersComponent {
         password: raw.password || undefined,
         phone: raw.phone || undefined,
         address: raw.address || undefined,
+        identificacion: raw.identificacion || undefined,
       });
       this.toast.show('success', 'Usuario registrado exitosamente.');
     }

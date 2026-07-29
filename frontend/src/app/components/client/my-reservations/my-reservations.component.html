@@ -25,7 +25,8 @@
             <div class="flex items-center gap-2">
               @if (res.status === 'Listo para retirar' || (res.status === 'En cola' && res.queuePosition === 1)) {
                 <button (click)="claimReservedBook(res)"
-                        class="text-[9px] text-white bg-[#232233] border border-[#232233] hover:bg-[#1a1928] px-3 py-1.5 font-bold uppercase tracking-wider cursor-pointer transition-all flex items-center gap-1">
+                        [disabled]="!hasAvailableCopies(res.bookIsbn)"
+                        class="text-[9px] text-[#232233] border-2 border-[#232233] hover:bg-[#232233] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[#232233] disabled:cursor-not-allowed px-3 py-1.5 font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer bg-transparent">
                   <mat-icon class="text-xs">assignment_turned_in</mat-icon> Reclamar / Retirar
                 </button>
               }

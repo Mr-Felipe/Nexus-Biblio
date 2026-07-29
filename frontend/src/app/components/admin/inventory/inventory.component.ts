@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +13,7 @@ import { ToastService } from '../../../services/toast.service';
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.css',
 })
-export class InventoryComponent {
+export class InventoryComponent implements OnInit {
   state = inject(LibraryState);
   private toast = inject(ToastService);
 
@@ -27,11 +27,20 @@ export class InventoryComponent {
   deleteBlocked = signal(false);
   deleteBlockedReason = signal('');
 
+  ngOnInit() {
+    const pendingSearch = this.state.pendingSearch();
+    if (pendingSearch) {
+      this.bookSearchQuery.set(pendingSearch);
+      this.state.pendingSearch.set('');
+    }
+  }
+
   bookForm = new FormGroup({
     isbn: new FormControl('', { validators: [Validators.required], nonNullable: true }),
     title: new FormControl('', { validators: [Validators.required], nonNullable: true }),
     author: new FormControl('', { validators: [Validators.required], nonNullable: true }),
-    description: new FormControl('', { nonNullable: true }),
+    editorial: new FormControl('', { nonNullable: true }),
+    anioPublicacion: new FormControl<number | null>(null, { nonNullable: true }),
     copies: new FormControl<number>(1, { validators: [Validators.required, Validators.min(1)], nonNullable: true }),
     stockMinimo: new FormControl<number>(0, { validators: [Validators.required, Validators.min(0)], nonNullable: true }),
     coverUrl: new FormControl('', { nonNullable: true }),
@@ -64,19 +73,22 @@ export class InventoryComponent {
     ).length;
   }
 
-  incrementCopies(book: Book) {
-    this.state.updateBook(book.isbn, { copies: book.copies + 1 });
-    this.toast.show('success', `Se agregó un ejemplar para "${book.title}". Total: ${book.copies + 1}`);
+  async incrementCopies(book: Book) {
+    const error = await this.state.addEjemplar(book.isbn);
+    if (error) {
+      this.toast.show('error', error);
+    } else {
+      this.toast.show('success', `Se agregó un ejemplar para "${book.title}".`);
+    }
   }
 
-  decrementCopies(book: Book) {
-    const loaned = this.getLoanedCopiesCount(book.isbn);
-    if (book.copies <= loaned) {
-      this.toast.show('error', `No se pueden retirar ejemplares. Hay ${loaned} copias actualmente prestadas o reservadas.`);
-      return;
+  async decrementCopies(book: Book) {
+    const error = await this.state.removeEjemplar(book.isbn);
+    if (error) {
+      this.toast.show('error', error);
+    } else {
+      this.toast.show('success', `Se retiró un ejemplar para "${book.title}".`);
     }
-    this.state.updateBook(book.isbn, { copies: book.copies - 1 });
-    this.toast.show('success', `Se retiró un ejemplar para "${book.title}". Total: ${book.copies - 1}`);
   }
 
   toggleBookExemplars(isbn: string) {
@@ -174,7 +186,8 @@ export class InventoryComponent {
       isbn: '',
       title: '',
       author: '',
-      description: '',
+      editorial: '',
+      anioPublicacion: null,
       copies: 1,
       stockMinimo: 0,
       coverUrl: '',
@@ -201,7 +214,8 @@ export class InventoryComponent {
       isbn: raw.isbn,
       title: raw.title,
       author: raw.author,
-      description: raw.description,
+      editorial: raw.editorial,
+      anioPublicacion: raw.anioPublicacion,
       copies: raw.copies,
       stockMinimo: raw.stockMinimo,
       coverUrl: finalCover,
@@ -216,7 +230,8 @@ export class InventoryComponent {
       isbn: book.isbn,
       title: book.title,
       author: book.author,
-      description: book.description,
+      editorial: book.editorial,
+      anioPublicacion: book.anioPublicacion,
       copies: book.copies,
       stockMinimo: book.stockMinimo ?? 0,
       coverUrl: book.coverUrl,
@@ -248,7 +263,8 @@ export class InventoryComponent {
       isbn: raw.isbn,
       title: raw.title,
       author: raw.author,
-      description: raw.description,
+      editorial: raw.editorial,
+      anioPublicacion: raw.anioPublicacion,
       copies: raw.copies,
       stockMinimo: raw.stockMinimo,
       coverUrl: finalCover,

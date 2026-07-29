@@ -41,7 +41,7 @@ export class HomeComponent implements OnInit {
     this.state.pendingSearch.set(query);
     const role = this.state.currentUser()?.role;
     if (role === 'ADMIN' || role === 'BIBL') {
-      this.state.activeView.set('books');
+      this.state.activeView.set('inventory');
     } else {
       this.state.activeView.set('catalogue');
     }
@@ -51,7 +51,7 @@ export class HomeComponent implements OnInit {
     this.state.pendingSearch.set(bookTitle);
     const role = this.state.currentUser()?.role;
     if (role === 'ADMIN' || role === 'BIBL') {
-      this.state.activeView.set('books');
+      this.state.activeView.set('inventory');
     } else {
       this.state.activeView.set('catalogue');
     }

@@ -23,6 +23,11 @@ export class MyReservationsComponent {
     return this.state.reservations().filter((r) => r.userId === cur.id);
   });
 
+  hasAvailableCopies(bookIsbn: string): boolean {
+    const book = this.state.books().find((b) => b.isbn === bookIsbn);
+    return book ? book.availableCopies > 0 : false;
+  }
+
   async cancelReservation(resId: string) {
     await this.state.cancelReservation(resId);
     this.toast.show('success', 'Reserva cancelada correctamente.');

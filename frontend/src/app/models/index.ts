@@ -7,13 +7,15 @@ export interface User {
   password?: string;
   phone?: string;
   address?: string;
+  identificacion?: string;
 }
 
 export interface Book {
   isbn: string;
   title: string;
   author: string;
-  description: string;
+  editorial: string;
+  anioPublicacion: number | null;
   copies: number;
   availableCopies: number;
   stockMinimo: number;

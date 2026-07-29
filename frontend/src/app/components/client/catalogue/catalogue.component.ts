@@ -31,7 +31,7 @@ export class CatalogueComponent implements OnInit {
   filteredCatalogue = computed(() => {
     const q = this.catalogueSearchQuery().toLowerCase().trim();
     return this.state.books().filter((b) => {
-      return b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.isbn.includes(q) || b.description.toLowerCase().includes(q);
+      return b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.isbn.includes(q) || b.editorial.toLowerCase().includes(q);
     });
   });
 

@@ -152,7 +152,7 @@ export class LibraryState {
         reservasRes,
         sancionesRes,
       ] = await Promise.all([
-        supabase.from('usuarios').select('id, nombre_completo, correo_electronico, contrasena, rol, activo'),
+        supabase.from('usuarios').select('id, nombre_completo, correo_electronico, contrasena, rol, activo, telefono, direccion, identificacion'),
         supabase.from('libros').select('id, titulo, autor, editorial, anio_publicacion, isbn, estado_general, stock_minimo, portada_url'),
         supabase.from('ejemplares').select('id, libro_id, codigo_ejemplar, estado'),
         supabase.from('prestamos').select('id, usuario_id, ejemplar_id, fecha_prestamo, fecha_limite_devolucion, fecha_real_devolucion, estado, observaciones, evaluado_por'),
@@ -181,6 +181,9 @@ export class LibraryState {
         role: ROLE_MAP[u.rol] || 'EST',
         status: u.activo ? 'Activo' as const : 'Inactivo' as const,
         password: u.contrasena || undefined,
+        phone: u.telefono || undefined,
+        address: u.direccion || undefined,
+        identificacion: u.identificacion || undefined,
       }));
       this.users.set(mappedUsers);
 
@@ -208,7 +211,8 @@ export class LibraryState {
           isbn: libro.isbn,
           title: libro.titulo,
           author: libro.autor,
-          description: `${libro.editorial || ''}, ${libro.anio_publicacion || ''}`.trim(),
+          editorial: libro.editorial || '',
+          anioPublicacion: libro.anio_publicacion ?? null,
           copies: totalCopies,
           availableCopies,
           stockMinimo: libro.stock_minimo ?? 0,
@@ -322,6 +326,9 @@ export class LibraryState {
           correo_electronico: u.email,
           rol: ROLE_MAP_REVERSE[u.role] || 'ESTUDIANTE',
           activo: u.status === 'Activo',
+          telefono: u.phone || null,
+          direccion: u.address || null,
+          identificacion: u.identificacion || null,
         };
         if (usuarioId) payload.id = usuarioId;
         const { error } = await supabase.from('usuarios').upsert(payload, { onConflict: 'id' });
@@ -433,6 +440,9 @@ export class LibraryState {
           correo_electronico: u.email,
           rol: ROLE_MAP_REVERSE[u.role] || 'ESTUDIANTE',
           activo: u.status === 'Activo',
+          telefono: u.phone || null,
+          direccion: u.address || null,
+          identificacion: u.identificacion || null,
         };
         if (u.password) payload.contrasena = u.password;
         if (usuarioId) payload.id = usuarioId;
@@ -444,6 +454,8 @@ export class LibraryState {
           isbn: b.isbn,
           titulo: b.title,
           autor: b.author,
+          editorial: b.editorial || null,
+          anio_publicacion: b.anioPublicacion ?? null,
           estado_general: 'ACTIVO',
           stock_minimo: b.stockMinimo ?? 0,
           portada_url: b.coverUrl || null,
@@ -669,6 +681,63 @@ export class LibraryState {
     const target = this.books().find((b) => b.isbn === isbn);
     this.books.update((bs) => bs.filter((b) => b.isbn !== isbn));
     this.syncToSupabase('libros', null, 'isbn', isbn, 'delete');
+  }
+
+  async addEjemplar(isbn: string): Promise<string | null> {
+    const book = this.books().find((b) => b.isbn === isbn);
+    if (!book) return 'Libro no encontrado.';
+
+    const { data: libro } = await supabase.from('libros').select('id').eq('isbn', isbn).single();
+    if (!libro) return 'Libro no encontrado en DB.';
+
+    const existingEjemplares = book.ejemplares || [];
+    const nextNumber = existingEjemplares.length > 0
+      ? Math.max(...existingEjemplares.map(e => e.numero)) + 1
+      : 1;
+    const codigo = `${isbn}-${String(nextNumber).padStart(3, '0')}`;
+
+    const { data: newEj, error } = await supabase.from('ejemplares').insert({
+      libro_id: libro.id,
+      codigo_ejemplar: codigo,
+      estado: 'DISPONIBLE',
+    }).select('id').single();
+
+    if (error) return 'Error al crear ejemplar en DB.';
+
+    this.books.update((bs) =>
+      bs.map((b) => {
+        if (b.isbn !== isbn) return b;
+        const newEjemplares = [...(b.ejemplares || []), { id: newEj.id, numero: nextNumber, codigo, estado: 'DISPONIBLE' }];
+        return { ...b, copies: newEjemplares.length, availableCopies: b.availableCopies + 1, ejemplares: newEjemplares, status: 'Disponible' as const };
+      })
+    );
+    return null;
+  }
+
+  async removeEjemplar(isbn: string): Promise<string | null> {
+    const book = this.books().find((b) => b.isbn === isbn);
+    if (!book) return 'Libro no encontrado.';
+
+    const loaned = this.loans().filter(
+      l => l.bookIsbn === isbn && (l.status === 'Activo' || l.status === 'Pendiente devolución')
+    ).length;
+    if (book.copies <= loaned) return 'No se pueden retirar ejemplares. Hay copias prestadas o reservadas.';
+
+    const ejemplares = book.ejemplares || [];
+    const availableEj = ejemplares.find(e => e.estado === 'DISPONIBLE');
+    if (!availableEj) return 'No hay ejemplares disponibles para eliminar.';
+
+    const { error } = await supabase.from('ejemplares').delete().eq('id', availableEj.id);
+    if (error) return 'Error al eliminar ejemplar de DB.';
+
+    this.books.update((bs) =>
+      bs.map((b) => {
+        if (b.isbn !== isbn) return b;
+        const newEjemplares = ejemplares.filter(e => e.id !== availableEj.id);
+        return { ...b, copies: newEjemplares.length, availableCopies: Math.max(0, b.availableCopies - 1), ejemplares: newEjemplares };
+      })
+    );
+    return null;
   }
 
   // LOANS MANAGEMENT

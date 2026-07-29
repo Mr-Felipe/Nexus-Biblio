@@ -99,7 +99,7 @@ export class App implements OnInit {
     }
   }
 
-  handleNewRegister(data: { name: string; email: string; password: string; role: 'DOC' | 'EST'; phone: string; address: string }) {
+  handleNewRegister(data: { name: string; email: string; password: string; role: 'DOC' | 'EST'; phone: string; address: string; identificacion: string }) {
     const exists = this.state.users().some((u) => u.email === data.email);
     if (exists) {
       this.toast.show('error', `Ya existe un usuario con el correo ${data.email}`);
@@ -113,6 +113,7 @@ export class App implements OnInit {
       password: data.password,
       phone: data.phone,
       address: data.address,
+      identificacion: data.identificacion,
     });
 
     this.toast.show('success', '¡Registro exitoso! Ya puedes iniciar sesión con tus credenciales.');
