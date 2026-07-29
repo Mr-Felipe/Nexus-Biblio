@@ -11,26 +11,7 @@
     </div>
   </div>
 
-  <!-- Date Range Filter -->
-  <div class="flex flex-col sm:flex-row gap-4 p-4 border-2 border-[#232233] bg-transparent">
-    <div class="flex-1">
-      <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Fecha Inicio</span>
-      <input type="date" [value]="dateFrom()" (input)="dateFrom.set($any($event.target).value)"
-             class="w-full px-3 py-2 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
-    </div>
-    <div class="flex-1">
-      <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Fecha Fin</span>
-      <input type="date" [value]="dateTo()" (input)="dateTo.set($any($event.target).value)"
-             class="w-full px-3 py-2 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
-    </div>
-    <div class="flex items-end">
-      <button (click)="dateFrom.set(''); dateTo.set('')" class="border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 px-4 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer">
-        Limpiar
-      </button>
-    </div>
-  </div>
-
-  <!-- KPIs -->
+  <!-- KPIs - Estado Actual (sin filtro de fechas) -->
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
     <div class="p-5 bg-transparent border-2 border-[#232233] flex items-center justify-between">
       <div>
@@ -107,7 +88,147 @@
     </div>
   </div>
 
-  <!-- Charts -->
+  <!-- Estado Actual - Sin filtro de fechas -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 font-sans">
+
+    <!-- Active Loans -->
+    <div class="bg-transparent border-2 border-[#232233] p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#232233] mb-4 border-b border-[#232233]/12 pb-1.5">Préstamos Activos</h3>
+      <div class="divide-y divide-[#232233]/15">
+        @for (loan of activeLoansList(); track loan.id) {
+          <div class="py-3 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ loan.bookTitle }}</p>
+              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ loan.userName }}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-[#232233] text-[#232233]">Activo</span>
+              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Vence: {{ loan.dueDate }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay préstamos activos.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Pending Returns -->
+    <div class="bg-transparent border-2 border-amber-500 p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-amber-700 mb-4 border-b border-amber-500/30 pb-1.5 flex items-center gap-1.5">
+        <mat-icon class="text-sm">assignment_late</mat-icon> Devoluciones Pendientes
+      </h3>
+      <div class="divide-y divide-amber-500/20">
+        @for (loan of pendingReturnsList(); track loan.id) {
+          <div class="py-3 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ loan.bookTitle }}</p>
+              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ loan.userName }}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-amber-500 text-white">Pendiente</span>
+              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Vence: {{ loan.dueDate }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay devoluciones pendientes.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Active Reservations -->
+    <div class="bg-transparent border-2 border-[#232233] p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#232233] mb-4 border-b border-[#232233]/12 pb-1.5">Reservas Activas</h3>
+      <div class="divide-y divide-[#232233]/15">
+        @for (res of activeReservationsList(); track res.id) {
+          <div class="py-3 flex items-center justify-between text-xs">
+            <div>
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ res.bookTitle }}</p>
+              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ res.userName }}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-[#232233] text-[#232233]">{{ res.status }}</span>
+              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Posición: #{{ res.queuePosition }}</p>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay reservas activas.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Sanctioned Users -->
+    <div class="bg-transparent border-2 border-red-500 p-6">
+      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-red-700 mb-4 border-b border-red-500/30 pb-1.5 flex items-center gap-1.5">
+        <mat-icon class="text-sm">gavel</mat-icon> Usuarios con Sanciones Activas
+      </h3>
+      <div class="divide-y divide-red-500/20">
+        @for (sanc of sanctionedUsers(); track $index) {
+          <div class="py-3 text-xs">
+            <div class="flex items-center justify-between mb-1">
+              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ sanc.userName }}</p>
+              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border"
+                    [ngClass]="sanc.type === 'Disciplinaria' ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-red-400 bg-red-50 text-red-700'">
+                {{ sanc.type }}
+              </span>
+            </div>
+            <p class="text-[10px] text-[#54546A] font-serif italic">{{ sanc.reason }}</p>
+            @if (sanc.fine > 0) {
+              <p class="text-[10px] text-red-600 font-bold mt-0.5">Multa: ${{ sanc.fine | number }}</p>
+            }
+          </div>
+        } @empty {
+          <p class="text-xs text-[#54546A]/80 py-4 text-center font-serif italic">No hay usuarios sancionados.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Ejemplares No Disponibles - Tarjeta completa -->
+  <div class="bg-transparent border-2 border-amber-500 p-6">
+    <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-amber-700 mb-4 border-b border-amber-500/30 pb-1.5 flex items-center gap-1.5">
+      <mat-icon class="text-sm">block</mat-icon> Ejemplares No Disponibles
+    </h3>
+    <div class="divide-y divide-amber-500/20">
+      @for (ej of activeUnavailableEjemplares(); track ej.codigo) {
+        <div class="py-3 flex items-center justify-between text-xs">
+          <div>
+            <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ ej.bookTitle }}</p>
+            <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">ISBN: {{ ej.bookIsbn }} · Ej. #{{ ej.ejemplarNumero }}</p>
+          </div>
+          <div class="text-right">
+            <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
+                  [style.background]="ej.estado === 'PERDIDO' ? '#dc2626' : '#d97706'">
+              {{ ej.estado === 'PERDIDO' ? 'Perdido' : 'Dañado' }}
+            </span>
+            <p class="text-[9px] text-[#54546A]/60 mt-0.5 font-mono">{{ ej.codigo }}</p>
+          </div>
+        </div>
+      } @empty {
+        <p class="text-xs text-[#54546A]/80 py-4 text-center font-serif italic">No hay ejemplares no disponibles.</p>
+      }
+    </div>
+  </div>
+
+  <!-- Date Range Filter - Separa lo activo del historial -->
+  <div class="flex flex-col sm:flex-row gap-4 p-4 border-2 border-[#232233] bg-transparent">
+    <div class="flex-1">
+      <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Fecha Inicio</span>
+      <input type="date" [value]="dateFrom()" (input)="dateFrom.set($any($event.target).value)"
+             class="w-full px-3 py-2 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
+    </div>
+    <div class="flex-1">
+      <span class="block text-[10px] font-bold text-[#232233] uppercase tracking-wider mb-1">Fecha Fin</span>
+      <input type="date" [value]="dateTo()" (input)="dateTo.set($any($event.target).value)"
+             class="w-full px-3 py-2 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold" />
+    </div>
+    <div class="flex items-end">
+      <button (click)="dateFrom.set(''); dateTo.set('')" class="border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 px-4 py-2 text-xs font-bold uppercase tracking-wider cursor-pointer">
+        Limpiar
+      </button>
+    </div>
+  </div>
+
+  <!-- Charts - Filtrados por fechas -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Loan Status Distribution -->
     <div class="p-6 bg-transparent border-2 border-[#232233]">
@@ -217,128 +338,7 @@
     </div>
   </div>
 
-  <!-- General Summary -->
-  <div class="p-6 border-2 border-[#232233] bg-transparent">
-    <h3 class="text-xs font-bold text-[#232233] uppercase tracking-wider mb-4 border-b border-[#232233]/12 pb-2">Resumen General</h3>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-        <p class="text-xl font-mono font-bold text-[#232233]">{{ state.users().length }}</p>
-        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Usuarios</p>
-      </div>
-      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-        <p class="text-xl font-mono font-bold text-[#232233]">{{ state.books().length }}</p>
-        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">ISBNs</p>
-      </div>
-      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-        <p class="text-xl font-mono font-bold text-[#232233]">{{ filteredLoans().length }}</p>
-        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Préstamos (Rango)</p>
-      </div>
-      <div class="p-3 border-2 border-[#232233] text-center bg-transparent">
-        <p class="text-xl font-mono font-bold text-[#232233]">{{ state.sanctions().length }}</p>
-        <p class="text-[9px] text-[#54546A]/80 uppercase font-bold tracking-wider mt-1">Sanciones</p>
-      </div>
-    </div>
-    <div class="border border-[#232233] p-3 text-[11px] text-[#232233] mt-4 bg-transparent font-serif italic">
-      Para un informe detallado de transacciones, visite la <strong>Bitácora de Auditoría</strong>.
-    </div>
-  </div>
-
-  <!-- Detailed Tables -->
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 font-sans">
-
-    <!-- Active Loans -->
-    <div class="bg-transparent border-2 border-[#232233] p-6">
-      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#232233] mb-4 border-b border-[#232233]/12 pb-1.5">Préstamos Activos</h3>
-      <div class="divide-y divide-[#232233]/15">
-        @for (loan of activeLoansList(); track loan.id) {
-          <div class="py-3 flex items-center justify-between text-xs">
-            <div>
-              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ loan.bookTitle }}</p>
-              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ loan.userName }}</p>
-            </div>
-            <div class="text-right">
-              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-[#232233] text-[#232233]">Activo</span>
-              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Vence: {{ loan.dueDate }}</p>
-            </div>
-          </div>
-        } @empty {
-          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay préstamos activos.</p>
-        }
-      </div>
-    </div>
-
-    <!-- Pending Returns -->
-    <div class="bg-transparent border-2 border-amber-500 p-6">
-      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-amber-700 mb-4 border-b border-amber-500/30 pb-1.5 flex items-center gap-1.5">
-        <mat-icon class="text-sm">assignment_late</mat-icon> Devoluciones Pendientes
-      </h3>
-      <div class="divide-y divide-amber-500/20">
-        @for (loan of pendingReturnsList(); track loan.id) {
-          <div class="py-3 flex items-center justify-between text-xs">
-            <div>
-              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ loan.bookTitle }}</p>
-              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ loan.userName }}</p>
-            </div>
-            <div class="text-right">
-              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-amber-500 text-white">Pendiente</span>
-              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Vence: {{ loan.dueDate }}</p>
-            </div>
-          </div>
-        } @empty {
-          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay devoluciones pendientes.</p>
-        }
-      </div>
-    </div>
-
-    <!-- Active Reservations -->
-    <div class="bg-transparent border-2 border-[#232233] p-6">
-      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-[#232233] mb-4 border-b border-[#232233]/12 pb-1.5">Reservas Activas</h3>
-      <div class="divide-y divide-[#232233]/15">
-        @for (res of activeReservationsList(); track res.id) {
-          <div class="py-3 flex items-center justify-between text-xs">
-            <div>
-              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ res.bookTitle }}</p>
-              <p class="text-[10px] text-[#54546A]/80 mt-0.5 font-serif italic">Lector: {{ res.userName }}</p>
-            </div>
-            <div class="text-right">
-              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border border-[#232233] text-[#232233]">{{ res.status }}</span>
-              <p class="text-[9px] text-[#54546A]/60 mt-0.5">Posición: #{{ res.queuePosition }}</p>
-            </div>
-          </div>
-        } @empty {
-          <p class="text-xs text-[#54546A]/70 py-4 text-center font-serif italic">No hay reservas activas.</p>
-        }
-      </div>
-    </div>
-
-    <!-- Sanctioned Users -->
-    <div class="bg-transparent border-2 border-red-500 p-6">
-      <h3 class="text-xs font-bold uppercase tracking-[0.12em] text-red-700 mb-4 border-b border-red-500/30 pb-1.5 flex items-center gap-1.5">
-        <mat-icon class="text-sm">gavel</mat-icon> Usuarios con Sanciones Activas
-      </h3>
-      <div class="divide-y divide-red-500/20">
-        @for (sanc of sanctionedUsers(); track $index) {
-          <div class="py-3 text-xs">
-            <div class="flex items-center justify-between mb-1">
-              <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ sanc.userName }}</p>
-              <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border"
-                    [ngClass]="sanc.type === 'Disciplinaria' ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-red-400 bg-red-50 text-red-700'">
-                {{ sanc.type }}
-              </span>
-            </div>
-            <p class="text-[10px] text-[#54546A] font-serif italic">{{ sanc.reason }}</p>
-            @if (sanc.fine > 0) {
-              <p class="text-[10px] text-red-600 font-bold mt-0.5">Multa: ${{ sanc.fine | number }}</p>
-            }
-          </div>
-        } @empty {
-          <p class="text-xs text-[#54546A]/80 py-4 text-center font-serif italic">No hay usuarios sancionados.</p>
-        }
-      </div>
-    </div>
-  </div>
-
-  <!-- Historial General -->
+  <!-- Historial General - Filtrado por fechas -->
   <div class="space-y-4">
     <h2 class="font-serif text-2xl text-[#232233] font-bold tracking-tight border-b-2 border-[#232233] pb-2">Historial General</h2>
 
@@ -353,22 +353,22 @@
           {{ historyLoans().length }}
         </span>
       </button>
+      <button (click)="setHistoryTab('reservations')"
+              [ngClass]="historyTab() === 'reservations' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:bg-[#D9C997]/20'"
+              class="flex-1 px-4 py-3 text-[10px] uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border-r-2 border-[#232233]">
+        <mat-icon class="text-sm">bookmark_border</mat-icon> Reservas
+        <span class="ml-1 px-1.5 py-0.5 text-[8px] font-bold"
+              [ngClass]="historyTab() === 'reservations' ? 'bg-white text-[#232233]' : 'bg-[#232233]/10 text-[#232233]'">
+          {{ historyReservations().length }}
+        </span>
+      </button>
       <button (click)="setHistoryTab('sanctions')"
               [ngClass]="historyTab() === 'sanctions' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:bg-[#D9C997]/20'"
-              class="flex-1 px-4 py-3 text-[10px] uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border-r-2 border-[#232233]">
+              class="flex-1 px-4 py-3 text-[10px] uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
         <mat-icon class="text-sm">gavel</mat-icon> Sanciones
         <span class="ml-1 px-1.5 py-0.5 text-[8px] font-bold"
               [ngClass]="historyTab() === 'sanctions' ? 'bg-white text-[#232233]' : 'bg-[#232233]/10 text-[#232233]'">
           {{ historySanctions().length }}
-        </span>
-      </button>
-      <button (click)="setHistoryTab('ejemplares')"
-              [ngClass]="historyTab() === 'ejemplares' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:bg-[#D9C997]/20'"
-              class="flex-1 px-4 py-3 text-[10px] uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-        <mat-icon class="text-sm">block</mat-icon> No Disponibles
-        <span class="ml-1 px-1.5 py-0.5 text-[8px] font-bold"
-              [ngClass]="historyTab() === 'ejemplares' ? 'bg-white text-[#232233]' : 'bg-[#232233]/10 text-[#232233]'">
-          {{ totalUnavailable() }}
         </span>
       </button>
     </div>
@@ -378,7 +378,7 @@
       <div class="flex-1 relative">
         <mat-icon class="absolute left-3 top-3 text-[#54546A]/80 text-lg">search</mat-icon>
         <input type="text"
-               [placeholder]="historyTab() === 'loans' ? 'Buscar por usuario, título o ID...' : historyTab() === 'sanctions' ? 'Buscar por usuario, motivo o ID...' : 'Buscar por título, ISBN o código...'"
+               [placeholder]="historyTab() === 'loans' ? 'Buscar por usuario, título o ID...' : historyTab() === 'sanctions' ? 'Buscar por usuario, motivo o ID...' : 'Buscar por usuario, libro o ID...'"
                [value]="historySearchQuery()" (input)="historySearchQuery.set($any($event.target).value)"
                class="w-full pl-10 pr-4 py-2.5 text-xs bg-transparent border-2 border-[#232233] focus:outline-none font-bold uppercase tracking-wide placeholder-[#A0A0B2]" />
       </div>
@@ -437,6 +437,53 @@
       </div>
     }
 
+    <!-- Tab: Historial de Reservas -->
+    @if (historyTab() === 'reservations') {
+      <div class="border-2 border-[#232233] bg-transparent">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-[#D9C997] text-[#232233] font-bold uppercase tracking-wider text-[10px] border-b-2 border-[#232233]">
+                <th class="p-4 font-bold">ID</th>
+                <th class="p-4 font-bold">Usuario</th>
+                <th class="p-4 font-bold">Libro</th>
+                <th class="p-4 font-bold">Fecha Reserva</th>
+                <th class="p-4 font-bold">Posición</th>
+                <th class="p-4 font-bold">Estado</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y-2 divide-[#232233]/12 font-sans">
+              @for (res of historyReservations(); track res.id) {
+                <tr class="hover:bg-[#D9C997]/15">
+                  <td class="p-4 font-mono font-bold">{{ res.id }}</td>
+                  <td class="p-4">
+                    <p class="font-bold text-[#232233] uppercase tracking-wide text-[11px]">{{ res.userName }}</p>
+                    <span class="text-[10px] text-[#54546A]/80 font-mono">ID: {{ res.userId }}</span>
+                  </td>
+                  <td class="p-4">
+                    <p class="font-bold text-[#232233] uppercase text-[11px]">{{ res.bookTitle }}</p>
+                    <span class="text-[9px] text-[#54546A]/80 font-mono">ISBN: {{ res.bookIsbn }}</span>
+                  </td>
+                  <td class="p-4 font-mono">{{ res.reservationDate }}</td>
+                  <td class="p-4 font-mono font-bold text-center">#{{ res.queuePosition }}</td>
+                  <td class="p-4">
+                    <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
+                          [style.background]="res.status === 'Retirada' ? '#232233' : res.status === 'Cancelada' ? '#dc2626' : res.status === 'Expirada' ? '#9ca3af' : '#4f46e5'">
+                      {{ res.status }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="p-8 text-center text-[#A0A0B2] font-serif italic">No hay reservas en el historial.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
     <!-- Tab: Historial de Sanciones -->
     @if (historyTab() === 'sanctions') {
       <div class="border-2 border-[#232233] bg-transparent">
@@ -480,47 +527,6 @@
               } @empty {
                 <tr>
                   <td colspan="7" class="p-8 text-center text-[#A0A0B2] font-serif italic">No hay sanciones en el historial.</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    }
-
-    <!-- Tab: Ejemplares No Disponibles -->
-    @if (historyTab() === 'ejemplares') {
-      <div class="border-2 border-[#232233] bg-transparent">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="bg-[#D9C997] text-[#232233] font-bold uppercase tracking-wider text-[10px] border-b-2 border-[#232233]">
-                <th class="p-4 font-bold">Libro</th>
-                <th class="p-4 font-bold">ISBN</th>
-                <th class="p-4 font-bold">Ejemplar #</th>
-                <th class="p-4 font-bold">Código</th>
-                <th class="p-4 font-bold">Estado</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y-2 divide-[#232233]/12 font-sans">
-              @for (ej of unavailableEjemplares(); track ej.codigo) {
-                <tr class="hover:bg-[#D9C997]/15">
-                  <td class="p-4">
-                    <p class="font-bold text-[#232233] uppercase text-[11px]">{{ ej.bookTitle }}</p>
-                  </td>
-                  <td class="p-4 font-mono">{{ ej.bookIsbn }}</td>
-                  <td class="p-4 font-mono font-bold text-center">{{ ej.ejemplarNumero }}</td>
-                  <td class="p-4 font-mono text-[10px]">{{ ej.codigo }}</td>
-                  <td class="p-4">
-                    <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
-                          [style.background]="ej.estado === 'PERDIDO' ? '#dc2626' : '#d97706'">
-                      {{ ej.estado === 'PERDIDO' ? 'Perdido' : 'Dañado' }}
-                    </span>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="5" class="p-8 text-center text-[#A0A0B2] font-serif italic">No hay ejemplares no disponibles.</td>
                 </tr>
               }
             </tbody>

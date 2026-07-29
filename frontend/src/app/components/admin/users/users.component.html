@@ -56,11 +56,17 @@
                 </span>
               </td>
               <td class="p-4">
-                <button (click)="toggleUserStatus(user)" class="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold hover:opacity-85 uppercase tracking-wider cursor-pointer"
-                        [ngClass]="user.status === 'Activo' ? 'border border-[#232233] text-[#232233]' : 'bg-red-600 text-white border border-red-600'">
-                  <span class="w-1.5 h-1.5" [ngClass]="user.status === 'Activo' ? 'bg-[#232233]' : 'bg-white'"></span>
-                  {{ user.status }}
-                </button>
+                @if (isUserSanctioned(user.id)) {
+                  <span class="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-red-600 text-white border border-red-600">
+                    <span class="w-1.5 h-1.5 bg-white"></span>
+                    Sancionado
+                  </span>
+                } @else {
+                  <span class="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider border border-[#232233] text-[#232233]">
+                    <span class="w-1.5 h-1.5 bg-[#232233]"></span>
+                    Activo
+                  </span>
+                }
               </td>
               <td class="p-4 text-right flex items-center justify-end gap-1.5">
                 <button (click)="openEditUserModal(user)" class="p-1.5 text-[#232233] hover:bg-[#D9C997]/20 border border-[#232233]/8 cursor-pointer" title="Editar">

@@ -85,12 +85,6 @@ export class ReportsComponent {
     ];
   });
 
-  recentLoans = computed(() => this.state.loans().slice(0, 5));
-
-  recentSanctionsActive = computed(() =>
-    this.state.sanctions().filter(s => s.status === 'Activa').slice(0, 5)
-  );
-
   activeLoansList = computed(() =>
     this.state.loans().filter(l => l.status === 'Activo')
   );
@@ -114,24 +108,45 @@ export class ReportsComponent {
       }))
   );
 
+  activeUnavailableEjemplares = computed(() => {
+    const result: { bookTitle: string; bookIsbn: string; ejemplarNumero: number; codigo: string; estado: string }[] = [];
+    for (const book of this.state.books()) {
+      for (const ej of book.ejemplares || []) {
+        if (ej.estado === 'PERDIDO' || ej.estado === 'DAÑADO') {
+          result.push({ bookTitle: book.title, bookIsbn: book.isbn, ejemplarNumero: ej.numero, codigo: ej.codigo, estado: ej.estado });
+        }
+      }
+    }
+    return result.sort((a, b) => a.bookTitle.localeCompare(b.bookTitle));
+  });
+
   navigateTo(view: string) {
     this.state.activeView.set(view);
   }
 
-  historyTab = signal<'loans' | 'sanctions' | 'ejemplares'>('loans');
+  historyTab = signal<'loans' | 'sanctions' | 'reservations'>('loans');
   historySearchQuery = signal('');
 
-  setHistoryTab(tab: 'loans' | 'sanctions' | 'ejemplares') {
+  setHistoryTab(tab: 'loans' | 'sanctions' | 'reservations') {
     this.historyTab.set(tab);
     this.historySearchQuery.set('');
+  }
+
+  private matchesDateRange(dateStr: string): boolean {
+    const from = this.dateFrom();
+    const to = this.dateTo();
+    if (from && dateStr < from) return false;
+    if (to && dateStr > to) return false;
+    return true;
   }
 
   historyLoans = computed(() => {
     const q = normalizeText(this.historySearchQuery().trim());
     return this.state.loans().filter(l => {
       const isHistory = l.status === 'Devuelto' || l.status === 'Vencido' || l.status === 'Cancelado';
+      const matchDate = this.matchesDateRange(l.loanDate);
       const matchQ = normalizeText(l.userName).includes(q) || normalizeText(l.bookTitle).includes(q) || normalizeText(l.id).includes(q);
-      return isHistory && matchQ;
+      return isHistory && matchDate && matchQ;
     }).sort((a, b) => {
       const dateA = a.returnDate || a.dueDate;
       const dateB = b.returnDate || b.dueDate;
@@ -143,35 +158,20 @@ export class ReportsComponent {
     const q = normalizeText(this.historySearchQuery().trim());
     return this.state.sanctions().filter(s => {
       const isHistory = s.status === 'Pagada';
+      const matchDate = this.matchesDateRange(s.date);
       const matchQ = normalizeText(s.userName).includes(q) || normalizeText(s.reason).includes(q) || normalizeText(s.id).includes(q);
-      return isHistory && matchQ;
+      return isHistory && matchDate && matchQ;
     }).sort((a, b) => b.date.localeCompare(a.date));
   });
 
-  unavailableEjemplares = computed(() => {
+  historyReservations = computed(() => {
     const q = normalizeText(this.historySearchQuery().trim());
-    const result: { bookTitle: string; bookIsbn: string; ejemplarNumero: number; codigo: string; estado: string }[] = [];
-    for (const book of this.state.books()) {
-      for (const ej of book.ejemplares || []) {
-        if (ej.estado === 'PERDIDO' || ej.estado === 'DAÑADO') {
-          const matchQ = normalizeText(book.title).includes(q) || normalizeText(book.isbn).includes(q) || normalizeText(ej.codigo).includes(q);
-          if (matchQ) {
-            result.push({ bookTitle: book.title, bookIsbn: book.isbn, ejemplarNumero: ej.numero, codigo: ej.codigo, estado: ej.estado });
-          }
-        }
-      }
-    }
-    return result.sort((a, b) => a.bookTitle.localeCompare(b.bookTitle));
-  });
-
-  totalUnavailable = computed(() => {
-    let count = 0;
-    for (const book of this.state.books()) {
-      for (const ej of book.ejemplares || []) {
-        if (ej.estado === 'PERDIDO' || ej.estado === 'DAÑADO') count++;
-      }
-    }
-    return count;
+    return this.state.reservations().filter(r => {
+      const isHistory = r.status === 'Retirada' || r.status === 'Cancelada' || r.status === 'Expirada';
+      const matchDate = this.matchesDateRange(r.reservationDate);
+      const matchQ = normalizeText(r.userName).includes(q) || normalizeText(r.bookTitle).includes(q) || normalizeText(r.id).includes(q);
+      return isHistory && matchDate && matchQ;
+    }).sort((a, b) => b.reservationDate.localeCompare(a.reservationDate));
   });
 
   exportReport(type: string) {

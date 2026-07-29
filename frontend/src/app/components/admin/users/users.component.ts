@@ -109,10 +109,8 @@ export class UsersComponent {
     this.showAddUserModal.set(false);
   }
 
-  toggleUserStatus(user: User) {
-    const newStatus = user.status === 'Activo' ? 'Inactivo' : 'Activo';
-    this.state.updateUser(user.id, { status: newStatus });
-    this.toast.show('info', `Estado de ${user.name} cambiado a: ${newStatus}`);
+  isUserSanctioned(userId: string): boolean {
+    return this.state.sanctions().some(s => s.userId === userId && s.status === 'Activa');
   }
 
   deleteUser(user: User) {
