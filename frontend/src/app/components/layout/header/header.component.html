@@ -26,11 +26,13 @@
     @if (state.currentUser()) {
       <!-- Admin & Librarian Links -->
       @if (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL') {
-        <button (click)="navigate.emit('reports')"
-                [ngClass]="state.activeView() === 'reports' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:bg-[#D9C997]/20'"
-                class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0">
-          Estadísticas
-        </button>
+        @if (state.currentUser()?.role === 'ADMIN') {
+          <button (click)="navigate.emit('reports')"
+                  [ngClass]="state.activeView() === 'reports' ? 'bg-[#232233] text-white font-bold' : 'text-[#232233] hover:bg-[#D9C997]/20'"
+                  class="px-2 py-1.5 text-[9px] xl:text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap cursor-pointer flex-shrink-0">
+            Estadísticas
+          </button>
+        }
 
         @if (state.currentUser()?.role === 'ADMIN') {
           <button (click)="navigate.emit('users')"

@@ -102,7 +102,7 @@
         }
 
         <!-- REPORTS (ADMIN ONLY) -->
-        @if (state.activeView() === 'reports' && (state.currentUser()?.role === 'ADMIN' || state.currentUser()?.role === 'BIBL')) {
+        @if (state.activeView() === 'reports' && state.currentUser()?.role === 'ADMIN') {
           <app-reports></app-reports>
         }
 

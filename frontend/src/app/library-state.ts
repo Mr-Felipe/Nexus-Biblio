@@ -568,7 +568,7 @@ export class LibraryState {
     const maxId = this.users().reduce((max, user) => {
       const num = parseInt(user.id, 10);
       return !isNaN(num) && num > max ? num : max;
-    }, 1000);
+    }, 0);
     const newId = u.id || String(maxId + 1);
     const newUser: User = {
       ...u,
