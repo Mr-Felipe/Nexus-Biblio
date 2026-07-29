@@ -29,7 +29,7 @@
 
       <!-- NAVBAR -->
       @if (state.currentUser() || (state.activeView() !== 'login' && state.activeView() !== 'register')) {
-        <app-header [mobileSidebarOpen]="mobileSidebarOpen" (navigate)="navigateTo($event)" (logout)="onLogout()" (openSupabaseModal)="showSupabaseModal.set(true)"></app-header>
+        <app-header [mobileSidebarOpen]="mobileSidebarOpen" (navigate)="navigateTo($event)" (logout)="onLogout()"></app-header>
       }
 
       <!-- CONTENT DISPLAY -->
@@ -114,83 +114,6 @@
       </main>
     </div>
   </div>
-
-  <!-- MODAL: SUPABASE INTEGRATION DETAILS & MANAGEMENT -->
-  @if (showSupabaseModal()) {
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-      <div class="bg-[#F8F3EA] border-4 border-[#232233] w-full max-w-lg p-6 relative flex flex-col max-h-[90vh]">
-        <div class="flex justify-between items-center pb-4 border-b-2 border-[#232233] mb-4">
-          <h3 class="font-serif text-lg font-bold text-[#232233] uppercase tracking-tight flex items-center gap-2">
-            <mat-icon class="text-xl">database</mat-icon> Nexus Corp DB - Supabase
-          </h3>
-          <button (click)="showSupabaseModal.set(false)" class="text-[#54546A]/80 hover:text-[#232233] cursor-pointer">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-
-        <div class="space-y-4 overflow-y-auto flex-1 pr-2">
-          <div class="border-2 border-[#232233] p-4 bg-[#D9C997]/15 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <p class="text-xs font-bold text-[#232233] uppercase tracking-wide">Estado de la Conexión</p>
-              <div class="flex items-center gap-2 mt-1">
-                @if (state.supabaseConnected()) {
-                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                  <span class="text-xs font-mono font-bold text-emerald-800 uppercase">Conectado y Sincronizado</span>
-                } @else if (state.supabaseConnecting()) {
-                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  <span class="text-xs font-mono font-bold text-amber-800 uppercase">Estableciendo Conexión...</span>
-                } @else {
-                  <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                  <span class="text-xs font-mono font-bold text-red-800 uppercase">Sin conexión / Error</span>
-                }
-              </div>
-            </div>
-
-            <div class="flex gap-2 w-full md:w-auto">
-              <button (click)="retrySupabaseConnection()" [disabled]="state.supabaseConnecting()"
-                      class="flex-1 md:flex-initial border-2 border-[#232233] bg-[#232233] text-white hover:bg-[#1a1928] disabled:opacity-50 px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                <mat-icon class="text-xs">sync</mat-icon> Re-Conectar
-              </button>
-              <button (click)="syncLocalToSupabaseDb()" [disabled]="state.supabaseConnecting()"
-                      class="flex-1 md:flex-initial border-2 border-[#232233] bg-transparent text-[#232233] hover:bg-[#D9C997]/20 disabled:opacity-50 px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                <mat-icon class="text-xs">cloud_upload</mat-icon> Sincronizar Locales
-              </button>
-            </div>
-          </div>
-
-          @if (!state.supabaseConnected() && state.supabaseError()) {
-            <div class="border-2 border-red-500 bg-red-50 text-red-800 p-4 font-mono text-[11px]">
-              <p class="font-bold uppercase tracking-wider flex items-center gap-1">
-                <mat-icon class="text-sm">error_outline</mat-icon> Error detectado:
-              </p>
-              <p class="mt-1">{{ state.supabaseError() }}</p>
-              <p class="mt-3 font-semibold text-red-700 bg-red-100/50 p-2 border border-red-200">
-                Nota: Verifica que las tablas (usuarios, libros, ejemplares, prestamos, reservas, sanciones) existan en tu base de datos de Supabase.
-              </p>
-            </div>
-          }
-
-          <div class="border border-[#232233]/8 p-4 text-xs space-y-1 bg-transparent">
-            <h4 class="font-serif italic font-bold text-[#232233] uppercase tracking-wide mb-2 text-[10px]">Credenciales de Base de Datos</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono">
-              <div>
-                <span class="text-[#54546A]/80 block text-[9px] uppercase font-bold tracking-wider">Proyecto:</span>
-                <span class="text-[#232233] font-semibold">Nexus Biblio (ydhvtuaomppbhcmcpedr)</span>
-              </div>
-              <div>
-                <span class="text-[#54546A]/80 block text-[9px] uppercase font-bold tracking-wider">API URL:</span>
-                <span class="text-[#232233] font-semibold truncate block">https://ydhvtuaomppbhcmcpedr.supabase.co</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="pt-4 border-t-2 border-[#232233] flex justify-end">
-          <button (click)="showSupabaseModal.set(false)" class="border-2 border-[#232233] bg-[#232233] hover:bg-[#1a1928] text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition-all cursor-pointer">Cerrar Configuración</button>
-        </div>
-      </div>
-    </div>
-  }
 
   <!-- MODAL: LOGIN REQUIRED PROMPT -->
   @if (showLoginRequiredModal()) {

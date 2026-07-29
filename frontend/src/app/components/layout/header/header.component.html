@@ -109,49 +109,6 @@
   <div class="flex-1"></div>
 
   <div class="flex items-center gap-2 lg:gap-3 flex-shrink-0">
-    <!-- Supabase Connection Status Badge -->
-    <button (click)="openSupabaseModal.emit()"
-            class="hidden sm:flex items-center gap-1.5 px-3 py-1 text-[10px] uppercase tracking-widest font-bold border transition-all cursor-pointer"
-            [ngClass]="{
-              'bg-[#E6F4EA] border-[#137333] text-[#137333] hover:opacity-80': state.supabaseConnected(),
-              'bg-[#FCE8E6] border-[#C5221F] text-[#C5221F] hover:opacity-80': !state.supabaseConnected() && state.supabaseError(),
-              'bg-[#FEF7E0] border-[#B06000] text-[#B06000] hover:opacity-80': !state.supabaseConnected() && !state.supabaseError()
-            }">
-      <span class="relative flex h-2 w-2">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 animate-duration-1000"
-              [ngClass]="{
-                'bg-emerald-400': state.supabaseConnected(),
-                'bg-red-400': !state.supabaseConnected() && state.supabaseError(),
-                'bg-amber-400': !state.supabaseConnected() && !state.supabaseError()
-              }"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2"
-              [ngClass]="{
-                'bg-emerald-500': state.supabaseConnected(),
-                'bg-red-500': !state.supabaseConnected() && state.supabaseError(),
-                'bg-amber-500': !state.supabaseConnected() && !state.supabaseError()
-              }"></span>
-      </span>
-      <span class="font-mono hidden xl:inline">Supabase: {{ state.supabaseConnected() ? 'Conectado' : (state.supabaseError() ? 'Error' : 'Offline') }}</span>
-    </button>
-    <!-- Supabase dot only on small screens -->
-    <button (click)="openSupabaseModal.emit()"
-            class="sm:hidden p-2 text-[#232233] hover:bg-[#D9C997]/15 transition-all relative cursor-pointer">
-      <span class="relative flex h-2.5 w-2.5">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 animate-duration-1000"
-              [ngClass]="{
-                'bg-emerald-400': state.supabaseConnected(),
-                'bg-red-400': !state.supabaseConnected() && state.supabaseError(),
-                'bg-amber-400': !state.supabaseConnected() && !state.supabaseError()
-              }"></span>
-        <span class="relative inline-flex rounded-full h-2.5 w-2.5"
-              [ngClass]="{
-                'bg-emerald-500': state.supabaseConnected(),
-                'bg-red-500': !state.supabaseConnected() && state.supabaseError(),
-                'bg-amber-500': !state.supabaseConnected() && !state.supabaseError()
-              }"></span>
-      </span>
-    </button>
-
     @if (state.currentUser()) {
       <!-- Notification Bell Trigger -->
       <div class="relative">

@@ -46,12 +46,8 @@
               <td class="p-4 font-mono font-bold text-[#232233]">{{ res.queuePosition }}</td>
               <td class="p-4">
                 <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                      [ngClass]="{
-                        'bg-indigo-600 text-white': res.status === 'En cola',
-                        'bg-[#232233] text-white': res.status === 'Listo para retirar',
-                        'bg-blue-600 text-white': res.status === 'Retirada',
-                        'bg-red-600 text-white': res.status === 'Cancelada'
-                      }">
+                      [style.background]="res.status === 'En cola' ? '#4f46e5' : res.status === 'Listo para retirar' ? '#232233' : res.status === 'Retirada' ? '#2563eb' : '#dc2626'"
+                      [style.color]="'white'">
                   {{ res.status }}
                 </span>
               </td>

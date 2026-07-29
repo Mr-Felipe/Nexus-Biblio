@@ -15,7 +15,6 @@ export class HeaderComponent {
   @Input({ required: true }) mobileSidebarOpen!: ReturnType<typeof signal<boolean>>;
   @Output() navigate = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();
-  @Output() openSupabaseModal = new EventEmitter<void>();
   showNotifications = signal(false);
   showProfile = signal(false);
   expandedNotification = signal<string | null>(null);

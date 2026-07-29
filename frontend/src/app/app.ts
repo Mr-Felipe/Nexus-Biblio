@@ -71,7 +71,6 @@ export class App implements OnInit {
 
   // UI state signals
   mobileSidebarOpen = signal(false);
-  showSupabaseModal = signal(false);
   showLoginRequiredModal = signal(false);
   showNewRegister = signal(false);
 
@@ -129,26 +128,5 @@ export class App implements OnInit {
     this.state.logout();
     this.toast.show('info', 'Sesión cerrada exitosamente.');
     this.navigateTo('home');
-  }
-
-  // Supabase management
-  async retrySupabaseConnection() {
-    this.toast.show('info', 'Re-conectando a Supabase...');
-    await this.state.initSupabase();
-    if (this.state.supabaseConnected()) {
-      this.toast.show('success', '¡Conexión a Supabase establecida correctamente!');
-    } else {
-      this.toast.show('error', `Error de conexión: ${this.state.supabaseError()}`);
-    }
-  }
-
-  async syncLocalToSupabaseDb() {
-    this.toast.show('info', 'Iniciando sincronización local a Supabase...');
-    const ok = await this.state.syncLocalToSupabase();
-    if (ok) {
-      this.toast.show('success', '¡Sincronización completa! Todos los datos locales se han subido a Supabase.');
-    } else {
-      this.toast.show('error', `Error en la sincronización: ${this.state.supabaseError()}`);
-    }
   }
 }
