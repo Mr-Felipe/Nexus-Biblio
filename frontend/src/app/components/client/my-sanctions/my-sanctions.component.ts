@@ -17,6 +17,6 @@ export class MySanctionsComponent {
   mySanctions = computed(() => {
     const cur = this.state.currentUser();
     if (!cur) return [];
-    return this.state.sanctions().filter((s) => s.userId === cur.id);
+    return this.state.sanctions().filter((s) => s.userId === cur.id).sort((a, b) => b.date.localeCompare(a.date));
   });
 }

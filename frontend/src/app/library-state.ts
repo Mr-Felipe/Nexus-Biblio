@@ -90,6 +90,10 @@ function todayStr(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+export function normalizeText(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 function todayISO(): string {
   return new Date().toISOString();
 }
@@ -745,10 +749,15 @@ export class LibraryState {
     const user = this.users().find((u) => u.id === userId);
     if (!user) return 'Usuario no encontrado.';
 
-    const hasActiveLoan = this.loans().some(
+    const activeLoans = this.loans().filter(
       (l) => l.userId === userId && (l.status === 'Activo' || l.status === 'Pendiente devolución' || l.status === 'Vencido')
     );
-    if (hasActiveLoan) return 'El usuario ya tiene un préstamo activo. El límite es de 1 préstamo activo a la vez.';
+    const activeReservations = this.reservations().filter(
+      (r) => r.userId === userId && (r.status === 'En cola' || r.status === 'Listo para retirar')
+    );
+    if (activeLoans.length + activeReservations.length >= 3) {
+      return 'Has alcanzado el límite de 3 préstamos y reservas combinados. Devuelve un libro o cancela una reserva primero.';
+    }
 
     await this.refreshSanctions();
     const hasActiveSanction = this.sanctions().some((s) => s.userId === userId && s.status === 'Activa');
@@ -931,6 +940,16 @@ export class LibraryState {
       (r) => r.userId === userId && r.bookIsbn === bookIsbn && (r.status === 'En cola' || r.status === 'Listo para retirar')
     );
     if (alreadyReserved) return 'Ya tienes una reserva activa para este mismo libro.';
+
+    const activeLoansCount = this.loans().filter(
+      (l) => l.userId === userId && (l.status === 'Activo' || l.status === 'Pendiente devolución' || l.status === 'Vencido')
+    ).length;
+    const activeReservationsCount = this.reservations().filter(
+      (r) => r.userId === userId && (r.status === 'En cola' || r.status === 'Listo para retirar')
+    ).length;
+    if (activeLoansCount + activeReservationsCount >= 3) {
+      return 'Has alcanzado el límite de 3 préstamos y reservas combinados. No puedes hacer una nueva reserva.';
+    }
 
     await this.refreshSanctions();
     const hasActiveSanction = this.sanctions().some((s) => s.userId === userId && s.status === 'Activa');

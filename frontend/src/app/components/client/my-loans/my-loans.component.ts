@@ -19,7 +19,7 @@ export class MyLoansComponent {
   private myLoans = computed(() => {
     const cur = this.state.currentUser();
     if (!cur) return [];
-    return this.state.loans().filter((l) => l.userId === cur.id);
+    return this.state.loans().filter((l) => l.userId === cur.id).sort((a, b) => b.loanDate.localeCompare(a.loanDate));
   });
 
   myActiveLoans = computed(() => {

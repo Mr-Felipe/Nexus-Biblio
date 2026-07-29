@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { LibraryState } from '../../../library-state';
+import { LibraryState, normalizeText } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
 
 @Component({
@@ -22,12 +22,18 @@ export class SanctionsComponent {
   showAddSanctionModal = signal(false);
 
   filteredSanctions = computed(() => {
-    const q = this.sanctionSearchQuery().toLowerCase().trim();
+    const q = normalizeText(this.sanctionSearchQuery().trim());
     const status = this.sanctionStatusFilter();
     return this.state.sanctions().filter((s) => {
-      const matchQ = s.userName.toLowerCase().includes(q) || s.reason.toLowerCase().includes(q) || s.id.toLowerCase().includes(q);
+      const matchQ = normalizeText(s.userName).includes(q) || normalizeText(s.reason).includes(q) || normalizeText(s.id).includes(q);
       const matchStatus = status === 'ALL' || s.status === status;
       return matchQ && matchStatus;
+    }).sort((a, b) => {
+      const dateCmp = b.date.localeCompare(a.date);
+      if (dateCmp !== 0) return dateCmp;
+      const numA = parseInt(a.id.replace(/\D/g, ''), 10) || 0;
+      const numB = parseInt(b.id.replace(/\D/g, ''), 10) || 0;
+      return numB - numA;
     });
   });
 

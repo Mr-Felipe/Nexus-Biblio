@@ -2,9 +2,9 @@
   <h1 class="font-serif text-3xl text-[#232233] font-bold tracking-tight">Mis Reservas</h1>
 
   <div class="border-2 border-[#232233] p-6 bg-transparent">
-    <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Apartados Vigentes</h3>
+    <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Reservas Activas</h3>
     <div class="space-y-4">
-      @for (res of myReservations(); track res.id) {
+      @for (res of myActiveReservations(); track res.id) {
         <div class="p-4 border-2 border-[#232233] bg-transparent flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
             <h4 class="font-serif font-bold text-[#232233] uppercase tracking-wide text-sm">{{ res.bookTitle }}</h4>
@@ -16,9 +16,7 @@
               @if (res.status === 'Listo para retirar') {
                 <span class="text-[10px] text-[#232233] font-bold border-2 border-[#232233] px-3 py-1 flex items-center gap-1 uppercase tracking-wider bg-[#232233] text-white"><mat-icon class="text-sm">check_circle</mat-icon> ¡Listo en mostrador!</span>
               } @else if (res.status === 'En cola') {
-                <span class="text-[10px] text-[#54546A] font-bold border border-[#232233] px-3 py-1 flex items-center gap-1 uppercase tracking-wider"><mat-icon class="text-sm">hourglass_full</mat-icon> En cola de espera (Pos: {{ res.queuePosition }})</span>
-              } @else {
-                <span class="text-[10px] text-[#A0A0B2] font-bold border border-[#232233]/8 px-3 py-1 uppercase tracking-wider">{{ res.status }}</span>
+                <span class="text-[10px] text-[#54546A] font-bold border border-[#232233] px-3 py-1 flex items-center gap-1 uppercase tracking-wider"><mat-icon class="text-sm">hourglass_full</mat-icon> En cola (Pos: {{ res.queuePosition }})</span>
               }
             </div>
 
@@ -30,17 +28,34 @@
                   <mat-icon class="text-xs">assignment_turned_in</mat-icon> Reclamar / Retirar
                 </button>
               }
-              @if (res.status === 'En cola' || res.status === 'Listo para retirar') {
-                <button (click)="cancelReservation(res.id)" class="text-[9px] text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-400 px-3 py-1.5 font-bold uppercase tracking-wider cursor-pointer transition-all">Cancelar Reserva</button>
-              }
+              <button (click)="cancelReservation(res.id)" class="text-[9px] text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-400 px-3 py-1.5 font-bold uppercase tracking-wider cursor-pointer transition-all">Cancelar</button>
             </div>
           </div>
         </div>
       } @empty {
         <div class="p-8 text-center border-2 border-dashed border-[#232233]/30 bg-transparent">
           <mat-icon class="text-4xl text-[#A0A0B2] mb-2">bookmark_border</mat-icon>
-          <p class="text-xs text-[#54546A]/70 font-serif italic">No tienes apartados activos.</p>
+          <p class="text-xs text-[#54546A]/70 font-serif italic">No tienes reservas activas en este momento.</p>
         </div>
+      }
+    </div>
+  </div>
+
+  <div class="border-2 border-[#232233] p-6 bg-transparent">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-[#232233] mb-4">Historial</h3>
+    <div class="divide-y-2 divide-[#232233]/12">
+      @for (res of myReservationsHistory(); track res.id) {
+        <div class="py-4 flex justify-between items-start text-xs">
+          <div>
+            <p class="font-serif font-bold text-[#232233] uppercase text-xs">{{ res.bookTitle }}</p>
+            <p class="text-[10px] text-[#54546A]/70 mt-1 font-mono">Apartado el: {{ res.reservationDate }}</p>
+          </div>
+          <span class="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                [style.background]="res.status === 'Retirada' ? '#232233' : res.status === 'Cancelada' ? '#9ca3af' : '#dc2626'"
+                [style.color]="'white'">{{ res.status }}</span>
+        </div>
+      } @empty {
+        <p class="text-xs text-[#A0A0B2] py-4 text-center font-serif italic">Aún no tienes historial de reservas.</p>
       }
     </div>
   </div>

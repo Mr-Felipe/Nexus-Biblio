@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { LibraryState } from '../../../library-state';
+import { LibraryState, normalizeText } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
 import { Book, Reservation } from '../../../models';
 
@@ -20,6 +20,25 @@ export class CatalogueComponent implements OnInit {
   catalogueSearchQuery = signal('');
   showLoginRequiredModal = signal(false);
 
+  activeLoansCount = computed(() => {
+    const current = this.state.currentUser();
+    if (!current) return 0;
+    return this.state.loans().filter(
+      (l) => l.userId === current.id && (l.status === 'Activo' || l.status === 'Pendiente devolución' || l.status === 'Vencido')
+    ).length;
+  });
+
+  activeReservationsCount = computed(() => {
+    const current = this.state.currentUser();
+    if (!current) return 0;
+    return this.state.reservations().filter(
+      (r) => r.userId === current.id && (r.status === 'En cola' || r.status === 'Listo para retirar')
+    ).length;
+  });
+
+  canBorrow = computed(() => this.activeLoansCount() + this.activeReservationsCount() < 3);
+  canReserve = computed(() => this.activeLoansCount() + this.activeReservationsCount() < 3);
+
   ngOnInit() {
     const pending = this.state.pendingSearch();
     if (pending) {
@@ -29,9 +48,9 @@ export class CatalogueComponent implements OnInit {
   }
 
   filteredCatalogue = computed(() => {
-    const q = this.catalogueSearchQuery().toLowerCase().trim();
+    const q = normalizeText(this.catalogueSearchQuery().trim());
     return this.state.books().filter((b) => {
-      return b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.isbn.includes(q) || b.editorial.toLowerCase().includes(q);
+      return normalizeText(b.title).includes(q) || normalizeText(b.author).includes(q) || b.isbn.includes(q) || normalizeText(b.editorial).includes(q);
     });
   });
 

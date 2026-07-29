@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } 
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { LibraryState, Book, BookCopy } from '../../../library-state';
+import { LibraryState, Book, BookCopy, normalizeText } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
 
 @Component({
@@ -47,9 +47,9 @@ export class InventoryComponent implements OnInit {
   });
 
   filteredBooks = computed(() => {
-    const q = this.bookSearchQuery().toLowerCase().trim();
+    const q = normalizeText(this.bookSearchQuery().trim());
     return this.state.books().filter((b) => {
-      return b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || b.isbn.includes(q);
+      return normalizeText(b.title).includes(q) || normalizeText(b.author).includes(q) || b.isbn.includes(q);
     });
   });
 

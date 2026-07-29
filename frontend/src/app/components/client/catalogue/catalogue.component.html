@@ -92,16 +92,17 @@
               } @else {
                 <!-- Normal view: Reserve or borrow -->
                 <div class="flex gap-1.5 w-full">
-                  <!-- Prestar (Direct borrow): Only enabled if availableCopies > 0 -->
+                  <!-- Prestar (Direct borrow): Only enabled if availableCopies > 0 AND activeLoans < 3 -->
                   <button (click)="borrowBookDirectly(book)"
-                          [disabled]="book.availableCopies <= 0"
+                          [disabled]="book.availableCopies <= 0 || !canBorrow()"
                           class="flex-1 border-2 border-[#232233] text-[#232233] hover:bg-[#D9C997]/20 disabled:opacity-30 disabled:hover:bg-transparent px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
                     <mat-icon class="text-xs">assignment_ind</mat-icon> Prestar
                   </button>
 
-                  <!-- Reservar (Queue reservation) -->
+                  <!-- Reservar (Queue reservation): Only enabled if combined count < 3 -->
                   <button (click)="requestReservation(book)"
-                          class="flex-1 border border-[#232233] bg-transparent text-[#232233] hover:bg-[#232233] hover:text-white px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
+                          [disabled]="!canReserve()"
+                          class="flex-1 border border-[#232233] bg-transparent text-[#232233] hover:bg-[#232233] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[#232233] px-2 py-1.5 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer">
                       <mat-icon class="text-xs">bookmark</mat-icon> Reservar
                   </button>
                 </div>

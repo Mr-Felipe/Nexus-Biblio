@@ -17,10 +17,16 @@ export class MyReservationsComponent {
   state = inject(LibraryState);
   private toast = inject(ToastService);
 
-  myReservations = computed(() => {
+  myActiveReservations = computed(() => {
     const cur = this.state.currentUser();
     if (!cur) return [];
-    return this.state.reservations().filter((r) => r.userId === cur.id);
+    return this.state.reservations().filter((r) => r.userId === cur.id && (r.status === 'En cola' || r.status === 'Listo para retirar')).sort((a, b) => b.id.localeCompare(a.id));
+  });
+
+  myReservationsHistory = computed(() => {
+    const cur = this.state.currentUser();
+    if (!cur) return [];
+    return this.state.reservations().filter((r) => r.userId === cur.id && r.status !== 'En cola' && r.status !== 'Listo para retirar').sort((a, b) => b.id.localeCompare(a.id));
   });
 
   hasAvailableCopies(bookIsbn: string): boolean {

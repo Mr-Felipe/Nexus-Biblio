@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { LibraryState, User } from '../../../library-state';
+import { LibraryState, User, normalizeText } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
 
 @Component({
@@ -26,10 +26,10 @@ export class UsersComponent {
   deleteBlockReasons = signal<string[]>([]);
 
   filteredUsers = computed(() => {
-    const q = this.userSearchQuery().toLowerCase().trim();
+    const q = normalizeText(this.userSearchQuery().trim());
     const role = this.userRoleFilter();
     return this.state.users().filter((u) => {
-      const matchQ = u.name.toLowerCase().includes(q) || u.id.includes(q) || u.email.toLowerCase().includes(q);
+      const matchQ = normalizeText(u.name).includes(q) || normalizeText(u.id).includes(q) || normalizeText(u.email).includes(q);
       const matchRole = role === 'ALL' || u.role === role;
       return matchQ && matchRole;
     });

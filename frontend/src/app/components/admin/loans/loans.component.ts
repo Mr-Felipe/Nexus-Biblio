@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal, 
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { LibraryState, Loan } from '../../../library-state';
+import { LibraryState, Loan, normalizeText } from '../../../library-state';
 import { ToastService } from '../../../services/toast.service';
 
 @Component({
@@ -23,12 +23,18 @@ export class LoansComponent {
   showAddLoanModal = signal(false);
 
   filteredLoans = computed(() => {
-    const q = this.loanSearchQuery().toLowerCase().trim();
+    const q = normalizeText(this.loanSearchQuery().trim());
     const status = this.loanStatusFilter();
     return this.state.loans().filter((l) => {
-      const matchQ = l.userName.toLowerCase().includes(q) || l.bookTitle.toLowerCase().includes(q) || l.id.toLowerCase().includes(q) || l.userId.includes(q);
+      const matchQ = normalizeText(l.userName).includes(q) || normalizeText(l.bookTitle).includes(q) || normalizeText(l.id).includes(q) || normalizeText(l.userId).includes(q);
       const matchStatus = status === 'ALL' || l.status === status;
       return matchQ && matchStatus;
+    }).sort((a, b) => {
+      const dateCmp = b.loanDate.localeCompare(a.loanDate);
+      if (dateCmp !== 0) return dateCmp;
+      const numA = parseInt(a.id.replace(/\D/g, ''), 10) || 0;
+      const numB = parseInt(b.id.replace(/\D/g, ''), 10) || 0;
+      return numB - numA;
     });
   });
 
