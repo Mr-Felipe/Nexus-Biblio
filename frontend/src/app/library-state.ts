@@ -827,7 +827,7 @@ export class LibraryState {
     const activeReservations = this.reservations().filter(
       (r) => r.userId === userId && (r.status === 'En cola' || r.status === 'Listo para retirar')
     );
-    if (activeLoans.length + activeReservations.length >= 3) {
+    if (activeLoans.length + activeReservations.length > 3) {
       return 'Has alcanzado el límite de 3 préstamos y reservas combinados. Devuelve un libro o cancela una reserva primero.';
     }
 
@@ -1020,7 +1020,7 @@ export class LibraryState {
     const activeReservationsCount = this.reservations().filter(
       (r) => r.userId === userId && (r.status === 'En cola' || r.status === 'Listo para retirar')
     ).length;
-    if (activeLoansCount + activeReservationsCount >= 3) {
+    if (activeLoansCount + activeReservationsCount > 3) {
       return 'Has alcanzado el límite de 3 préstamos y reservas combinados. No puedes hacer una nueva reserva.';
     }
 
