@@ -111,8 +111,7 @@ export class InventoryComponent implements OnInit {
 
     const loanedEjemplarIds = new Set<number>();
     for (const loan of activeLoans) {
-      const ejId = parseInt(loan.id, 10);
-      if (!isNaN(ejId)) loanedEjemplarIds.add(ejId);
+      loanedEjemplarIds.add(loan.ejemplarId);
     }
 
     const reservedEjemplarIds = new Set<number>();
@@ -121,7 +120,6 @@ export class InventoryComponent implements OnInit {
       if (!isNaN(ejId)) reservedEjemplarIds.add(ejId);
     }
 
-    let loanIndex = 0;
     let resIndex = 0;
 
     for (const ej of ejemplares) {
@@ -133,15 +131,17 @@ export class InventoryComponent implements OnInit {
         status = 'Perdido';
       } else if (ej.estado === 'DAÑADO') {
         status = 'Dañado';
-      } else if (loanIndex < activeLoans.length) {
-        status = 'Prestado';
-        const loan = activeLoans[loanIndex++];
-        loanDetails = {
-          loanId: loan.id,
-          userId: loan.userId,
-          userName: loan.userName,
-          dueDate: loan.dueDate
-        };
+      } else if (loanedEjemplarIds.has(ej.id)) {
+        const loan = activeLoans.find(l => l.ejemplarId === ej.id);
+        if (loan) {
+          status = 'Prestado';
+          loanDetails = {
+            loanId: loan.id,
+            userId: loan.userId,
+            userName: loan.userName,
+            dueDate: loan.dueDate
+          };
+        }
       } else if (resIndex < activeReservations.length) {
         status = 'En reserva';
         const res = activeReservations[resIndex++];

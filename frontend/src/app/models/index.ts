@@ -46,6 +46,7 @@ export interface BookCopy {
 
 export interface Loan {
   id: string;
+  ejemplarId: number;
   userId: string;
   userName: string;
   bookIsbn: string;

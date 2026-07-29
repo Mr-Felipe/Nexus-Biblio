@@ -240,6 +240,7 @@ export class LibraryState {
         const libroInfo = ejIdToLibro.get(p.ejemplar_id);
         return {
           id: String(p.id),
+          ejemplarId: p.ejemplar_id,
           userId: identificacion,
           userName,
           bookIsbn: libroInfo?.isbn || '',
@@ -772,8 +773,11 @@ export class LibraryState {
     due.setDate(due.getDate() + 15);
     const dueDate = due.toISOString().split('T')[0];
 
+    const firstDisponible = (book.ejemplares || []).find(e => e.estado === 'DISPONIBLE');
+
     const newLoan: Loan = {
       id: 'P' + (this.loans().length + 1).toString().padStart(3, '0'),
+      ejemplarId: firstDisponible?.id ?? 0,
       userId,
       userName: user.name,
       bookIsbn,
@@ -789,7 +793,6 @@ export class LibraryState {
     this.books.update((bs) =>
       bs.map((b) => {
         if (b.isbn !== bookIsbn) return b;
-        const firstDisponible = (b.ejemplares || []).find(e => e.estado === 'DISPONIBLE');
         if (firstDisponible) {
           const updatedEjemplares = (b.ejemplares || []).map(e =>
             e.id === firstDisponible.id ? { ...e, estado: 'PRESTADO' as const } : e
@@ -800,7 +803,6 @@ export class LibraryState {
       })
     );
 
-    const firstDisponible = (book.ejemplares || []).find(e => e.estado === 'DISPONIBLE');
     if (firstDisponible) {
       await supabase.from('ejemplares').update({ estado: 'PRESTADO' }).eq('id', firstDisponible.id);
     }
@@ -1235,6 +1237,7 @@ export class LibraryState {
       const usr = usrMap.get(p.usuario_id);
       return {
         id: String(p.id),
+        ejemplarId: p.ejemplar_id,
         userId: String(p.usuario_id),
         userName: usr?.nombre_completo || 'Desconocido',
         bookIsbn: lib?.isbn || '',
@@ -1343,6 +1346,7 @@ export class LibraryState {
       const usr = usrMap.get(p.usuario_id);
       return {
         id: String(p.id),
+        ejemplarId: p.ejemplar_id,
         userId: String(p.usuario_id),
         userName: usr?.nombre_completo || 'Desconocido',
         bookIsbn: lib?.isbn || '',
